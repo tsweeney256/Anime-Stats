@@ -23,8 +23,9 @@ namespace cppw
 		void Commit();
 		void Rollback();
 		void EnableForeignKey(const bool enable);
-		std::unique_ptr<Sqlite3Result> ExecuteQuery(const std::string& query);
+		void ExecuteQuery(const std::string& query);
 		std::unique_ptr<Sqlite3Statement> PrepareStatement(const std::string& statement);
+
 
 	private:
 		sqlite3_stmt* PrepareStatementCommon(const std::string& statement);

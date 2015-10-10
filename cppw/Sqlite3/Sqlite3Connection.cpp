@@ -59,11 +59,9 @@ sqlite3_stmt* cppw::Sqlite3Connection::PrepareStatementCommon(const std::string&
 	return statement;
 }
 
-std::unique_ptr<cppw::Sqlite3Result> cppw::Sqlite3Connection::ExecuteQuery(const std::string& query)
+void cppw::Sqlite3Connection::ExecuteQuery(const std::string& query)
 {
-    auto result = std::unique_ptr<Sqlite3Result>(new Sqlite3Result(PrepareStatementCommon(query)));
-    result->NextRow();
-    return result;
+    Sqlite3Result(m_connection, query);
 }
 
 std::unique_ptr<cppw::Sqlite3Statement> cppw::Sqlite3Connection::PrepareStatement(const std::string& statement)

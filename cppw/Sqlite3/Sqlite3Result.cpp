@@ -3,6 +3,13 @@
 cppw::Sqlite3Result::Sqlite3Result(sqlite3_stmt* statement)
 	: m_statement(statement) {}
 
+cppw::Sqlite3Result::Sqlite3Result(sqlite3* connection, std::string query)
+    : m_statement(nullptr)
+{
+    if(sqlite3_exec(connection, query.c_str(), nullptr, nullptr, nullptr) != SQLITE_OK)
+        throw Sqlite3Exception(connection);
+}
+
 cppw::Sqlite3Result::~Sqlite3Result()
 {
 	sqlite3_finalize(m_statement);

@@ -31,6 +31,7 @@ namespace cppw
 		friend class Sqlite3Connection;
 		friend class Sqlite3Statement;
 		Sqlite3Result(sqlite3_stmt* statement);
+		Sqlite3Result(sqlite3* connection, std::string query);
 		void InitColMap();
 		sqlite3_stmt* m_statement;
 		//pointer so that users who don't use the string search overloads don't have to suffer a needless construction cost
