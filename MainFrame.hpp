@@ -2,6 +2,9 @@
 #define MAINFRAME_HPP
 
 #include <wx/frame.h>
+#include <wx/wxsqlite3.h>
+
+//class wxSQLite3Database;
 
 class MainFrame : public wxFrame
 {
@@ -13,6 +16,8 @@ private:
     void OnSave(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
+
+    void CreateDatabase(wxSQLite3Database* database);
 
     wxDECLARE_EVENT_TABLE();
 };

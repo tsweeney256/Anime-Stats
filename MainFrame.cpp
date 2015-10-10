@@ -1,12 +1,16 @@
+#include <string>
 #include <wx/menu.h>
 #include <wx/panel.h>
 #include <wx/notebook.h>
 #include <wx/aboutdlg.h>
 #include <wx/sizer.h>
-#include <wx/wxsqlite3.h>
+#include <wx/filefn.h>
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
+#include "cppw/Sqlite3.hpp"
 
+#include <wx/msgdlg.h>
+#include <memory>
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_CLOSE(MainFrame::OnClose)
@@ -34,6 +38,10 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 
 	menuBar->Append(fileMenu, _("&File"));
 	menuBar->Append(helpMenu, _("&Help"));
+
+	//
+	//database
+	//
 
 	//
 	//noteBook
@@ -71,4 +79,9 @@ void MainFrame::OnAbout(wxCommandEvent &event)
 	info.SetCopyright("(C) 2015 Thomas Sweeney");
 
 	wxAboutBox(info);
+}
+
+void MainFrame::CreateDatabase(wxSQLite3Database* database)
+{
+
 }
