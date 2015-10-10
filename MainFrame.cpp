@@ -1,16 +1,17 @@
 #include <string>
+#include <memory>
 #include <wx/menu.h>
 #include <wx/panel.h>
 #include <wx/notebook.h>
 #include <wx/aboutdlg.h>
 #include <wx/sizer.h>
+#include <wx/filename.h>
+#include <wx/file.h>
 #include <wx/filefn.h>
+#include <wx/msgdlg.h>
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "cppw/Sqlite3.hpp"
-
-#include <wx/msgdlg.h>
-#include <memory>
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_CLOSE(MainFrame::OnClose)
@@ -39,20 +40,56 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 	menuBar->Append(fileMenu, _("&File"));
 	menuBar->Append(helpMenu, _("&Help"));
 
-	//
-	//database
-	//
+    //
+    //database
+    //
+    auto fileExists = wxFileName::FileExists("AnimeStats.db");
+    cppw::Sqlite3Connection connection("AnimeStats.db");
+    connection.EnableForeignKey(true);
+    if(!fileExists){
+        auto error = false;
+        wxString errorMsg;
+        wxString createFileName = "sql/create.sql";
+        wxString createStr;
+        if(wxFileName::FileExists(createFileName)){
+            wxFile createFile(createFileName);
+            if(createFile.ReadAll(&createStr)){
+                try{
+                    auto sql = std::string(createStr.utf8_str());
+                    connection.ExecuteQuery(sql);
+                }
+                catch(cppw::Sqlite3Exception& e){
+                    error = true;
+                    errorMsg <<_("Error: Could not execute create command.\n sqlite3 error: ") << e.GetExtendedErrorCode() <<
+                           _(" ") << e.GetErrorMessage();
+                }
+            }
+            else{
+                error = true;
+                errorMsg = "Error: Could not read from sql/create.sql.";
+            }
+        }
+        else{
+            error = true;
+            errorMsg = "Error: " + createFileName + " could not be found.";
+        }
+        if(error){
+            wxRemoveFile("AnimeStats.db");
+            wxMessageBox(errorMsg);
+            Close();
+        }
+    }
 
-	//
-	//noteBook
-	//
-	auto mainPanel = new wxPanel(this, wxID_ANY);
-	auto mainPanelSizer = new wxBoxSizer(wxVERTICAL);
-	auto notebook = new wxNotebook(mainPanel, wxID_ANY);
-	auto dataPage = new DataPanel(notebook);
-	notebook->AddPage(dataPage, _("Data"));
-	mainPanelSizer->Add(notebook, wxSizerFlags(0).Expand());
-	mainPanel->SetSizerAndFit(mainPanelSizer);
+    //
+    //noteBook
+    //
+    auto mainPanel = new wxPanel(this, wxID_ANY);
+    auto mainPanelSizer = new wxBoxSizer(wxVERTICAL);
+    auto notebook = new wxNotebook(mainPanel, wxID_ANY);
+    auto dataPage = new DataPanel(notebook);
+    notebook->AddPage(dataPage, _("Data"));
+    mainPanelSizer->Add(notebook, wxSizerFlags(0).Expand());
+    mainPanel->SetSizerAndFit(mainPanelSizer);
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)
@@ -79,9 +116,4 @@ void MainFrame::OnAbout(wxCommandEvent &event)
 	info.SetCopyright("(C) 2015 Thomas Sweeney");
 
 	wxAboutBox(info);
-}
-
-void MainFrame::CreateDatabase(wxSQLite3Database* database)
-{
-
 }

@@ -2,7 +2,7 @@
 #define MAINFRAME_HPP
 
 #include <wx/frame.h>
-#include <wx/wxsqlite3.h>
+#include "cppw/Sqlite3.hpp"
 
 //class wxSQLite3Database;
 
@@ -17,7 +17,7 @@ private:
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
 
-    void CreateDatabase(wxSQLite3Database* database);
+    void CreateDatabase(cppw::Sqlite3Connection& connection);
 
     wxDECLARE_EVENT_TABLE();
 };
