@@ -4,13 +4,17 @@
 #include <wx/panel.h>
 #include <wx/grid.h>
 #include <wx/sizer.h>
+#include <memory>
+#include "cppw/Sqlite3.hpp"
 #include "AppIDs.hpp"
+
+namespace cppw { class Sqlite3Connection; }
 
 //the panel that holds all the components that will make up the Data page
 class DataPanel : public wxPanel
 {
 public:
-    DataPanel(wxWindow* parent, wxWindowID id = ID_NOTEBOOK,
+    DataPanel(cppw::Sqlite3Connection& connection, wxWindow* parent, wxWindow* top, wxWindowID id = ID_NOTEBOOK,
               const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
               long style = wxTAB_TRAVERSAL, const wxString& name = wxPanelNameStr);
 private:
@@ -22,18 +26,21 @@ private:
     void OnAddRow(wxCommandEvent& event);
     void OnDeleteRow(wxCommandEvent& event);
 
-    //DECLARE_EVENT_TABLE();
+    void CreateTable(std::unique_ptr<cppw::Sqlite3Result> results);
 
-    //DataGrid* m_grid;
+    DECLARE_EVENT_TABLE();
 
+    wxGrid* m_grid;
     wxCheckBox* m_watchedCheck;
     wxCheckBox* m_watchingCheck;
     wxCheckBox* m_stalledCheck;
     wxCheckBox* m_droppedCheck;
     wxCheckBox* m_blankCheck;
     wxCheckBox* m_allCheck;
-
     wxTextCtrl* m_titleFilterTextField;
+    cppw::Sqlite3Connection& m_connection;
+    std::unique_ptr<cppw::Sqlite3Statement> m_basicResultsStatement;
+    static const int m_numCols = 15; //including the hidden 3
 };
 
 #endif // DATAPANEL_HPP

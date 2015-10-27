@@ -2,13 +2,40 @@
 #include <wx/button.h>
 #include <wx/textctrl.h>
 #include <wx/sizer.h>
+#include <wx/filename.h>
+#include <wx/file.h>
+#include <wx/filefn.h>
+#include <wx/debug.h>
+#include <wx/msgdlg.h>
 #include "DataPanel.hpp"
 #include "AppIDs.hpp"
+#include "cppw/Sqlite3.hpp"
 
-DataPanel::DataPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size,
-		long style, const wxString& name)
-		: wxPanel(parent, id, pos, size, style, name)
+BEGIN_EVENT_TABLE(DataPanel, wxPanel)
+    EVT_CHECKBOX(ID_WATCHED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
+    EVT_CHECKBOX(ID_WATCHING_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
+    EVT_CHECKBOX(ID_STALLED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
+    EVT_CHECKBOX(ID_DROPPED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
+    EVT_CHECKBOX(ID_BLANK_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
+    EVT_CHECKBOX(ID_ALL_CB, DataPanel::OnEnableAllCheckbox)
+    EVT_TEXT_ENTER(ID_TITLE_FILTER_FIELD, DataPanel::OnTextEnter)
+    EVT_BUTTON(ID_APPLY_FILTER_BTN, DataPanel::OnApplyFilter)
+    EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
+    EVT_BUTTON(ID_ADD_ROW_BTN, DataPanel::OnAddRow)
+    EVT_BUTTON(ID_DELETE_ROW_BTN, DataPanel::OnDeleteRow)
+END_EVENT_TABLE()
+
+DataPanel::DataPanel(cppw::Sqlite3Connection& connection, wxWindow* parent, wxWindow* top, wxWindowID id, const wxPoint& pos,
+        const wxSize& size, long style, const wxString& name)
+		: wxPanel(parent, id, pos, size, style, name), m_connection(connection)
 {
+    ////
+    ////Top Bar
+    ////
+
+    //
+    //checkboxes
+    //
 	m_watchedCheck = new wxCheckBox(this, ID_WATCHED_CB, _("Watched"));
 	m_watchingCheck = new wxCheckBox(this, ID_WATCHING_CB, _("Watching"));
 	m_stalledCheck = new wxCheckBox(this, ID_STALLED_CB, _("Stalled"));
@@ -24,6 +51,9 @@ DataPanel::DataPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 	m_allCheck->SetValue(true);
 	m_allCheck->Disable();
 
+	//
+	//buttons and textfield
+	//
 	auto applyFilterButton = new wxButton(this, ID_APPLY_FILTER_BTN, "Apply Filter");
 	auto resetFilterButton = new wxButton(this, ID_RESET_FILTER_BTN, "Reset Filter");
 	m_titleFilterTextField = new wxTextCtrl(this, ID_TITLE_FILTER_FIELD, wxEmptyString,
@@ -32,8 +62,9 @@ DataPanel::DataPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 	auto addRowButton = new wxButton(this, ID_ADD_ROW_BTN, "Add Row");
 	auto deleteRowButton = new wxButton(this, ID_DELETE_ROW_BTN, "Delete Rows");
 
-	//m_grid = new DataGrid(data, this, ID_DATA_GRID);
-
+	//
+	//top bar sizers
+	//
 	auto checkBoxSizer = new wxGridSizer(3, 5, 5);
 	auto checkBoxSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, this, _("Filter Watched Status"));
 	auto titleFilterSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _("Filter Title"));
@@ -60,11 +91,106 @@ DataPanel::DataPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const 
 	topControlBarSizer->Add(titleFilterSizer, wxSizerFlags(0).Bottom().Expand().Border(wxRIGHT|wxLEFT, 2));
 	topControlBarSizer->Add(btnSizer, wxSizerFlags(0).Bottom().Border(wxRIGHT|wxLEFT, 2).Expand());
 
+	////
+	////grid
+	////
+
+	m_grid = new wxGrid(this, ID_DATA_GRID);
+
+	//get basic select statement from file and prepare it
+	wxString basicSelectFileName = "sql/basicSelect.sql";
+    wxString basicSelectStr;
+    wxString errorMsg;
+    bool error = false;
+    if(wxFileName::FileExists(basicSelectFileName)){
+        wxFile createFile(basicSelectFileName);
+        if(createFile.ReadAll(&basicSelectStr)){
+            try{
+                auto sql = std::string(basicSelectStr.utf8_str());
+                connection.ExecuteQuery(sql);
+            }
+            catch(cppw::Sqlite3Exception& e){
+                error = true;
+                errorMsg <<_("Error: Could not execute basic select command.\n sqlite3 error: ") << e.GetExtendedErrorCode() <<
+                       _(" ") << e.GetErrorMessage();
+            }
+        }
+        else{
+            error = true;
+            errorMsg = "Error: Could not read from sql/basicSelect.sql.";
+        }
+        if(error){
+            wxMessageBox(errorMsg);
+            top->Close();
+        }
+    }
+    try{
+        m_basicResultsStatement = m_connection.PrepareStatement(std::string(basicSelectStr.ToUTF8()));
+        CreateTable(m_basicResultsStatement->GetResults());
+    }
+    catch(cppw::Sqlite3Exception& e){
+        wxMessageBox("Error preparing basic select statement.");
+        top->Close();
+    }
+	//
+	//panel sizer
+	//
 	panelSizer->Add(topControlBarSizer, wxSizerFlags(0).Border(wxALL, 2));
-	//panelSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
+	panelSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
 	SetSizerAndFit(panelSizer);
 }
 
+void DataPanel::OnGeneralWatchedStatusCheckbox(wxCommandEvent& event)
+{
+}
 
+void DataPanel::OnEnableAllCheckbox(wxCommandEvent& event)
+{
+}
 
+void DataPanel::OnTextEnter(wxCommandEvent& event)
+{
+}
 
+void DataPanel::OnApplyFilter(wxCommandEvent& event)
+{
+}
+
+void DataPanel::OnResetFilter(wxCommandEvent& event)
+{
+}
+
+void DataPanel::OnAddRow(wxCommandEvent& event)
+{
+}
+
+void DataPanel::OnDeleteRow(wxCommandEvent& event)
+{
+}
+
+void DataPanel::CreateTable(std::unique_ptr<cppw::Sqlite3Result> results)
+{
+    wxGridUpdateLocker lock;
+    if(results->NextRow()){
+        int rowPos = 0;
+        wxASSERT_MSG(results->GetColumnCount() == m_numCols, "Basic Select Results have wrong number of columns.");
+        m_grid->CreateGrid(results->GetInt(0), m_numCols); //first column of the result is the number of rows
+        for(int i = 0; i < m_numCols; ++i){
+            m_grid->SetColLabelValue(i, results->GetColumnName(i));
+            m_grid->SetCellValue(rowPos, i, results->GetString(i));
+        }
+        ++rowPos;
+        while(results->NextRow()){
+            for(int i = 0; i < m_numCols; ++i){
+                m_grid->SetCellValue(rowPos, i, results->GetString(i));
+            }
+            ++rowPos;
+        }
+    }
+    else{
+        m_grid->CreateGrid(1, m_numCols);
+    }
+    //number of rows and table keys. user shouldn't see these.
+    m_grid->HideCol(0); m_grid->HideCol(1); m_grid->HideCol(2);
+    m_grid->AutoSize();
+}
