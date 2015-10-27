@@ -75,4 +75,18 @@ std::unique_ptr<cppw::Sqlite3Result> cppw::Sqlite3Statement::GetResults()
     return std::unique_ptr<cppw::Sqlite3Result>(new cppw::Sqlite3Result(m_statement));
 }
 
+/*cppw::Sqlite3Statement::Sqlite3Statement(cppw::Sqlite3Statement&& other)
+{
+    other.m_finalized = m_finalized;
+    other.m_statement = m_statement;
+    m_statement = nullptr;
+}
 
+cppw::Sqlite3Statement&& cppw::Sqlite3Statement::operator =(Sqlite3Statement&& rhs)
+{
+    if(this != &rhs){
+        rhs.m_finalized = m_finalized;
+        rhs.m_statement = m_statement;
+        m_statement = nullptr;
+    }
+}*/

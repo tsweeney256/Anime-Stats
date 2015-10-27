@@ -17,6 +17,13 @@ void cppw::Sqlite3Connection::Open(const std::string& filename)
 	}
 }
 
+void cppw::Sqlite3Connection::Open(const char* filename)
+{
+    if(sqlite3_open(filename, &m_connection) != SQLITE_OK){
+        throw Sqlite3Exception(m_connection);
+    }
+}
+
 void cppw::Sqlite3Connection::Close()
 {
 	sqlite3_close(m_connection);
@@ -68,3 +75,5 @@ std::unique_ptr<cppw::Sqlite3Statement> cppw::Sqlite3Connection::PrepareStatemen
 {
     return std::unique_ptr<Sqlite3Statement>(new Sqlite3Statement(PrepareStatementCommon(statement)));
 }
+
+

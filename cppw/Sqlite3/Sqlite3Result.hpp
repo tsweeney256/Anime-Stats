@@ -13,6 +13,8 @@ namespace cppw
 		Sqlite3Result() = delete;
 		Sqlite3Result(const Sqlite3Result&) = delete;
 		Sqlite3Result& operator=(const Sqlite3Result&) = delete;
+		Sqlite3Result(Sqlite3Result&&) = default;
+		Sqlite3Result& operator=(Sqlite3Result&&) = default;
 
 		bool NextRow();
 		int GetInt(const int colIdx);
@@ -25,6 +27,7 @@ namespace cppw
 		bool GetBool(const std::string& colName);
 		bool IsNull(const int colIdx);
 		bool IsNull(const std::string& colName);
+		std::string GetColumnName(const int colIdx);
 		int GetColumnCount();
 
 	private:

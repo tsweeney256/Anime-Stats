@@ -13,11 +13,13 @@ namespace cppw
 		Sqlite3Connection() = default;
 		Sqlite3Connection(const std::string& filename);
 		~Sqlite3Connection();
-
 		Sqlite3Connection(const Sqlite3Connection&) = delete;
 		Sqlite3Connection& operator=(const Sqlite3Connection&) = delete;
+		Sqlite3Connection(Sqlite3Connection&&) = default;
+		Sqlite3Connection& operator=(Sqlite3Connection&&) = default;
 
 		void Open(const std::string& filename); //delayed construction
+		void Open(const char* filename);
 		void Close(); //Optional. Connection will be closed upon object destruction if this is not called.
 		void Begin();
 		void Commit();

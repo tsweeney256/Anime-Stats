@@ -12,6 +12,8 @@ namespace cppw
 		Sqlite3Statement() = delete;
 		Sqlite3Statement(const Sqlite3Statement&) = delete;
 		Sqlite3Statement& operator=(const Sqlite3Statement&) = delete;
+		Sqlite3Statement(Sqlite3Statement&&) = default;
+		Sqlite3Statement& operator=(Sqlite3Statement&&) = default;
 
 		void Bind(const int paramIdx, const int val);
 		void Bind(const int paramIdx, const double val);

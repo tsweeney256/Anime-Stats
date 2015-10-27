@@ -112,3 +112,8 @@ void cppw::Sqlite3Result::InitColMap()
 		(*m_colMap)[sqlite3_column_name(m_statement, i)] = i;
 	}
 }
+
+std::string cppw::Sqlite3Result::GetColumnName(const int colIdx)
+{
+    return reinterpret_cast<const char*>(sqlite3_column_name(m_statement, colIdx));
+}
