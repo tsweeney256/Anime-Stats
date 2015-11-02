@@ -142,10 +142,25 @@ DataPanel::DataPanel(cppw::Sqlite3Connection& connection, wxWindow* parent, wxWi
 
 void DataPanel::OnGeneralWatchedStatusCheckbox(wxCommandEvent& event)
 {
+    if(m_watchedCheck->GetValue() && m_watchingCheck->GetValue() && m_stalledCheck->GetValue()
+            && m_droppedCheck->GetValue() && m_blankCheck->GetValue()){
+        m_allCheck->SetValue(true);
+        m_allCheck->Disable();
+    }
+    else{
+        m_allCheck->SetValue(false);
+        m_allCheck->Enable();
+    }
 }
 
 void DataPanel::OnEnableAllCheckbox(wxCommandEvent& event)
 {
+    m_allCheck->Disable();
+    m_watchedCheck->SetValue(true);
+    m_watchingCheck->SetValue(true);
+    m_stalledCheck->SetValue(true);
+    m_droppedCheck->SetValue(true);
+    m_blankCheck->SetValue(true);
 }
 
 void DataPanel::OnTextEnter(wxCommandEvent& event)
