@@ -100,36 +100,25 @@ DataPanel::DataPanel(cppw::Sqlite3Connection& connection, wxWindow* parent, wxWi
 	//get basic select statement from file and prepare it
 	wxString basicSelectFileName = "sql/basicSelect.sql";
     wxString basicSelectStr;
-    wxString errorMsg;
     bool error = false;
     if(wxFileName::FileExists(basicSelectFileName)){
-        wxFile createFile(basicSelectFileName);
-        if(createFile.ReadAll(&basicSelectStr)){
-            try{
-                auto sql = std::string(basicSelectStr.utf8_str());
-                connection.ExecuteQuery(sql);
-            }
-            catch(cppw::Sqlite3Exception& e){
-                error = true;
-                errorMsg <<_("Error: Could not execute basic select command.\n sqlite3 error: ") << e.GetExtendedErrorCode() <<
-                       _(" ") << e.GetErrorMessage();
-            }
-        }
-        else{
+        wxFile selectFile(basicSelectFileName);
+        if(!selectFile.ReadAll(&basicSelectStr))
             error = true;
-            errorMsg = "Error: Could not read from sql/basicSelect.sql.";
-        }
-        if(error){
-            wxMessageBox(errorMsg);
-            top->Close();
-        }
+    }
+    else
+        error = true;
+    if(error){
+        wxMessageBox("Error: Could not read from sql/basicSelect.sql.");
+        top->Close();
     }
     try{
         m_basicResultsStatement = m_connection.PrepareStatement(std::string(basicSelectStr.ToUTF8()));
+        m_basicResultsStatement->Bind(1,1); //placeholder. selects only english titles.
         CreateTable(m_basicResultsStatement->GetResults());
     }
     catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error preparing basic select statement.");
+        wxMessageBox("Error preparing basic select statement.\n" + e.GetErrorMessage());
         top->Close();
     }
 	//
@@ -191,13 +180,13 @@ void DataPanel::CreateTable(std::unique_ptr<cppw::Sqlite3Result> results)
         wxASSERT_MSG(results->GetColumnCount() == m_numCols, "Basic Select Results have wrong number of columns.");
         m_grid->CreateGrid(results->GetInt(0), m_numCols); //first column of the result is the number of rows
         for(int i = 0; i < m_numCols; ++i){
-            m_grid->SetColLabelValue(i, results->GetColumnName(i));
-            m_grid->SetCellValue(rowPos, i, results->GetString(i));
+            m_grid->SetColLabelValue(i, wxString::FromUTF8(results->GetColumnName(i).c_str()));
+            m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
         }
         ++rowPos;
         while(results->NextRow()){
             for(int i = 0; i < m_numCols; ++i){
-                m_grid->SetCellValue(rowPos, i, results->GetString(i));
+                m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
             }
             ++rowPos;
         }
