@@ -10,11 +10,6 @@ cppw::Sqlite3Result::Sqlite3Result(sqlite3* connection, std::string query)
         throw Sqlite3Exception(connection);
 }
 
-cppw::Sqlite3Result::~Sqlite3Result()
-{
-	sqlite3_finalize(m_statement);
-}
-
 bool cppw::Sqlite3Result::NextRow()
 {
 	int code;

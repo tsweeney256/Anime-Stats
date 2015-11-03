@@ -9,7 +9,7 @@ namespace cppw
 	class Sqlite3Result
 	{
 	public:
-		~Sqlite3Result();
+		~Sqlite3Result() = default;
 		Sqlite3Result() = delete;
 		Sqlite3Result(const Sqlite3Result&) = delete;
 		Sqlite3Result& operator=(const Sqlite3Result&) = delete;
