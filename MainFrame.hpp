@@ -17,9 +17,11 @@ private:
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
 
-    void CreateDatabase(cppw::Sqlite3Connection& connection);
+    void CreateDatabase(cppw::Sqlite3Connection* connection);
 
     wxDECLARE_EVENT_TABLE();
+
+    cppw::Sqlite3Connection* m_connection;
 };
 
 #endif

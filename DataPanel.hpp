@@ -14,7 +14,7 @@ namespace cppw { class Sqlite3Connection; }
 class DataPanel : public wxPanel
 {
 public:
-    DataPanel(cppw::Sqlite3Connection& connection, wxWindow* parent, wxWindow* top, wxWindowID id = ID_NOTEBOOK,
+    DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWindow* top, wxWindowID id = ID_NOTEBOOK,
               const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
               long style = wxTAB_TRAVERSAL, const wxString& name = wxPanelNameStr);
 private:
@@ -26,10 +26,12 @@ private:
     void OnAddRow(wxCommandEvent& event);
     void OnDeleteRow(wxCommandEvent& event);
 
-    void CreateTable(std::unique_ptr<cppw::Sqlite3Result> results);
+    void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
+    void ApplyFilter();
 
     DECLARE_EVENT_TABLE();
 
+    wxWindow* m_top;
     wxGrid* m_grid;
     wxCheckBox* m_watchedCheck;
     wxCheckBox* m_watchingCheck;
@@ -38,9 +40,12 @@ private:
     wxCheckBox* m_blankCheck;
     wxCheckBox* m_allCheck;
     wxTextCtrl* m_titleFilterTextField;
-    cppw::Sqlite3Connection& m_connection;
-    std::unique_ptr<cppw::Sqlite3Statement> m_basicResultsStatement;
-    static const int m_numCols = 15; //including the hidden 3
+    wxString m_basicSelectString;
+    cppw::Sqlite3Connection* m_connection;
+    std::unique_ptr<cppw::Sqlite3Statement> m_basicSelectStatement;
+    std::string m_order = "Title collate nocase asc"; //placeholder until custom ordering is implemented
+    bool m_colsCreated = false;
+    static const int m_numCols = 14; //including the hidden 3
 };
 
 #endif // DATAPANEL_HPP

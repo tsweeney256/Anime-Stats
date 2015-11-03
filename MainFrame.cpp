@@ -44,8 +44,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     //database
     //
     auto fileExists = wxFileName::FileExists("AnimeData.db");
-    cppw::Sqlite3Connection connection("AnimeData.db");
-    connection.EnableForeignKey(true);
+    m_connection = new cppw::Sqlite3Connection("AnimeData.db");
+    m_connection->EnableForeignKey(true);
     if(!fileExists){
         auto error = false;
         wxString errorMsg;
@@ -56,7 +56,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
             if(createFile.ReadAll(&createStr)){
                 try{
                     auto sql = std::string(createStr.utf8_str());
-                    connection.ExecuteQuery(sql);
+                    m_connection->ExecuteQuery(sql);
                 }
                 catch(cppw::Sqlite3Exception& e){
                     error = true;
@@ -86,7 +86,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     auto mainPanel = new wxPanel(this, wxID_ANY);
     auto mainPanelSizer = new wxBoxSizer(wxVERTICAL);
     auto notebook = new wxNotebook(mainPanel, wxID_ANY);
-    auto dataPage = new DataPanel(connection, notebook, this);
+    auto dataPage = new DataPanel(m_connection, notebook, this);
     notebook->AddPage(dataPage, _("Data"));
     mainPanelSizer->Add(notebook, wxSizerFlags(0).Expand());
     mainPanel->SetSizerAndFit(mainPanelSizer);

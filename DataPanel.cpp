@@ -25,9 +25,9 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_BUTTON(ID_DELETE_ROW_BTN, DataPanel::OnDeleteRow)
 END_EVENT_TABLE()
 
-DataPanel::DataPanel(cppw::Sqlite3Connection& connection, wxWindow* parent, wxWindow* top, wxWindowID id, const wxPoint& pos,
+DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWindow* top, wxWindowID id, const wxPoint& pos,
         const wxSize& size, long style, const wxString& name)
-		: wxPanel(parent, id, pos, size, style, name), m_connection(connection)
+		: wxPanel(parent, id, pos, size, style, name), m_top(top), m_connection(connection)
 {
     ////
     ////Top Bar
@@ -96,14 +96,14 @@ DataPanel::DataPanel(cppw::Sqlite3Connection& connection, wxWindow* parent, wxWi
 	////
 
 	m_grid = new wxGrid(this, ID_DATA_GRID);
+	m_grid->CreateGrid(0,0);
 
 	//get basic select statement from file and prepare it
 	wxString basicSelectFileName = "sql/basicSelect.sql";
-    wxString basicSelectStr;
     bool error = false;
     if(wxFileName::FileExists(basicSelectFileName)){
         wxFile selectFile(basicSelectFileName);
-        if(!selectFile.ReadAll(&basicSelectStr))
+        if(!selectFile.ReadAll(&m_basicSelectString))
             error = true;
     }
     else
@@ -113,9 +113,10 @@ DataPanel::DataPanel(cppw::Sqlite3Connection& connection, wxWindow* parent, wxWi
         top->Close();
     }
     try{
-        m_basicResultsStatement = m_connection.PrepareStatement(std::string(basicSelectStr.ToUTF8()));
-        m_basicResultsStatement->Bind(1,1); //placeholder. selects only english titles.
-        CreateTable(m_basicResultsStatement->GetResults());
+        m_basicSelectStatement = m_connection->PrepareStatement(std::string(m_basicSelectString.ToUTF8()) + "order by " + m_order);
+        m_basicSelectStatement->Bind(1,1); //placeholder. selects only english titles.
+        auto results = m_basicSelectStatement->GetResults();
+        ResetTable(results);
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error preparing basic select statement.\n" + e.GetErrorMessage());
@@ -154,14 +155,19 @@ void DataPanel::OnEnableAllCheckbox(wxCommandEvent& event)
 
 void DataPanel::OnTextEnter(wxCommandEvent& event)
 {
+    ApplyFilter();
 }
 
 void DataPanel::OnApplyFilter(wxCommandEvent& event)
 {
+    ApplyFilter();
 }
 
 void DataPanel::OnResetFilter(wxCommandEvent& event)
 {
+    m_basicSelectStatement->Reset();
+    auto result = m_basicSelectStatement->GetResults();
+    ResetTable(result);
 }
 
 void DataPanel::OnAddRow(wxCommandEvent& event)
@@ -172,29 +178,49 @@ void DataPanel::OnDeleteRow(wxCommandEvent& event)
 {
 }
 
-void DataPanel::CreateTable(std::unique_ptr<cppw::Sqlite3Result> results)
+void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 {
     wxGridUpdateLocker lock;
+    if(int numRows = m_grid->GetNumberRows()) //on very first grid creation
+        m_grid->DeleteRows(0, numRows);
     if(results->NextRow()){
         int rowPos = 0;
         wxASSERT_MSG(results->GetColumnCount() == m_numCols, "Basic Select Results have wrong number of columns.");
-        m_grid->CreateGrid(results->GetInt(0), m_numCols); //first column of the result is the number of rows
-        for(int i = 0; i < m_numCols; ++i){
-            m_grid->SetColLabelValue(i, wxString::FromUTF8(results->GetColumnName(i).c_str()));
-            m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
+        m_grid->AppendRows();
+        if(!m_colsCreated){
+            m_colsCreated = true;
+            m_grid->AppendCols(m_numCols);
+            for(int i = 0; i < m_numCols; ++i)
+                m_grid->SetColLabelValue(i, wxString::FromUTF8(results->GetColumnName(i).c_str()));
         }
+        for(int i = 0; i < m_numCols; ++i)
+            m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
         ++rowPos;
         while(results->NextRow()){
+            m_grid->AppendRows();
             for(int i = 0; i < m_numCols; ++i){
                 m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
             }
             ++rowPos;
         }
     }
-    else{
-        m_grid->CreateGrid(1, m_numCols);
-    }
+    m_grid->AppendRows(); //blank row at the bottom
     //number of rows and table keys. user shouldn't see these.
-    m_grid->HideCol(0); m_grid->HideCol(1); m_grid->HideCol(2);
+    m_grid->HideCol(0); m_grid->HideCol(1);
     m_grid->AutoSize();
+}
+
+void DataPanel::ApplyFilter()
+{
+    try{
+        auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) +
+                    "where Title like '%" + std::string(m_titleFilterTextField->GetValue().utf8_str()) + "%' order by " + m_order);
+        statement->Bind(1,1); //placeholder. selecting english titles only.
+        auto results = statement->GetResults();
+        ResetTable(results);
+    }
+    catch(cppw::Sqlite3Exception& e){
+        wxMessageBox("Error applying filter.\n" + e.GetErrorMessage());
+        m_top->Close();
+    }
 }
