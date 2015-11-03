@@ -231,6 +231,7 @@ void DataPanel::ApplyFilter()
         statement->Bind(1,1); //placeholder. selecting english titles only.
         auto results = statement->GetResults();
         ResetTable(results);
+        Fit();
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error applying filter.\n" + e.GetErrorMessage());
@@ -257,6 +258,7 @@ void DataPanel::ApplyFullGrid()
         statement->Bind(1,1); //placeholder. selects only english titles.
         auto results = statement->GetResults();
         ResetTable(results);
+        Fit();
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error preparing basic select statement.\n" + e.GetErrorMessage());
