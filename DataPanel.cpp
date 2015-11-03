@@ -158,6 +158,7 @@ void DataPanel::OnApplyFilter(wxCommandEvent& event)
 void DataPanel::OnResetFilter(wxCommandEvent& event)
 {
     ApplyFullGrid();
+    m_titleFilterTextField->SetValue("");
 }
 
 void DataPanel::OnAddRow(wxCommandEvent& event)
