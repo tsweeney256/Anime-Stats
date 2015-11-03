@@ -10,4 +10,3 @@ left join Season
 on series.idSeason = Season.idSeason
 left join WatchedStatus
 on series.idWatchedStatus = WatchedStatus.idWatchedStatus
-order by Title asc
