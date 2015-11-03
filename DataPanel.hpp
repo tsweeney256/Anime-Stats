@@ -28,6 +28,7 @@ private:
 
     void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
     void ApplyFilter();
+    void AppendStatusStr(std::string& statusStr, std::string toAppend, bool& firstStatus);
 
     DECLARE_EVENT_TABLE();
 

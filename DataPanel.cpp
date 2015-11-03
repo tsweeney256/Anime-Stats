@@ -213,8 +213,24 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 void DataPanel::ApplyFilter()
 {
     try{
+        //setting up the where part of the sql statement to filter by watched statuses
+        bool firstStatus = true;
+        std::string statusStr;
+        if(m_watchedCheck->GetValue())
+            AppendStatusStr(statusStr, "= 0 ", firstStatus);
+        if(m_watchingCheck->GetValue())
+            AppendStatusStr(statusStr, "= 1 ", firstStatus);
+        if(m_stalledCheck->GetValue())
+            AppendStatusStr(statusStr, "= 2 ", firstStatus);
+        if(m_droppedCheck->GetValue())
+            AppendStatusStr(statusStr, "= 3 ", firstStatus);
+        if(m_blankCheck->GetValue())
+            AppendStatusStr(statusStr, " is null ", firstStatus);
+        if(!firstStatus)
+            statusStr += " ) ";
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) +
-                    "where Title like '%" + std::string(m_titleFilterTextField->GetValue().utf8_str()) + "%' order by " + m_order);
+                    " where Title like '%" + std::string(m_titleFilterTextField->GetValue().utf8_str()) + "%'" +
+                    statusStr + " order by " + m_order);
         statement->Bind(1,1); //placeholder. selecting english titles only.
         auto results = statement->GetResults();
         ResetTable(results);
@@ -223,4 +239,15 @@ void DataPanel::ApplyFilter()
         wxMessageBox("Error applying filter.\n" + e.GetErrorMessage());
         m_top->Close();
     }
+}
+
+void DataPanel::AppendStatusStr(std::string& statusStr, std::string toAppend, bool& firstStatus)
+{
+    if(!firstStatus)
+        statusStr += " or ";
+    else{
+        statusStr += " and ( ";
+        firstStatus = false;
+    }
+    statusStr += "WatchedStatus.idWatchedStatus" + toAppend;
 }
