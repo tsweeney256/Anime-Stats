@@ -25,10 +25,12 @@ private:
     void OnResetFilter(wxCommandEvent& event);
     void OnAddRow(wxCommandEvent& event);
     void OnDeleteRow(wxCommandEvent& event);
+    void OnGridColSort(wxGridEvent& event);
 
     void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
     void ApplyFilter();
     void AppendStatusStr(std::string& statusStr, std::string toAppend, bool& firstStatus);
+    void ApplyFullGrid();
 
     DECLARE_EVENT_TABLE();
 
@@ -43,8 +45,8 @@ private:
     wxTextCtrl* m_titleFilterTextField;
     wxString m_basicSelectString;
     cppw::Sqlite3Connection* m_connection;
-    std::unique_ptr<cppw::Sqlite3Statement> m_basicSelectStatement;
-    std::string m_order = "Title collate nocase asc"; //placeholder until custom ordering is implemented
+    std::string m_curOrderCol = "Title collate nocase";
+    std::string m_curOrderDir = "asc";
     bool m_colsCreated = false;
     static const int m_numCols = 14; //including the hidden 3
 };

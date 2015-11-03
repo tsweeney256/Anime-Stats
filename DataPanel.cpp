@@ -23,6 +23,7 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
     EVT_BUTTON(ID_ADD_ROW_BTN, DataPanel::OnAddRow)
     EVT_BUTTON(ID_DELETE_ROW_BTN, DataPanel::OnDeleteRow)
+    EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
 END_EVENT_TABLE()
 
 DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWindow* top, wxWindowID id, const wxPoint& pos,
@@ -112,16 +113,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
         wxMessageBox("Error: Could not read from sql/basicSelect.sql.");
         top->Close();
     }
-    try{
-        m_basicSelectStatement = m_connection->PrepareStatement(std::string(m_basicSelectString.ToUTF8()) + "order by " + m_order);
-        m_basicSelectStatement->Bind(1,1); //placeholder. selects only english titles.
-        auto results = m_basicSelectStatement->GetResults();
-        ResetTable(results);
-    }
-    catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error preparing basic select statement.\n" + e.GetErrorMessage());
-        top->Close();
-    }
+    ApplyFullGrid();
 	//
 	//panel sizer
 	//
@@ -165,9 +157,7 @@ void DataPanel::OnApplyFilter(wxCommandEvent& event)
 
 void DataPanel::OnResetFilter(wxCommandEvent& event)
 {
-    m_basicSelectStatement->Reset();
-    auto result = m_basicSelectStatement->GetResults();
-    ResetTable(result);
+    ApplyFullGrid();
 }
 
 void DataPanel::OnAddRow(wxCommandEvent& event)
@@ -176,6 +166,13 @@ void DataPanel::OnAddRow(wxCommandEvent& event)
 
 void DataPanel::OnDeleteRow(wxCommandEvent& event)
 {
+}
+
+void DataPanel::OnGridColSort(wxGridEvent& event)
+{
+    m_curOrderCol = std::to_string(event.GetCol() + 1) + " collate nocase";
+    m_curOrderDir = (m_grid->IsSortOrderAscending() ? "asc" : "desc");
+    ApplyFilter();
 }
 
 void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
@@ -230,7 +227,7 @@ void DataPanel::ApplyFilter()
             statusStr += " ) ";
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) +
                     " where Title like '%" + std::string(m_titleFilterTextField->GetValue().utf8_str()) + "%'" +
-                    statusStr + " order by " + m_order);
+                    statusStr + " order by " + m_curOrderCol + " "+ m_curOrderDir);
         statement->Bind(1,1); //placeholder. selecting english titles only.
         auto results = statement->GetResults();
         ResetTable(results);
@@ -250,4 +247,19 @@ void DataPanel::AppendStatusStr(std::string& statusStr, std::string toAppend, bo
         firstStatus = false;
     }
     statusStr += "WatchedStatus.idWatchedStatus" + toAppend;
+}
+
+void DataPanel::ApplyFullGrid()
+{
+    try{
+        auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.ToUTF8()) +
+                "order by " + m_curOrderCol + " " + m_curOrderDir);
+        statement->Bind(1,1); //placeholder. selects only english titles.
+        auto results = statement->GetResults();
+        ResetTable(results);
+    }
+    catch(cppw::Sqlite3Exception& e){
+        wxMessageBox("Error preparing basic select statement.\n" + e.GetErrorMessage());
+        m_top->Close();
+    }
 }
