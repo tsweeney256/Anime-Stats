@@ -48,6 +48,8 @@ private:
     std::string m_curOrderCol = "Title collate nocase";
     std::string m_curOrderDir = "asc";
     bool m_colsCreated = false;
+    int m_curColSort = 2; //title
+    bool m_curSortAsc = true;
     static const int m_numCols = 14; //including the hidden 3
 };
 

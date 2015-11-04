@@ -172,7 +172,15 @@ void DataPanel::OnDeleteRow(wxCommandEvent& event)
 void DataPanel::OnGridColSort(wxGridEvent& event)
 {
     m_curOrderCol = std::to_string(event.GetCol() + 1) + " collate nocase";
-    m_curOrderDir = (m_grid->IsSortOrderAscending() ? "asc" : "desc");
+    if(m_curColSort == event.GetCol()){
+        m_curOrderDir = (m_curSortAsc ? "desc" : "asc");
+        m_curSortAsc = !m_curSortAsc;
+    }
+    else{
+        m_curOrderDir = "asc";
+        m_curSortAsc = true;
+    }
+    m_curColSort = event.GetCol();
     ApplyFilter();
 }
 
