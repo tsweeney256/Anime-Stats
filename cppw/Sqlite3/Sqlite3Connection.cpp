@@ -76,4 +76,7 @@ std::unique_ptr<cppw::Sqlite3Statement> cppw::Sqlite3Connection::PrepareStatemen
     return std::unique_ptr<Sqlite3Statement>(new Sqlite3Statement(PrepareStatementCommon(statement)));
 }
 
-
+uint64_t cppw::Sqlite3Connection::GetLastInsertRowID()
+{
+    return sqlite3_last_insert_rowid(m_connection);
+}

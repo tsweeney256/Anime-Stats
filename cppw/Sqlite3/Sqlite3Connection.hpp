@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <cstdint>
 #include "../Sqlite3.hpp"
 
 namespace cppw
@@ -25,6 +26,7 @@ namespace cppw
 		void Commit();
 		void Rollback();
 		void EnableForeignKey(const bool enable);
+		uint64_t  GetLastInsertRowID();
 		void ExecuteQuery(const std::string& query);
 		std::unique_ptr<Sqlite3Statement> PrepareStatement(const std::string& statement);
 
