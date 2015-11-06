@@ -11,11 +11,9 @@ CREATE TABLE "Title" (
   "idName" INTEGER PRIMARY KEY,
   "name" TEXT NOT NULL,
   "idSeries" INTEGER NOT NULL,
-  "primaryName" INTEGER NOT NULL,
-  "idLanguage" INTEGER NOT NULL,
-  "officialName" INTEGER NOT NULL,
-  CONSTRAINT "fk_Title_Language1" FOREIGN KEY ("idLanguage") REFERENCES "Language" ("idLanguage") ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT "fk_Title_Show1" FOREIGN KEY ("idSeries") REFERENCES "Series" ("idSeries") ON DELETE NO ACTION ON UPDATE NO ACTION
+  "idLabel" INTEGER NOT NULL DEFAULT 0,
+  CONSTRAINT "fk_Title_Show1" FOREIGN KEY ("idSeries") REFERENCES "Series" ("idSeries") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "fk_Title_Label1" FOREIGN KEY ("idLabel") REFERENCES "Label" ("idLabel") ON DELETE SET DEFAULT ON UPDATE CASCADE
 );
 
 CREATE TABLE "Series" (
@@ -63,14 +61,10 @@ INSERT INTO `LengthType` VALUES (0,'Normal');
 INSERT INTO `LengthType` VALUES (1,'Half');
 INSERT INTO `LengthType` VALUES (2,'Short');
 INSERT INTO `LengthType` VALUES (3,'Long');
-CREATE TABLE "Language" (
-  "idLanguage" INTEGER PRIMARY KEY,
-  "language" TEXT NOT NULL
+CREATE TABLE "Label" (
+  "idLabel" INTEGER PRIMARY KEY,
+  "label" TEXT NOT NULL
 );
-INSERT INTO `Language` VALUES (0,'Japanese');
-INSERT INTO `Language` VALUES (1,'English');
-CREATE TRIGGER onTitleDelete delete on Title
-begin
-delete from Series where Series.idSeries = old.idSeries;
-end;
+INSERT INTO `Label` VALUES (0,'No Label');
+INSERT INTO `Label` VALUES (1,'Default');
 COMMIT;
