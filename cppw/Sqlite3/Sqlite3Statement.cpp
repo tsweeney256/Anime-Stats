@@ -16,6 +16,12 @@ void cppw::Sqlite3Statement::Bind(const int paramIdx, const int val)
         throw Sqlite3Exception(sqlite3_db_handle(m_statement));
 }
 
+void cppw::Sqlite3Statement::Bind(const int paramIdx, const int64_t val)
+{
+    if(sqlite3_bind_int64(m_statement, paramIdx, val) != SQLITE_OK)
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement));
+}
+
 void cppw::Sqlite3Statement::Bind(const int paramIdx, const double val)
 {
     if(sqlite3_bind_double(m_statement, paramIdx, val) != SQLITE_OK)

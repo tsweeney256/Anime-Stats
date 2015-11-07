@@ -1,6 +1,7 @@
 #ifndef SQLITE3STATEMENT_HPP_
 #define SQLITE3STATEMENT_HPP_
 
+#include <cstdint>
 #include "../Sqlite3.hpp"
 
 namespace cppw
@@ -16,6 +17,7 @@ namespace cppw
 		Sqlite3Statement& operator=(Sqlite3Statement&&) = default;
 
 		void Bind(const int paramIdx, const int val);
+		void Bind(const int paramIdx, const int64_t val);
 		void Bind(const int paramIdx, const double val);
 		void Bind(const int paramIdx, const std::string& val);
 		void Bind(const int paramIdx, const char* val);
