@@ -23,4 +23,17 @@ enum
     ID_TITLE_FILTER_FIELD
 };
 
+namespace col
+{
+    enum
+    {
+        ID_SERIES = 0,
+        TITLE
+    };
+}
+
+const int numTitleCols = 4;
+const int numSeriesCols = 12;
+const int numViewCols = 13; //including the hidden 1
+
 #endif // APPIDS_HPP
