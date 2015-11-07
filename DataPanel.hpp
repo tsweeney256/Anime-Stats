@@ -59,7 +59,7 @@ private:
     std::vector<SqlGridCommand*> m_commands;
     int m_commandLevel = -1;
     bool m_colsCreated = false;
-    int m_curColSort = 2; //title
+    int m_curColSort = col::TITLE;
     bool m_curSortAsc = true;
     bool m_unsavedChanges = false;
 };
