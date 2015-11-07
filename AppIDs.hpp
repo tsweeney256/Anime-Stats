@@ -35,5 +35,7 @@ namespace col
 const int numTitleCols = 4;
 const int numSeriesCols = 12;
 const int numViewCols = 13; //including the hidden 1
+const std::vector<std::string> colViewName {"idSeries", "name", "rating", "idReleaseType", "idWatchedStatus", "year", "idSeason",
+    "episodesWatched", "totalEpisodes", "rewatchedEpisodes", "episodeLength", "dateStarted", "dateFinished"};
 
 #endif // APPIDS_HPP
