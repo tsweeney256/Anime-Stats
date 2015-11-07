@@ -128,6 +128,7 @@ void MainFrame::OnSave(wxCommandEvent &event)
 {
     try{
         m_connection->Commit();
+        m_connection->Begin();
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error saving.\n" + e.GetErrorMessage());
