@@ -243,8 +243,21 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
             m_top->Close(true);
         }
         AppendLastGridRow();
-        ++m_commandLevel;
     }
+    else{
+        try{
+            auto idSeries = strtoll(m_grid->GetCellValue(event.GetRow(), col::ID_SERIES).ToUTF8(), nullptr, 10);
+            auto newVal = std::string(event.GetString().utf8_str());
+            auto oldVal = std::string(m_grid->GetCellValue(event.GetRow(), event.GetCol()).utf8_str());
+            auto col = event.GetCol();
+            m_commands.push_back(new UpdateCommand(m_connection, m_grid, idSeries, newVal, oldVal, col));
+        }
+        catch(cppw::Sqlite3Exception& e){
+            wxMessageBox("Error making UpdateCommand.\n" + e.GetErrorMessage());
+            m_top->Close(true);
+        }
+    }
+    ++m_commandLevel;
     m_unsavedChanges = true;
 }
 
@@ -341,9 +354,11 @@ void DataPanel::AppendLastGridRow()
 {
     m_grid->AppendRows();
     for(int i = col::TITLE + 1; i < numViewCols; ++i){ //want to only allow the user to edit the name field of the new entry line at first
-        m_grid->SetReadOnly(m_grid->GetNumberRows()-2, i, false);
-        m_grid->SetCellBackgroundColour(m_grid->GetNumberRows()-2, i, wxColour(255, 255, 255)); //make greyed out cells white again
-        m_grid->SetRowLabelValue(m_grid->GetNumberRows()-2, wxString::Format("%i", m_grid->GetNumberRows()-1));
+        if(m_grid->GetNumberRows() > 1){
+            m_grid->SetReadOnly(m_grid->GetNumberRows()-2, i, false);
+            m_grid->SetCellBackgroundColour(m_grid->GetNumberRows()-2, i, wxColour(255, 255, 255)); //make greyed out cells white again
+            m_grid->SetRowLabelValue(m_grid->GetNumberRows()-2, wxString::Format("%i", m_grid->GetNumberRows()-1));
+        }
 
         m_grid->SetReadOnly(m_grid->GetNumberRows()-1, i);
         m_grid->SetCellBackgroundColour(m_grid->GetNumberRows()-1, i, wxColour(220, 220, 220)); //grey as a sign that the cells are read only
