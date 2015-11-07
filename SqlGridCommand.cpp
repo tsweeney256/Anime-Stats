@@ -143,7 +143,6 @@ void DeleteCommand::UnExecute()
     wxGridUpdateLocker lock(m_grid);
     int insertLoc = m_grid->GetNumberRows()-1;
     m_grid->InsertRows(insertLoc, m_series.size());
-    m_idSeries.clear();
     for(unsigned int i = 0; i < m_series.size(); ++i){
         //insert each series back in the db
         m_seriesInsertStmt->Reset();
@@ -161,7 +160,7 @@ void DeleteCommand::UnExecute()
             m_grid->SetCellValue(insertLoc + i, k, wxString::FromUTF8(m_seriesView[i][k].c_str()));
         }
         //insert back all titles associated with each series in the db
-        InsertIntoTitle(m_titlesGroup[i], std::to_string(m_idSeries.back()));
+        InsertIntoTitle(m_titlesGroup[i], std::to_string(m_idSeries[i]));
     }
     m_grid->GoToCell(insertLoc, col::TITLE);
 }
