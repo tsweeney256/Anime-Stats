@@ -194,6 +194,7 @@ void DataPanel::OnResetFilter(wxCommandEvent& event)
 
 void DataPanel::OnAddRow(wxCommandEvent& event)
 {
+    m_grid->GoToCell(m_grid->GetNumberRows()-1, col::TITLE);
 }
 
 void DataPanel::OnDeleteRow(wxCommandEvent& event)
