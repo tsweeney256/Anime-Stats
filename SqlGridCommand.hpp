@@ -90,4 +90,27 @@ private:
             "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished ";
 };
 
+class UpdateCommand : public SqlGridCommand
+{
+public:
+    UpdateCommand() = delete;
+    UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, int64_t idSeries,
+            std::string newVal, std::string oldVal, int wxGridCol);
+    void Execute() override;
+    void UnExecute() override;
+
+private:
+    void ExecutionCommon(const std::string& newVal, const std::string& oldVal);
+    std::string FormatUpdate(const std::string& val);
+
+    int64_t m_idSeries;
+    std::string m_newGridVal;
+    std::string m_oldGridVal;
+    std::string m_newDbVal;
+    std::string m_oldDbVal;
+    int m_col;
+
+    static std::unique_ptr<cppw::Sqlite3Statement> m_selectIdTitleStmt;
+};
+
 #endif

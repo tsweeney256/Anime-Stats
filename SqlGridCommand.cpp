@@ -222,3 +222,56 @@ void DeleteCommand::ExecuteCommon()
     }
 
 }
+
+UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, int64_t idSeries, std::string newVal,
+        std::string oldVal, int wxGridCol)
+    : SqlGridCommand(connection, grid), m_idSeries(idSeries), m_newGridVal(newVal), m_oldGridVal(oldVal), m_col(wxGridCol)
+{
+    m_newDbVal = FormatUpdate(newVal);
+    m_oldDbVal = FormatUpdate(oldVal);
+    ExecutionCommon(m_newDbVal, m_oldDbVal);
+}
+
+std::unique_ptr<cppw::Sqlite3Statement> UpdateCommand::m_selectIdTitleStmt(nullptr);
+
+void UpdateCommand::Execute()
+{
+    ExecutionCommon(m_newDbVal, m_oldDbVal);
+    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, m_newGridVal);
+}
+
+void UpdateCommand::UnExecute()
+{
+    ExecutionCommon(m_oldDbVal, m_newDbVal);
+    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, m_oldGridVal);
+}
+
+void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string& oldVal)
+{
+    if(m_col == col::TITLE){
+        if(!m_selectIdTitleStmt)
+            m_selectIdTitleStmt = m_connection->PrepareStatement("select idName from Title inner join Label "
+                    "on Title.idLabel = Label.idLabel where name = ? and Main=1");
+        m_selectIdTitleStmt->Reset();
+        m_selectIdTitleStmt->ClearBindings();
+        m_selectIdTitleStmt->Bind(1, oldVal);
+        auto result = m_selectIdTitleStmt->GetResults();
+        result->NextRow();
+        auto idName = result->GetString(0);
+        m_connection->ExecuteQuery("update Title set name='" + newVal + "' where idName=" + idName);
+    }
+    else
+        m_connection->ExecuteQuery("update Series set " + colViewName[m_col] + "=" +
+                newVal + " where idSeries=" + std::to_string(m_idSeries));
+}
+
+std::string UpdateCommand::FormatUpdate(const std::string& val)
+{
+    std::string output = val;
+    if(!output.compare(""))
+            output = "null";
+        else
+            //we could avoid 1 string construction by changing this function, but eh.
+            FormatString(output);
+    return output;
+}
