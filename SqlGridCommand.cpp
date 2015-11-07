@@ -18,6 +18,19 @@ void SqlGridCommand::FormatString(std::string& str)
     }
 }
 
+int SqlGridCommand::GetRowWithIdSeries(int64_t idSeries)
+{
+    //linear should be good enough considering how small the n should be
+    //don't want to have to make an index every time the view is changed
+    for(int i = 0; i < m_grid->GetNumberRows(); ++i){
+        int64_t num = strtoll(m_grid->GetCellValue(i, col::ID_SERIES).ToUTF8(), nullptr, 10);
+        if(num  == idSeries){
+            return i;
+        }
+    }
+    return -1; //not found
+}
+
 InsertDeleteCommand::InsertDeleteCommand(cppw::Sqlite3Connection* connection, wxGrid* grid)
     : SqlGridCommand(connection, grid) {}
 
@@ -41,19 +54,6 @@ std::vector<std::array<std::string, numTitleCols-2>> InsertDeleteCommand::getTit
         titles.push_back(row);
     }
     return titles;
-}
-
-int InsertDeleteCommand::GetRowWithIdSeries(int64_t idSeries)
-{
-    //linear should be good enough considering how small the n should be
-    //don't want to have to make an index every time the view is changed
-    for(int i = 0; i < m_grid->GetNumberRows(); ++i){
-        int64_t num = strtoll(m_grid->GetCellValue(i, col::ID_SERIES).ToUTF8(), nullptr, 10);
-        if(num  == idSeries){
-            return i;
-        }
-    }
-    return -1; //not found
 }
 
 void InsertDeleteCommand::InsertIntoTitle(const std::vector<std::array<std::string, selectedTitleCols>>& titles,

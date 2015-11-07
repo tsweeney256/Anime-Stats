@@ -21,6 +21,7 @@ public:
 protected:
     //does things like replace ' with '' and replace the empty string with null
     void FormatString(std::string& str);
+    int GetRowWithIdSeries(int64_t idSeries);
 
     cppw::Sqlite3Connection* m_connection;
     wxGrid* m_grid;
@@ -38,7 +39,6 @@ protected:
     static const int selectedSeriesCols = numSeriesCols-1;
 
     std::vector<std::array<std::string, selectedTitleCols>> getTitlesOfSeries(int64_t idSeries);
-    int GetRowWithIdSeries(int64_t idSeries);
     void InsertIntoTitle(const std::vector<std::array<std::string, selectedTitleCols>>& titles,
             const std::string& idSeries);
 
