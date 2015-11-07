@@ -21,7 +21,6 @@ CREATE TABLE "Series" (
   "rating" INTEGER DEFAULT NULL,
   "idReleaseType" INTEGER DEFAULT NULL,
   "idWatchedStatus" INTEGER DEFAULT NULL,
-  "idLengthType" INTEGER DEFAULT NULL,
   "year" INTEGER DEFAULT NULL,
   "idSeason" INTEGER DEFAULT NULL,
   "episodesWatched" INTEGER DEFAULT NULL,
@@ -53,18 +52,12 @@ INSERT INTO `ReleaseType` VALUES (1,'OVA');
 INSERT INTO `ReleaseType` VALUES (2,'ONA');
 INSERT INTO `ReleaseType` VALUES (3,'Movie');
 INSERT INTO `ReleaseType` VALUES (4,'TV Special');
-CREATE TABLE "LengthType" (
-  "idLengthType" INTEGER PRIMARY KEY,
-  "type" TEXT NOT NULL
-);
-INSERT INTO `LengthType` VALUES (0,'Normal');
-INSERT INTO `LengthType` VALUES (1,'Half');
-INSERT INTO `LengthType` VALUES (2,'Short');
-INSERT INTO `LengthType` VALUES (3,'Long');
 CREATE TABLE "Label" (
-  "idLabel" INTEGER PRIMARY KEY,
-  "label" TEXT NOT NULL
+	`idLabel`	INTEGER,
+	`label`	TEXT NOT NULL,
+	`Main`	INTEGER DEFAULT 0,
+	PRIMARY KEY(idLabel)
 );
-INSERT INTO `Label` VALUES (0,'No Label');
-INSERT INTO `Label` VALUES (1,'Default');
+INSERT INTO `Label` VALUES (0,'No Label',0);
+INSERT INTO `Label` VALUES (1,'Default',1);
 COMMIT;
