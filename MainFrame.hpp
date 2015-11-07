@@ -4,7 +4,7 @@
 #include <wx/frame.h>
 #include "cppw/Sqlite3.hpp"
 
-//class wxSQLite3Database;
+class DataPanel;
 
 class MainFrame : public wxFrame
 {
@@ -16,12 +16,15 @@ private:
     void OnSave(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
+    void OnUndo(wxCommandEvent& event);
+    void OnRedo(wxCommandEvent& event);
 
     void CreateDatabase(cppw::Sqlite3Connection* connection);
 
     wxDECLARE_EVENT_TABLE();
 
     cppw::Sqlite3Connection* m_connection;
+    DataPanel* m_dataPanel = nullptr;
 };
 
 #endif

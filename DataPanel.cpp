@@ -24,6 +24,7 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_BUTTON(ID_ADD_ROW_BTN, DataPanel::OnAddRow)
     EVT_BUTTON(ID_DELETE_ROW_BTN, DataPanel::OnDeleteRow)
     EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
+    EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
 END_EVENT_TABLE()
 
 DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWindow* top, wxWindowID id, const wxPoint& pos,
@@ -122,6 +123,36 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	SetSizerAndFit(panelSizer);
 }
 
+bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
+
+void DataPanel::SetUnsavedChanges(bool unsavedChanges) { m_unsavedChanges = unsavedChanges; }
+
+void DataPanel::Undo()
+{
+    try{
+        if(m_commandLevel >= 0){
+            m_commands[m_commandLevel--]->UnExecute();
+        }
+    }
+    catch(cppw::Sqlite3Exception& e){
+        wxMessageBox("Error while undoing action.\n" + e.GetErrorMessage());
+        m_top->Close(true);
+    }
+}
+
+void DataPanel::Redo()
+{
+    try{
+        if(m_commandLevel < static_cast<int>(m_commands.size()) - 1){
+            m_commands[++m_commandLevel]->Execute();
+        }
+    }
+    catch(cppw::Sqlite3Exception& e){
+        wxMessageBox("Error while redoing action.\n" + e.GetErrorMessage());
+        m_top->Close(true);
+    }
+}
+
 void DataPanel::OnGeneralWatchedStatusCheckbox(wxCommandEvent& event)
 {
     if(m_watchedCheck->GetValue() && m_watchingCheck->GetValue() && m_stalledCheck->GetValue()
@@ -167,6 +198,22 @@ void DataPanel::OnAddRow(wxCommandEvent& event)
 
 void DataPanel::OnDeleteRow(wxCommandEvent& event)
 {
+    auto rows = m_grid->GetSelectedRows();
+    std::vector<int64_t> idSeries(rows.GetCount());
+    for(unsigned int i = 0; i < rows.GetCount(); ++i){
+        auto idSeriesStr = m_grid->GetCellValue(rows.Item(i), col::ID_SERIES);
+        if(idSeriesStr.compare("")) //ignore the last row
+            idSeries[i] = strtoll(idSeriesStr, nullptr, 10);
+    }
+    try{
+        m_commands.push_back(new DeleteCommand(m_connection, m_grid, idSeries));
+    }
+    catch(cppw::Sqlite3Exception& e){
+        wxMessageBox("Error deleting row(s)\n" + e.GetErrorMessage());
+        m_top->Destroy();
+    }
+    ++m_commandLevel;
+    m_unsavedChanges = true;
 }
 
 void DataPanel::OnGridColSort(wxGridEvent& event)
@@ -184,6 +231,22 @@ void DataPanel::OnGridColSort(wxGridEvent& event)
     ApplyFilter();
 }
 
+void DataPanel::OnGridCellChanging(wxGridEvent& event)
+{
+    if(event.GetRow() == m_grid->GetNumberRows()-1 && event.GetCol() == col::TITLE){
+        try{
+            m_commands.push_back(new InsertCommand(m_connection, m_grid, std::string(event.GetString().utf8_str()), 1));
+        }
+        catch(cppw::Sqlite3Exception& e){
+            wxMessageBox("Error making InsertCommand.\n" + e.GetErrorMessage());
+            m_top->Close(true);
+        }
+        AppendLastGridRow();
+        ++m_commandLevel;
+    }
+    m_unsavedChanges = true;
+}
+
 void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 {
     wxGridUpdateLocker lock;
@@ -191,28 +254,28 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
         m_grid->DeleteRows(0, numRows);
     if(results->NextRow()){
         int rowPos = 0;
-        wxASSERT_MSG(results->GetColumnCount() == m_numCols, "Basic Select Results have wrong number of columns.");
+        wxASSERT_MSG(results->GetColumnCount() == numViewCols, "Basic Select Results have wrong number of columns.");
         m_grid->AppendRows();
         if(!m_colsCreated){
             m_colsCreated = true;
-            m_grid->AppendCols(m_numCols);
-            for(int i = 0; i < m_numCols; ++i)
+            m_grid->AppendCols(numViewCols);
+            for(int i = 0; i < numViewCols; ++i)
                 m_grid->SetColLabelValue(i, wxString::FromUTF8(results->GetColumnName(i).c_str()));
         }
-        for(int i = 0; i < m_numCols; ++i)
+        for(int i = 0; i < numViewCols; ++i)
             m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
         ++rowPos;
         while(results->NextRow()){
             m_grid->AppendRows();
-            for(int i = 0; i < m_numCols; ++i){
+            for(int i = 0; i < numViewCols; ++i){
                 m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
             }
             ++rowPos;
         }
     }
-    m_grid->AppendRows(); //blank row at the bottom
+    AppendLastGridRow();
     //number of rows and table keys. user shouldn't see these.
-    m_grid->HideCol(0); m_grid->HideCol(1);
+    m_grid->HideCol(0);
     m_grid->AutoSize();
 }
 
@@ -237,14 +300,13 @@ void DataPanel::ApplyFilter()
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) +
                     " where Title like '%" + std::string(m_titleFilterTextField->GetValue().utf8_str()) + "%'" +
                     statusStr + " order by " + m_curOrderCol + " "+ m_curOrderDir);
-        statement->Bind(1,1); //placeholder. selecting english titles only.
         auto results = statement->GetResults();
         ResetTable(results);
         Fit();
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error applying filter.\n" + e.GetErrorMessage());
-        m_top->Close();
+        m_top->Close(true);
     }
 }
 
@@ -264,13 +326,26 @@ void DataPanel::ApplyFullGrid()
     try{
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.ToUTF8()) +
                 "order by " + m_curOrderCol + " " + m_curOrderDir);
-        statement->Bind(1,1); //placeholder. selects only english titles.
         auto results = statement->GetResults();
         ResetTable(results);
         Fit();
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error preparing basic select statement.\n" + e.GetErrorMessage());
-        m_top->Close();
+        m_top->Close(true);
+    }
+}
+
+void DataPanel::AppendLastGridRow()
+{
+    m_grid->AppendRows();
+    for(int i = col::TITLE + 1; i < numViewCols; ++i){ //want to only allow the user to edit the name field of the new entry line at first
+        m_grid->SetReadOnly(m_grid->GetNumberRows()-2, i, false);
+        m_grid->SetCellBackgroundColour(m_grid->GetNumberRows()-2, i, wxColour(255, 255, 255)); //make greyed out cells white again
+        m_grid->SetRowLabelValue(m_grid->GetNumberRows()-2, wxString::Format("%i", m_grid->GetNumberRows()-1));
+
+        m_grid->SetReadOnly(m_grid->GetNumberRows()-1, i);
+        m_grid->SetCellBackgroundColour(m_grid->GetNumberRows()-1, i, wxColour(220, 220, 220)); //grey as a sign that the cells are read only
+        m_grid->SetRowLabelValue(m_grid->GetNumberRows()-1, "*");
     }
 }

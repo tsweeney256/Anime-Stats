@@ -18,6 +18,8 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_SAVE, MainFrame::OnSave)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
+	EVT_MENU(wxID_UNDO, MainFrame::OnUndo)
+	EVT_MENU(wxID_REDO, MainFrame::OnRedo)
 
 wxEND_EVENT_TABLE()
 
@@ -34,10 +36,15 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 	fileMenu->Append(wxID_SAVE);
 	fileMenu->Append(wxID_EXIT);
 
+	auto editMenu = new wxMenu;
+	editMenu->Append(wxID_UNDO);
+	editMenu->Append(wxID_REDO);
+
 	auto helpMenu = new wxMenu;
 	helpMenu->Append(wxID_ABOUT);
 
 	menuBar->Append(fileMenu, _("&File"));
+	menuBar->Append(editMenu, _("&Edit"));
 	menuBar->Append(helpMenu, _("&Help"));
 
     //
@@ -46,6 +53,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     auto fileExists = wxFileName::FileExists("AnimeData.db");
     m_connection = new cppw::Sqlite3Connection("AnimeData.db");
     m_connection->EnableForeignKey(true);
+    m_connection->Begin();
     if(!fileExists){
         auto error = false;
         wxString errorMsg;
@@ -86,20 +94,45 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     auto mainPanel = new wxPanel(this, wxID_ANY);
     auto mainPanelSizer = new wxBoxSizer(wxVERTICAL);
     auto notebook = new wxNotebook(mainPanel, wxID_ANY);
-    auto dataPage = new DataPanel(m_connection, notebook, this);
-    notebook->AddPage(dataPage, _("Data"));
+    m_dataPanel = new DataPanel(m_connection, notebook, this);
+    notebook->AddPage(m_dataPanel, _("Data"));
     mainPanelSizer->Add(notebook, wxSizerFlags(0).Expand());
     mainPanel->SetSizerAndFit(mainPanelSizer);
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
-	Destroy();
+    if(m_dataPanel->UnsavedChangesExist() && event.CanVeto()){
+        event.Veto();
+        auto test = new wxMessageDialog(this, _("Save changes to database before closing?"),
+                wxMessageBoxCaptionStr, wxCANCEL|wxYES_NO|wxCANCEL_DEFAULT|wxCENTER);
+        auto button = test->ShowModal();
+        if(button == wxID_YES){
+            try{
+                m_connection->Commit();
+            }
+            catch(cppw::Sqlite3Exception& e){
+                wxMessageBox("Error saving.\n" + e.GetErrorMessage());
+            }
+            Destroy();
+        }
+        else if(button == wxID_NO){
+            Destroy();
+        }
+    }
+    else
+        Destroy();
 }
 
 void MainFrame::OnSave(wxCommandEvent &event)
 {
-
+    try{
+        m_connection->Commit();
+    }
+    catch(cppw::Sqlite3Exception& e){
+        wxMessageBox("Error saving.\n" + e.GetErrorMessage());
+    }
+    m_dataPanel->SetUnsavedChanges(false);
 }
 
 void MainFrame::OnExit(wxCommandEvent &event)
@@ -117,3 +150,7 @@ void MainFrame::OnAbout(wxCommandEvent &event)
 
 	wxAboutBox(info);
 }
+
+void MainFrame::OnUndo(wxCommandEvent& event) { m_dataPanel->Undo(); }
+
+void MainFrame::OnRedo(wxCommandEvent& event) { m_dataPanel->Redo(); }
