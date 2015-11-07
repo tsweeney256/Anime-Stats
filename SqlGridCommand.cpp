@@ -134,7 +134,7 @@ void DeleteCommand::UnExecute()
 {
     if(!m_seriesInsertStmt){
         std::string questionStr = "?";
-        for(int i = 1; i < selectedSeriesCols; ++i){
+        for(int i = 1; i < numSeriesCols; ++i){
             questionStr += " ,?";
         }
         m_seriesInsertStmt = m_connection->PrepareStatement("insert into Series (" + seriesColNames + ") values(" +
@@ -148,7 +148,7 @@ void DeleteCommand::UnExecute()
         //insert each series back in the db
         m_seriesInsertStmt->Reset();
         m_seriesInsertStmt->ClearBindings();
-        for(int k = 0; k < selectedSeriesCols; ++k){
+        for(int k = 0; k < numSeriesCols; ++k){
             if(m_series[i][k].compare(""))
                 m_seriesInsertStmt->Bind(k+1, m_series[i][k]);
             else
@@ -157,10 +157,8 @@ void DeleteCommand::UnExecute()
         auto results = m_seriesInsertStmt->GetResults();
         results->NextRow();
         //put series back in the grid
-        m_idSeries.push_back(m_connection->GetLastInsertRowID());
-        m_grid->SetCellValue(insertLoc + i, col::ID_SERIES, std::to_string(m_idSeries.back()));
-        for(int k = col::TITLE; k < m_grid->GetNumberCols(); ++k){
-            m_grid->SetCellValue(insertLoc + i, k, wxString::FromUTF8(m_seriesView[i][k-1].c_str()));
+        for(int k = 0; k < m_grid->GetNumberCols(); ++k){
+            m_grid->SetCellValue(insertLoc + i, k, wxString::FromUTF8(m_seriesView[i][k].c_str()));
         }
         //insert back all titles associated with each series in the db
         InsertIntoTitle(m_titlesGroup[i], std::to_string(m_idSeries.back()));
@@ -198,7 +196,7 @@ void DeleteCommand::ExecuteCommon()
         m_seriesSelectStmt->Bind(1, m_idSeries[i]);
         auto seriesResults = m_seriesSelectStmt->GetResults();
         while(seriesResults->NextRow()){
-            std::array<std::string, selectedSeriesCols> row;
+            std::array<std::string, numSeriesCols> row;
             for(int k = 0; k < seriesResults->GetColumnCount(); ++k){
                 row[k] = seriesResults->GetString(k);
                 FormatString(row[k]);
@@ -210,9 +208,9 @@ void DeleteCommand::ExecuteCommon()
         m_seriesViewSelectStmt->Bind(1, m_idSeries[i]);
         auto seriesViewResults = m_seriesViewSelectStmt->GetResults();
         while(seriesViewResults->NextRow()){
-            std::array<std::string, numViewCols-1> rowView;
-            for(int k = 0; k < seriesViewResults->GetColumnCount()-1; ++k){
-                rowView[k] = seriesViewResults->GetString(k+1);
+            std::array<std::string, numViewCols> rowView;
+            for(int k = 0; k < seriesViewResults->GetColumnCount(); ++k){
+                rowView[k] = seriesViewResults->GetString(k);
             }
             m_seriesView.push_back(rowView);
         }

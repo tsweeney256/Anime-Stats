@@ -36,7 +36,6 @@ public:
 
 protected:
     static const int selectedTitleCols = numTitleCols-2;
-    static const int selectedSeriesCols = numSeriesCols-1;
 
     std::vector<std::array<std::string, selectedTitleCols>> getTitlesOfSeries(int64_t idSeries);
     void InsertIntoTitle(const std::vector<std::array<std::string, selectedTitleCols>>& titles,
@@ -80,14 +79,14 @@ private:
     void ExecuteCommon();
 
     std::vector<int64_t> m_idSeries;
-    std::vector<std::array<std::string, selectedSeriesCols>> m_series;
-    std::vector<std::array<std::string, numViewCols-1>> m_seriesView;
+    std::vector<std::array<std::string, numSeriesCols>> m_series;
+    std::vector<std::array<std::string, numViewCols>> m_seriesView;
     std::vector<std::vector<std::array<std::string, selectedTitleCols>>> m_titlesGroup; //multiple entries will each have multiple names
 
     static std::unique_ptr<cppw::Sqlite3Statement> m_seriesSelectStmt;
     static std::unique_ptr<cppw::Sqlite3Statement> m_seriesInsertStmt;
     static std::unique_ptr<cppw::Sqlite3Statement> m_seriesViewSelectStmt;
-    const std::string seriesColNames = " rating, idReleaseType, idWatchedStatus, year, idSeason, episodesWatched, "
+    const std::string seriesColNames = " idSeries, rating, idReleaseType, idWatchedStatus, year, idSeason, episodesWatched, "
             "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished ";
 };
 
