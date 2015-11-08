@@ -213,7 +213,7 @@ void DataPanel::OnDeleteRow(wxCommandEvent& event)
             idSeries[i] = strtoll(idSeriesStr, nullptr, 10);
     }
     try{
-        m_commands.push_back(new DeleteCommand(m_connection, m_grid, idSeries));
+        m_commands.push_back(std::make_unique<DeleteCommand>(m_connection, m_grid, idSeries));
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error deleting row(s)\n" + e.GetErrorMessage());
@@ -242,7 +242,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
 {
     if(event.GetRow() == m_grid->GetNumberRows()-1 && event.GetCol() == col::TITLE){
         try{
-            m_commands.push_back(new InsertCommand(m_connection, m_grid, std::string(event.GetString().utf8_str()), 1));
+            m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_grid, std::string(event.GetString().utf8_str()), 1));
         }
         catch(cppw::Sqlite3Exception& e){
             wxMessageBox("Error making InsertCommand.\n" + e.GetErrorMessage());
@@ -256,7 +256,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
             auto newVal = std::string(event.GetString().utf8_str());
             auto oldVal = std::string(m_grid->GetCellValue(event.GetRow(), event.GetCol()).utf8_str());
             auto col = event.GetCol();
-            m_commands.push_back(new UpdateCommand(m_connection, m_grid, idSeries, newVal, oldVal, col));
+            m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_grid, idSeries, newVal, oldVal, col));
         }
         catch(cppw::Sqlite3Exception& e){
             wxMessageBox("Error making UpdateCommand.\n" + e.GetErrorMessage());
@@ -402,7 +402,7 @@ void DataPanel::ApplyFilterEasy()
 void DataPanel::NewFilter()
 {
     std::string newFilterStr = std::string(m_titleFilterTextField->GetValue().utf8_str());
-    m_commands.push_back(new FilterCommand(this, newFilterStr, m_oldFilterStr, m_watchedCheck->GetValue(),
+    m_commands.push_back(std::make_unique<FilterCommand>(this, newFilterStr, m_oldFilterStr, m_watchedCheck->GetValue(),
             m_watchingCheck->GetValue(), m_stalledCheck->GetValue(), m_droppedCheck->GetValue(), m_blankCheck->GetValue(),
             m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank));
 

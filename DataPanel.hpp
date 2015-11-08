@@ -58,7 +58,7 @@ private:
     cppw::Sqlite3Connection* m_connection;
     std::string m_curOrderCol = "Title collate nocase";
     std::string m_curOrderDir = "asc";
-    std::vector<SqlGridCommand*> m_commands;
+    std::vector<std::unique_ptr<SqlGridCommand>> m_commands;
     int m_commandLevel = -1;
     bool m_colsCreated = false;
     int m_curColSort = col::TITLE;
