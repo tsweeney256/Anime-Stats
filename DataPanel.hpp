@@ -42,6 +42,7 @@ private:
     void AppendLastGridRow();
     void ApplyFilterEasy();
     void NewFilter();
+    void HandleCommandChecking();
 
     DECLARE_EVENT_TABLE();
 
@@ -59,7 +60,7 @@ private:
     std::string m_curOrderCol = "Title collate nocase";
     std::string m_curOrderDir = "asc";
     std::vector<std::unique_ptr<SqlGridCommand>> m_commands;
-    int m_commandLevel = -1;
+    int m_commandLevel = 0;
     bool m_colsCreated = false;
     int m_curColSort = col::TITLE;
     bool m_curSortAsc = true;

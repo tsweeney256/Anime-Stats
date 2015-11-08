@@ -130,8 +130,8 @@ void DataPanel::SetUnsavedChanges(bool unsavedChanges) { m_unsavedChanges = unsa
 void DataPanel::Undo()
 {
     try{
-        if(m_commandLevel >= 0){
-            m_commands[m_commandLevel--]->UnExecute();
+        if(m_commandLevel > 0){
+            m_commands[--m_commandLevel]->UnExecute();
         }
     }
     catch(cppw::Sqlite3Exception& e){
@@ -143,8 +143,8 @@ void DataPanel::Undo()
 void DataPanel::Redo()
 {
     try{
-        if(m_commandLevel < static_cast<int>(m_commands.size()) - 1){
-            m_commands[++m_commandLevel]->Execute();
+        if(m_commandLevel <= static_cast<int>(m_commands.size()) - 1){
+            m_commands[m_commandLevel++]->Execute();
         }
     }
     catch(cppw::Sqlite3Exception& e){
@@ -220,6 +220,7 @@ void DataPanel::OnDeleteRow(wxCommandEvent& event)
         m_top->Destroy();
     }
     ++m_commandLevel;
+    HandleCommandChecking();
     m_unsavedChanges = true;
 }
 
@@ -264,6 +265,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
         }
     }
     ++m_commandLevel;
+    HandleCommandChecking();
     m_unsavedChanges = true;
 }
 
@@ -413,4 +415,12 @@ void DataPanel::NewFilter()
     m_oldDropped = m_droppedCheck->GetValue();
     m_oldBlank = m_blankCheck->GetValue();
     ++m_commandLevel;
+    HandleCommandChecking();
+}
+
+void DataPanel::HandleCommandChecking()
+{
+    if(m_commandLevel != static_cast<int>(m_commands.size())){
+        m_commands.erase(m_commands.begin()+m_commandLevel-1, m_commands.end()-1);
+    }
 }
