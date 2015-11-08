@@ -9,6 +9,7 @@
 namespace cppw { class Sqlite3Connection;
                  class Sqlite3Statement; }
 class wxGrid;
+class DataPanel;
 
 class SqlGridCommand //abstract
 {
@@ -111,6 +112,23 @@ private:
     int m_col;
 
     static std::unique_ptr<cppw::Sqlite3Statement> m_selectIdTitleStmt;
+};
+
+class FilterCommand : public SqlGridCommand
+{
+public:
+    FilterCommand() = delete;
+    FilterCommand(DataPanel* dataPanel, std::string newFilterStr, std::string oldFilterStr, bool newWatched, bool newWatching,
+            bool newStalled, bool newDropped, bool newBlank, bool oldWatched, bool oldWatching, bool oldStalled, bool oldDropped,
+            bool oldBlank); //this is obnoxious
+    void Execute() override;
+    void UnExecute() override;
+private:
+    DataPanel* m_dataPanel;
+    std::string m_newFilterStr;
+    std::string m_oldFilterStr;
+    bool m_newWatched, m_newWatching, m_newStalled, m_newDropped, m_newBlank;
+    bool m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank;
 };
 
 #endif

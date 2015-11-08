@@ -5,6 +5,7 @@
 #include "cppw/Sqlite3.hpp"
 #include "SqlGridCommand.hpp"
 #include "AppIDs.hpp"
+#include "DataPanel.hpp"
 
 SqlGridCommand::SqlGridCommand(cppw::Sqlite3Connection* connection, wxGrid* grid)
     : m_connection(connection), m_grid(grid) {}
@@ -273,4 +274,24 @@ std::string UpdateCommand::FormatUpdate(const std::string& val)
             //we could avoid 1 string construction by changing this function, but eh.
             FormatString(output);
     return output;
+}
+
+//truly, truly obnoxious
+FilterCommand::FilterCommand(DataPanel* dataPanel, std::string newFilterStr, std::string oldFilterStr, bool newWatched, bool newWatching,
+        bool newStalled, bool newDropped, bool newBlank, bool oldWatched, bool oldWatching, bool oldStalled, bool oldDropped, bool oldBlank)
+    : SqlGridCommand(nullptr, nullptr), m_dataPanel(dataPanel), m_newFilterStr(newFilterStr), m_oldFilterStr(oldFilterStr),
+      m_newWatched(newWatched), m_newWatching(newWatching), m_newStalled(newStalled), m_newDropped(newDropped), m_newBlank(newBlank),
+      m_oldWatched(oldWatched), m_oldWatching(oldWatching), m_oldStalled(oldStalled), m_oldDropped(oldDropped), m_oldBlank(oldBlank)
+{
+    Execute();
+}
+
+void FilterCommand::Execute()
+{
+    m_dataPanel->ApplyFilter(m_newFilterStr, m_newWatched, m_newWatching, m_newStalled, m_newDropped, m_newBlank);
+}
+
+void FilterCommand::UnExecute()
+{
+    m_dataPanel->ApplyFilter(m_oldFilterStr, m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank);
 }

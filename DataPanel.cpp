@@ -178,18 +178,24 @@ void DataPanel::OnEnableAllCheckbox(wxCommandEvent& event)
 
 void DataPanel::OnTextEnter(wxCommandEvent& event)
 {
-    ApplyFilter();
+    NewFilter();
 }
 
 void DataPanel::OnApplyFilter(wxCommandEvent& event)
 {
-    ApplyFilter();
+    NewFilter();
 }
 
 void DataPanel::OnResetFilter(wxCommandEvent& event)
 {
-    ApplyFullGrid();
+    m_watchedCheck->SetValue(true);
+    m_watchingCheck->SetValue(true);
+    m_stalledCheck->SetValue(true);
+    m_droppedCheck->SetValue(true);
+    m_blankCheck->SetValue(true);
+    m_allCheck->Disable();
     m_titleFilterTextField->SetValue("");
+    NewFilter();
 }
 
 void DataPanel::OnAddRow(wxCommandEvent& event)
@@ -229,7 +235,7 @@ void DataPanel::OnGridColSort(wxGridEvent& event)
         m_curSortAsc = true;
     }
     m_curColSort = event.GetCol();
-    ApplyFilter();
+    ApplyFilterEasy();
 }
 
 void DataPanel::OnGridCellChanging(wxGridEvent& event)
@@ -293,29 +299,43 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
     m_grid->AutoSize();
 }
 
-void DataPanel::ApplyFilter()
+void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool watching, bool stalled, bool dropped, bool blank)
 {
     try{
         //setting up the where part of the sql statement to filter by watched statuses
         bool firstStatus = true;
         std::string statusStr;
-        if(m_watchedCheck->GetValue())
+        if(watched)
             AppendStatusStr(statusStr, "= 0 ", firstStatus);
-        if(m_watchingCheck->GetValue())
+        if(watching)
             AppendStatusStr(statusStr, "= 1 ", firstStatus);
-        if(m_stalledCheck->GetValue())
+        if(stalled)
             AppendStatusStr(statusStr, "= 2 ", firstStatus);
-        if(m_droppedCheck->GetValue())
+        if(dropped)
             AppendStatusStr(statusStr, "= 3 ", firstStatus);
-        if(m_blankCheck->GetValue())
+        if(blank)
             AppendStatusStr(statusStr, " is null ", firstStatus);
         if(!firstStatus)
             statusStr += " ) ";
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) +
-                    " where Title like '%" + std::string(m_titleFilterTextField->GetValue().utf8_str()) + "%'" +
+                    " where Title like '%" + filterStr + "%'" +
                     statusStr + " order by " + m_curOrderCol + " "+ m_curOrderDir);
         auto results = statement->GetResults();
         ResetTable(results);
+        m_watchedCheck->SetValue(watched);
+        m_watchingCheck->SetValue(watching);
+        m_stalledCheck->SetValue(stalled);
+        m_droppedCheck->SetValue(dropped);
+        m_blankCheck->SetValue(blank);
+        if(watched && watching && stalled && dropped && blank){
+            m_allCheck->SetValue(true);
+            m_allCheck->Disable();
+        }
+        else{
+            m_allCheck->SetValue(false);
+            m_allCheck->Enable();
+        }
+        m_titleFilterTextField->SetValue(filterStr);
         Fit();
     }
     catch(cppw::Sqlite3Exception& e){
@@ -353,6 +373,9 @@ void DataPanel::ApplyFullGrid()
 void DataPanel::AppendLastGridRow()
 {
     m_grid->AppendRows();
+    for(int i = 0; i < m_grid->GetNumberRows(); ++i){
+        m_grid->SetRowLabelValue(i, wxString::Format("%i", i+1));
+    }
     for(int i = col::TITLE + 1; i < numViewCols; ++i){ //want to only allow the user to edit the name field of the new entry line at first
         if(m_grid->GetNumberRows() > 1){
             m_grid->SetReadOnly(m_grid->GetNumberRows()-2, i, false);
@@ -364,4 +387,30 @@ void DataPanel::AppendLastGridRow()
         m_grid->SetCellBackgroundColour(m_grid->GetNumberRows()-1, i, wxColour(220, 220, 220)); //grey as a sign that the cells are read only
         m_grid->SetRowLabelValue(m_grid->GetNumberRows()-1, "*");
     }
+}
+
+void DataPanel::ApplyFilterEasy()
+{
+    ApplyFilter(std::string(m_titleFilterTextField->GetValue().utf8_str()),
+            m_watchedCheck->GetValue(),
+            m_watchingCheck->GetValue(),
+            m_stalledCheck->GetValue(),
+            m_droppedCheck->GetValue(),
+            m_blankCheck->GetValue());
+}
+
+void DataPanel::NewFilter()
+{
+    std::string newFilterStr = std::string(m_titleFilterTextField->GetValue().utf8_str());
+    m_commands.push_back(new FilterCommand(this, newFilterStr, m_oldFilterStr, m_watchedCheck->GetValue(),
+            m_watchingCheck->GetValue(), m_stalledCheck->GetValue(), m_droppedCheck->GetValue(), m_blankCheck->GetValue(),
+            m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank));
+
+    m_oldFilterStr = newFilterStr;
+    m_oldWatched = m_watchedCheck->GetValue();
+    m_oldWatching = m_watchingCheck->GetValue();
+    m_oldStalled = m_stalledCheck->GetValue();
+    m_oldDropped = m_droppedCheck->GetValue();
+    m_oldBlank = m_blankCheck->GetValue();
+    ++m_commandLevel;
 }

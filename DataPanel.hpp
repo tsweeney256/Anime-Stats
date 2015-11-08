@@ -23,6 +23,7 @@ public:
     void SetUnsavedChanges(bool);
     void Undo();
     void Redo();
+    void ApplyFilter(const std::string& filterStr, bool Watched, bool Watching, bool Stalled, bool Dropped, bool Blank);
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);
@@ -36,10 +37,11 @@ private:
     void OnGridCellChanging(wxGridEvent& event);
 
     void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
-    void ApplyFilter();
     void AppendStatusStr(std::string& statusStr, std::string toAppend, bool& firstStatus);
     void ApplyFullGrid();
     void AppendLastGridRow();
+    void ApplyFilterEasy();
+    void NewFilter();
 
     DECLARE_EVENT_TABLE();
 
@@ -62,6 +64,8 @@ private:
     int m_curColSort = col::TITLE;
     bool m_curSortAsc = true;
     bool m_unsavedChanges = false;
+    std::string m_oldFilterStr;
+    bool m_oldWatched = true, m_oldWatching = true, m_oldStalled = true, m_oldDropped = true, m_oldBlank = true;
 };
 
 #endif // DATAPANEL_HPP
