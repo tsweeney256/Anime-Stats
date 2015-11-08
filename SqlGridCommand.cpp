@@ -237,13 +237,17 @@ std::unique_ptr<cppw::Sqlite3Statement> UpdateCommand::m_selectIdTitleStmt(nullp
 void UpdateCommand::Execute()
 {
     ExecutionCommon(m_newDbVal, m_oldDbVal);
+    int row = GetRowWithIdSeries(m_idSeries);
     m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, m_newGridVal);
+    m_grid->GoToCell(row, m_col);
 }
 
 void UpdateCommand::UnExecute()
 {
     ExecutionCommon(m_oldDbVal, m_newDbVal);
+    int row = GetRowWithIdSeries(m_idSeries);
     m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, m_oldGridVal);
+    m_grid->GoToCell(row, m_col);
 }
 
 void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string& oldVal)
