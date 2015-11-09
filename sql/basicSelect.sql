@@ -1,4 +1,4 @@
-select series.idSeries, name as Title, rating as Rating, type as "Release Type", status as "Watched Status", year as Year, 
+select series.idSeries, name as Title, rating as Rating, status as "Watched Status", type as "Release Type", year as Year, 
 	season as Season, episodesWatched as "Episodes Watched", totalEpisodes as "Total Episodes", 
 	rewatchedEpisodes as "Rewatched Episodes" , episodeLength as "Episode Length", dateStarted as "Date Started", dateFinished as "Date Finished"
 from (select * from Title inner join Label on Title.idLabel = Label.idLabel where Main = 1) as pTitle
