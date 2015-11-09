@@ -33,7 +33,13 @@ namespace col
         WATCHED_STATUS,
         RELEASE_TYPE,
         YEAR,
-        SEASON
+        SEASON,
+        EPISODES_WATCHED,
+        TOTAL_EPISODES,
+        REWATCHED_EPISODES,
+        EPISODE_LENGTH,
+        DATE_STARTED,
+        DATE_FINISHED
     };
 }
 
