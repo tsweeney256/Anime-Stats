@@ -19,10 +19,10 @@ CREATE TABLE "Title" (
 CREATE TABLE "Series" (
   "idSeries" INTEGER PRIMARY KEY,
   "rating" INTEGER DEFAULT NULL,
-  "idReleaseType" INTEGER DEFAULT NULL,
-  "idWatchedStatus" INTEGER DEFAULT NULL,
+  "idReleaseType" INTEGER DEFAULT 0,
+  "idWatchedStatus" INTEGER DEFAULT 0,
   "year" INTEGER DEFAULT NULL,
-  "idSeason" INTEGER DEFAULT NULL,
+  "idSeason" INTEGER DEFAULT 0,
   "episodesWatched" INTEGER DEFAULT NULL,
   "totalEpisodes" INTEGER DEFAULT NULL,
   "rewatchedEpisodes" INTEGER DEFAULT NULL,
