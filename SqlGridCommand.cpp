@@ -267,8 +267,8 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
         m_connection->ExecuteQuery("update Title set name='" + newVal + "' where idName=" + idName);
     }
     else
-        m_connection->ExecuteQuery("update Series set " + colViewName[m_col] + "=" +
-                newVal + " where idSeries=" + std::to_string(m_idSeries));
+        m_connection->ExecuteQuery("update Series set " + colViewName[m_col] + "='" +
+                newVal + "' where idSeries=" + std::to_string(m_idSeries));
 }
 
 std::string UpdateCommand::FormatUpdate(const std::string& val)
