@@ -28,14 +28,19 @@ namespace col
     enum
     {
         ID_SERIES = 0,
-        TITLE
+        TITLE,
+        RATING,
+        WATCHED_STATUS,
+        RELEASE_TYPE,
+        YEAR,
+        SEASON
     };
 }
 
 const int numTitleCols = 4;
 const int numSeriesCols = 12;
 const int numViewCols = 13; //including the hidden 1
-const std::vector<std::string> colViewName {"idSeries", "name", "rating", "idReleaseType", "idWatchedStatus", "year", "idSeason",
+const std::vector<std::string> colViewName {"idSeries", "name", "rating", "idWatchedStatus", "idReleaseType", "year", "idSeason",
     "episodesWatched", "totalEpisodes", "rewatchedEpisodes", "episodeLength", "dateStarted", "dateFinished"};
 
 #endif // APPIDS_HPP

@@ -1,6 +1,7 @@
 #include <wx/grid.h>
 #include <wx/file.h>
 #include <wx/filename.h>
+#include <wx/string.h>
 #include <cstdlib>
 #include "cppw/Sqlite3.hpp"
 #include "SqlGridCommand.hpp"
@@ -224,8 +225,9 @@ void DeleteCommand::ExecuteCommon()
 }
 
 UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, int64_t idSeries, std::string newVal,
-        std::string oldVal, int wxGridCol)
-    : SqlGridCommand(connection, grid), m_idSeries(idSeries), m_newGridVal(newVal), m_oldGridVal(oldVal), m_col(wxGridCol)
+        std::string oldVal, int wxGridCol, const std::vector<wxString>* map)
+    : SqlGridCommand(connection, grid), m_idSeries(idSeries), m_newGridVal(newVal), m_oldGridVal(oldVal), m_col(wxGridCol),
+      m_map(map)
 {
     m_newDbVal = FormatUpdate(newVal);
     m_oldDbVal = FormatUpdate(oldVal);
@@ -238,7 +240,7 @@ void UpdateCommand::Execute()
 {
     ExecutionCommon(m_newDbVal, m_oldDbVal);
     int row = GetRowWithIdSeries(m_idSeries);
-    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, m_newGridVal);
+    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_newGridVal)] : m_newGridVal));
     m_grid->GoToCell(row, m_col);
 }
 
@@ -246,7 +248,7 @@ void UpdateCommand::UnExecute()
 {
     ExecutionCommon(m_oldDbVal, m_newDbVal);
     int row = GetRowWithIdSeries(m_idSeries);
-    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, m_oldGridVal);
+    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_oldGridVal)] : m_oldGridVal));
     m_grid->GoToCell(row, m_col);
 }
 

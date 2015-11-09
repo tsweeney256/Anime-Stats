@@ -7,6 +7,7 @@
 #include <wx/filefn.h>
 #include <wx/debug.h>
 #include <wx/msgdlg.h>
+#include <wx/combobox.h>
 #include "DataPanel.hpp"
 #include "AppIDs.hpp"
 #include "cppw/Sqlite3.hpp"
@@ -25,6 +26,7 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_BUTTON(ID_DELETE_ROW_BTN, DataPanel::OnDeleteRow)
     EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
     EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
+    EVT_COMBOBOX_DROPDOWN(wxID_ANY, DataPanel::OnComboDropDown)
 END_EVENT_TABLE()
 
 DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWindow* top, wxWindowID id, const wxPoint& pos,
@@ -114,6 +116,9 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
         wxMessageBox("Error: Could not read from sql/basicSelect.sql.");
         top->Close();
     }
+    BuildAllowedValsMap(m_allowedWatchedVals, "select status from WatchedStatus order by idWatchedStatus");
+    BuildAllowedValsMap(m_allowedReleaseVals, "select type from ReleaseType order by idReleaseType");
+    BuildAllowedValsMap(m_allowedSeasonVals, "select season from Season order by idSeason");
     ApplyFullGrid();
 	//
 	//panel sizer
@@ -241,6 +246,7 @@ void DataPanel::OnGridColSort(wxGridEvent& event)
 
 void DataPanel::OnGridCellChanging(wxGridEvent& event)
 {
+    //if adding a new entry
     if(event.GetRow() == m_grid->GetNumberRows()-1 && event.GetCol() == col::TITLE){
         try{
             m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_grid, std::string(event.GetString().utf8_str()), 1));
@@ -251,13 +257,34 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
         }
         AppendLastGridRow();
     }
-    else{
+    else{ //if updating value
         try{
             auto idSeries = strtoll(m_grid->GetCellValue(event.GetRow(), col::ID_SERIES).ToUTF8(), nullptr, 10);
-            auto newVal = std::string(event.GetString().utf8_str());
-            auto oldVal = std::string(m_grid->GetCellValue(event.GetRow(), event.GetCol()).utf8_str());
+            std::string newVal;
+            std::string oldVal;
             auto col = event.GetCol();
-            m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_grid, idSeries, newVal, oldVal, col));
+            std::vector<wxString>* map = nullptr;
+            if(event.GetCol() == col::RELEASE_TYPE || event.GetCol() == col::SEASON ||
+                    event.GetCol() == col::WATCHED_STATUS){
+                auto editor = m_grid->GetCellEditor(event.GetRow(), event.GetCol());
+                auto control = static_cast<wxComboBox*>(editor->GetControl());
+                int selectedIdx = control->GetCurrentSelection();
+                newVal = std::to_string(selectedIdx);
+                oldVal = m_oldCellComboIndex;
+                editor->DecRef();
+                if(event.GetCol() == col::RELEASE_TYPE)
+                    map = &m_allowedReleaseVals;
+                if(event.GetCol() == col::SEASON)
+                    map = &m_allowedSeasonVals;
+                if(event.GetCol() == col::WATCHED_STATUS)
+                    map = &m_allowedWatchedVals;
+            }
+            else{
+                newVal = std::string(event.GetString().utf8_str());
+                oldVal = std::string(m_grid->GetCellValue(event.GetRow(), event.GetCol()).utf8_str());
+            }
+
+            m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_grid, idSeries, newVal, oldVal, col, map));
         }
         catch(cppw::Sqlite3Exception& e){
             wxMessageBox("Error making UpdateCommand.\n" + e.GetErrorMessage());
@@ -269,11 +296,19 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
     m_unsavedChanges = true;
 }
 
+void DataPanel::OnComboDropDown(wxCommandEvent& event)
+{
+    auto control = static_cast<wxComboBox*>(event.GetEventObject());
+    m_oldCellComboIndex = std::to_string(control->GetCurrentSelection());
+}
+
+
 void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 {
     wxGridUpdateLocker lock;
-    if(int numRows = m_grid->GetNumberRows()) //on very first grid creation
-        m_grid->DeleteRows(0, numRows);
+    for(int i = m_grid->GetNumberRows() - 1; i >= 0; --i){
+        m_grid->DeleteRows(i);
+    }
     if(results->NextRow()){
         int rowPos = 0;
         wxASSERT_MSG(results->GetColumnCount() == numViewCols, "Basic Select Results have wrong number of columns.");
@@ -281,11 +316,21 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
         if(!m_colsCreated){
             m_colsCreated = true;
             m_grid->AppendCols(numViewCols);
+            auto watchedAttr = new wxGridCellAttr();
+            auto releasedAttr = new wxGridCellAttr();
+            auto seasonAttr = new wxGridCellAttr();
+            watchedAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedWatchedVals.size(), &m_allowedWatchedVals[0]));
+            releasedAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedReleaseVals.size(), &m_allowedReleaseVals[0]));
+            seasonAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedSeasonVals.size(), &m_allowedSeasonVals[0]));
+            m_grid->SetColAttr(col::WATCHED_STATUS, watchedAttr);
+            m_grid->SetColAttr(col::RELEASE_TYPE, releasedAttr);
+            m_grid->SetColAttr(col::SEASON, seasonAttr);
             for(int i = 0; i < numViewCols; ++i)
                 m_grid->SetColLabelValue(i, wxString::FromUTF8(results->GetColumnName(i).c_str()));
         }
-        for(int i = 0; i < numViewCols; ++i)
+        for(int i = 0; i < numViewCols; ++i){
             m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
+        }
         ++rowPos;
         while(results->NextRow()){
             m_grid->AppendRows();
@@ -296,7 +341,7 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
         }
     }
     AppendLastGridRow();
-    //number of rows and table keys. user shouldn't see these.
+    //user shouldn't see idSeries key
     m_grid->HideCol(0);
     m_grid->AutoSize();
 }
@@ -423,4 +468,14 @@ void DataPanel::HandleCommandChecking()
     if(m_commandLevel != static_cast<int>(m_commands.size())){
         m_commands.erase(m_commands.begin()+m_commandLevel-1, m_commands.end()-1);
     }
+}
+
+void DataPanel::BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr)
+{
+    //assumes the primary keys are in order and contiguous from 0 to n and that the value to be mapped
+    //is the first column
+    auto stmt = m_connection->PrepareStatement(sqlStmtStr);
+    auto results = stmt->GetResults();
+    while(results->NextRow())
+        map.emplace_back(results->GetString(0).c_str(), wxMBConvUTF8());
 }

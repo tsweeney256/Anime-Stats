@@ -9,6 +9,7 @@
 namespace cppw { class Sqlite3Connection;
                  class Sqlite3Statement; }
 class wxGrid;
+class wxString;
 class DataPanel;
 
 class SqlGridCommand //abstract
@@ -96,7 +97,7 @@ class UpdateCommand : public SqlGridCommand
 public:
     UpdateCommand() = delete;
     UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, int64_t idSeries,
-            std::string newVal, std::string oldVal, int wxGridCol);
+            std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map);
     void Execute() override;
     void UnExecute() override;
 
@@ -110,6 +111,7 @@ private:
     std::string m_newDbVal;
     std::string m_oldDbVal;
     int m_col;
+    const std::vector<wxString>* m_map;
 
     static std::unique_ptr<cppw::Sqlite3Statement> m_selectIdTitleStmt;
 };

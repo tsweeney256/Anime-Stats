@@ -4,6 +4,7 @@
 #include <wx/panel.h>
 #include <wx/grid.h>
 #include <wx/sizer.h>
+#include <wx/string.h>
 #include <memory>
 #include <vector>
 #include "cppw/Sqlite3.hpp"
@@ -35,6 +36,7 @@ private:
     void OnDeleteRow(wxCommandEvent& event);
     void OnGridColSort(wxGridEvent& event);
     void OnGridCellChanging(wxGridEvent& event);
+    void OnComboDropDown(wxCommandEvent& event);
 
     void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
     void AppendStatusStr(std::string& statusStr, std::string toAppend, bool& firstStatus);
@@ -43,6 +45,7 @@ private:
     void ApplyFilterEasy();
     void NewFilter();
     void HandleCommandChecking();
+    void BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr);
 
     DECLARE_EVENT_TABLE();
 
@@ -59,7 +62,11 @@ private:
     cppw::Sqlite3Connection* m_connection;
     std::string m_curOrderCol = "Title collate nocase";
     std::string m_curOrderDir = "asc";
+    std::string m_oldCellComboIndex;
     std::vector<std::unique_ptr<SqlGridCommand>> m_commands;
+    std::vector<wxString> m_allowedWatchedVals;
+    std::vector<wxString> m_allowedReleaseVals;
+    std::vector<wxString> m_allowedSeasonVals;
     int m_commandLevel = 0;
     bool m_colsCreated = false;
     int m_curColSort = col::TITLE;
