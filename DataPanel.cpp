@@ -319,12 +319,23 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
             auto watchedAttr = new wxGridCellAttr();
             auto releasedAttr = new wxGridCellAttr();
             auto seasonAttr = new wxGridCellAttr();
+            auto intAttr = new wxGridCellAttr();
             watchedAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedWatchedVals.size(), &m_allowedWatchedVals[0]));
             releasedAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedReleaseVals.size(), &m_allowedReleaseVals[0]));
             seasonAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedSeasonVals.size(), &m_allowedSeasonVals[0]));
+            intAttr->SetEditor(new wxGridCellNumberEditor());
+            m_grid->SetColAttr(col::RATING, intAttr);
             m_grid->SetColAttr(col::WATCHED_STATUS, watchedAttr);
             m_grid->SetColAttr(col::RELEASE_TYPE, releasedAttr);
+            m_grid->SetColAttr(col::YEAR, intAttr);
             m_grid->SetColAttr(col::SEASON, seasonAttr);
+            m_grid->SetColAttr(col::EPISODES_WATCHED, intAttr);
+            m_grid->SetColAttr(col::TOTAL_EPISODES, intAttr);
+            m_grid->SetColAttr(col::REWATCHED_EPISODES, intAttr);
+            m_grid->SetColAttr(col::EPISODE_LENGTH, intAttr);
+            //increment the intAttr reference counter by how many columns use it minus 1
+            for(int i = 0; i < 5; ++i)
+                intAttr->IncRef();
             for(int i = 0; i < numViewCols; ++i)
                 m_grid->SetColLabelValue(i, wxString::FromUTF8(results->GetColumnName(i).c_str()));
         }
