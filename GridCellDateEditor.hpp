@@ -27,7 +27,7 @@ public:
     virtual wxObject* Clone() const override { return new DateValidator(*this); }
 
 private:
-    void OnCharacter(wxKeyEvent& event);
+    void OnKeyDown(wxKeyEvent& event);
 
     DECLARE_EVENT_TABLE()
 };

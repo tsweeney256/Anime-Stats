@@ -5,7 +5,7 @@
 #include "GridCellDateEditor.hpp"
 
 BEGIN_EVENT_TABLE(DateValidator, wxTextValidator)
-    EVT_KEY_DOWN(DateValidator::OnCharacter)
+    EVT_KEY_DOWN(DateValidator::OnKeyDown)
 END_EVENT_TABLE()
 
 GridCellDateEditor::GridCellDateEditor()
@@ -68,7 +68,7 @@ DateValidator::DateValidator()
     SetCharIncludes("-0123456789");
 }
 
-void DateValidator::OnCharacter(wxKeyEvent& event)
+void DateValidator::OnKeyDown(wxKeyEvent& event)
 {
     auto control = static_cast<wxTextCtrl*>(event.GetEventObject());
     //is the first character an alpha character, i.e. is the hint showing
