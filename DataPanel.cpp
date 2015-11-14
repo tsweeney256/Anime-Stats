@@ -386,15 +386,15 @@ void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool wat
         bool firstStatus = true;
         std::string statusStr;
         if(watched)
-            AppendStatusStr(statusStr, "= 0 ", firstStatus);
-        if(watching)
             AppendStatusStr(statusStr, "= 1 ", firstStatus);
-        if(stalled)
+        if(watching)
             AppendStatusStr(statusStr, "= 2 ", firstStatus);
-        if(dropped)
+        if(stalled)
             AppendStatusStr(statusStr, "= 3 ", firstStatus);
+        if(dropped)
+            AppendStatusStr(statusStr, "= 4 ", firstStatus);
         if(blank)
-            AppendStatusStr(statusStr, " is null ", firstStatus);
+            AppendStatusStr(statusStr, "= 0 ", firstStatus);
         if(!firstStatus)
             statusStr += " ) ";
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) +
