@@ -328,7 +328,12 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
             watchedAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedWatchedVals.size(), &m_allowedWatchedVals[0]));
             releasedAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedReleaseVals.size(), &m_allowedReleaseVals[0]));
             seasonAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedSeasonVals.size(), &m_allowedSeasonVals[0]));
-            intAttr->SetEditor(new wxGridCellNumberEditor());
+            //don't want to use wxGridCellNumericEditor because it doesn't allow nulls
+            auto intEditor = new wxGridCellTextEditor(6); //only allow 6 length as an easy way to prevent integer overflows
+            wxTextValidator intValidator(wxFILTER_INCLUDE_CHAR_LIST);
+            intValidator.SetCharIncludes("0123456789");
+            intEditor->SetValidator(intValidator);
+            intAttr->SetEditor(intEditor);
             dateAttr->SetEditor(new GridCellDateEditor());
             m_grid->SetColAttr(col::RATING, intAttr);
             m_grid->SetColAttr(col::WATCHED_STATUS, watchedAttr);
