@@ -267,8 +267,8 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
         m_connection->ExecuteQuery("update Title set name='" + newVal + "' where idName=" + idName);
     }
     else
-        m_connection->ExecuteQuery("update Series set " + colViewName[m_col] + "='" +
-                newVal + "' where idSeries=" + std::to_string(m_idSeries));
+        m_connection->ExecuteQuery("update Series set " + colViewName[m_col] + "=" +
+                newVal + " where idSeries=" + std::to_string(m_idSeries));
 }
 
 std::string UpdateCommand::FormatUpdate(const std::string& val)
@@ -276,9 +276,9 @@ std::string UpdateCommand::FormatUpdate(const std::string& val)
     std::string output = val;
     if(!output.compare(""))
             output = "null";
-        else
-            //we could avoid 1 string construction by changing this function, but eh.
-            FormatString(output);
+    else
+        //we could avoid 1 string construction by changing this function, but eh.
+        FormatString(output);
     return output;
 }
 

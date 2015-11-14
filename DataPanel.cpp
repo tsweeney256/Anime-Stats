@@ -280,10 +280,10 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
                 if(event.GetCol() == col::WATCHED_STATUS)
                     map = &m_allowedWatchedVals;
             }
-            else if(event.GetCol() == col::RATING){
-                SetRatingColor(event.GetRow(), event.GetString().ToUTF8());
-            }
             else{
+                if(event.GetCol() == col::RATING){
+                    SetRatingColor(event.GetRow(), event.GetString().ToUTF8());
+                }
                 newVal = std::string(event.GetString().utf8_str());
                 oldVal = std::string(m_grid->GetCellValue(event.GetRow(), event.GetCol()).utf8_str());
             }
