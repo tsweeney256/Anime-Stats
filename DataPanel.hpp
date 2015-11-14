@@ -41,13 +41,19 @@ private:
     void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
     void AppendStatusStr(std::string& statusStr, std::string toAppend, bool& firstStatus);
     void ApplyFullGrid();
-    void AppendLastGridRow();
+    void AppendLastGridRow(bool whiteOutPrevious);
     void ApplyFilterEasy();
     void NewFilter();
     void HandleCommandChecking();
     void BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr);
+    void SetRatingColor(int row, const char* valStr);
+    void SetWatchedStatusColor(int row, const std::string& valStr);
 
-    DECLARE_EVENT_TABLE();
+    class ratingColor{
+    public:
+        enum{MIN, MID, MAX};
+        enum{R, G, B};
+    };
 
     wxWindow* m_top;
     wxGrid* m_grid;
@@ -74,6 +80,15 @@ private:
     bool m_unsavedChanges = false;
     std::string m_oldFilterStr;
     bool m_oldWatched = true, m_oldWatching = true, m_oldStalled = true, m_oldDropped = true, m_oldBlank = true;
+    bool m_ratingColorEnabled = true, m_watchedStatusColorEnabled = true;
+    int m_ratingColor[3][3] {{248, 105, 107}, {255, 235, 132}, {99, 190, 123}};
+    //the hex is bgr instead of rgb because wxwidgets implemented it backwards
+    std::vector<wxColour> m_watchedStatusColor {0xFFFFFF, 0xFFC271, 0x94FF3B, 0x83B8F9, 0x7D7DFF};
+    int m_minRating = 0;
+    int m_midRating = 5;
+    int m_maxRating = 9;
+
+    DECLARE_EVENT_TABLE()
 };
 
 #endif // DATAPANEL_HPP

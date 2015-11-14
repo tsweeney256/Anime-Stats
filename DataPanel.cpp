@@ -256,7 +256,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
             wxMessageBox("Error making InsertCommand.\n" + e.GetErrorMessage());
             m_top->Close(true);
         }
-        AppendLastGridRow();
+        AppendLastGridRow(true);
     }
     else{ //if updating value
         try{
@@ -279,6 +279,9 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
                     map = &m_allowedSeasonVals;
                 if(event.GetCol() == col::WATCHED_STATUS)
                     map = &m_allowedWatchedVals;
+            }
+            else if(event.GetCol() == col::RATING){
+                SetRatingColor(event.GetRow(), event.GetString().ToUTF8());
             }
             else{
                 newVal = std::string(event.GetString().utf8_str());
@@ -346,18 +349,26 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
                 m_grid->SetColLabelValue(i, wxString::FromUTF8(results->GetColumnName(i).c_str()));
         }
         for(int i = 0; i < numViewCols; ++i){
+            if(i == col::RATING)
+                SetRatingColor(rowPos, results->GetString(i).c_str());
+            else if(i == col::WATCHED_STATUS)
+                SetWatchedStatusColor(rowPos, results->GetString(i));
             m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
         }
         ++rowPos;
         while(results->NextRow()){
             m_grid->AppendRows();
             for(int i = 0; i < numViewCols; ++i){
+                if(i == col::RATING)
+                    SetRatingColor(rowPos, results->GetString(i).c_str());
+                else if(i == col::WATCHED_STATUS)
+                    SetWatchedStatusColor(rowPos, results->GetString(i));
                 m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
             }
             ++rowPos;
         }
     }
-    AppendLastGridRow();
+    AppendLastGridRow(false);
     //user shouldn't see idSeries key
     m_grid->HideCol(0);
     m_grid->AutoSize();
@@ -434,14 +445,14 @@ void DataPanel::ApplyFullGrid()
     }
 }
 
-void DataPanel::AppendLastGridRow()
+void DataPanel::AppendLastGridRow(bool whiteOutPrevious)
 {
     m_grid->AppendRows();
     for(int i = 0; i < m_grid->GetNumberRows(); ++i){
         m_grid->SetRowLabelValue(i, wxString::Format("%i", i+1));
     }
     for(int i = col::TITLE + 1; i < numViewCols; ++i){ //want to only allow the user to edit the name field of the new entry line at first
-        if(m_grid->GetNumberRows() > 1){
+        if(m_grid->GetNumberRows() > 1 && whiteOutPrevious){
             m_grid->SetReadOnly(m_grid->GetNumberRows()-2, i, false);
             m_grid->SetCellBackgroundColour(m_grid->GetNumberRows()-2, i, wxColour(255, 255, 255)); //make greyed out cells white again
             m_grid->SetRowLabelValue(m_grid->GetNumberRows()-2, wxString::Format("%i", m_grid->GetNumberRows()-1));
@@ -495,4 +506,52 @@ void DataPanel::BuildAllowedValsMap(std::vector<wxString>& map, const std::strin
     auto results = stmt->GetResults();
     while(results->NextRow())
         map.emplace_back(results->GetString(0).c_str(), wxMBConvUTF8());
+}
+
+void DataPanel::SetRatingColor(int row, const char* valStr)
+{
+    if(valStr && valStr[0] != '\0' && m_ratingColorEnabled){ //only have color if not null or blank
+        int val = atoi(valStr)-1;
+        if(val > m_maxRating)
+            val = m_maxRating;
+        int cellColour[3];
+
+        if(val < m_midRating){
+            for(int i=0; i<3; ++i){
+                cellColour[i] = m_ratingColor[ratingColor::MID][i] +
+                        (m_ratingColor[ratingColor::MIN][i] - m_ratingColor[ratingColor::MID][i]) *
+                        ((m_midRating-val)/static_cast<double>(m_midRating));
+            }
+            m_grid->SetCellBackgroundColour(row, col::RATING,
+                    wxColour(cellColour[ratingColor::R], cellColour[ratingColor::G], cellColour[ratingColor::B]));
+        }
+        else{
+            for(int i=0; i<3; ++i){
+                cellColour[i] = m_ratingColor[ratingColor::MAX][i] -
+                        (m_ratingColor[ratingColor::MAX][i] - m_ratingColor[ratingColor::MID][i]) *
+                        ((m_maxRating-val)/static_cast<double>(m_midRating-1));
+            }
+            m_grid->SetCellBackgroundColour(row, col::RATING,
+                    wxColour(cellColour[ratingColor::R], cellColour[ratingColor::G], cellColour[ratingColor::B]));
+        }
+    }
+    else{
+        m_grid->SetCellBackgroundColour(row, col::RATING, wxColour(255, 255, 255));
+    }
+}
+
+void DataPanel::SetWatchedStatusColor(int row, const std::string& valStr)
+{
+    if(m_watchedStatusColorEnabled){
+        int idx = -1;
+        //can't get the index of the combobox control because they possibly haven't been created yet and it'd be way
+        //more inefficient to pre-create a combobox for every cell than to just do a few string comparisons for each one
+        for(unsigned int i = 0; i < m_allowedWatchedVals.size(); ++i)
+            if(!valStr.compare(m_allowedWatchedVals[i])){
+                idx = i;
+                break;
+            }
+        wxASSERT_MSG(idx > -1, "Illegal Watched Status value.");
+        m_grid->SetCellBackgroundColour(row, col::WATCHED_STATUS, wxColour(m_watchedStatusColor[idx]));
+    }
 }
