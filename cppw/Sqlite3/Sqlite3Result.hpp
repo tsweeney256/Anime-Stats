@@ -29,6 +29,7 @@ namespace cppw
 		bool IsNull(const std::string& colName);
 		std::string GetColumnName(const int colIdx);
 		int GetColumnCount();
+		void Reset(); //same thing as Sqlite3Statement::Reset()
 
 	private:
 		friend class Sqlite3Connection;

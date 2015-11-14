@@ -112,3 +112,9 @@ std::string cppw::Sqlite3Result::GetColumnName(const int colIdx)
 {
     return reinterpret_cast<const char*>(sqlite3_column_name(m_statement, colIdx));
 }
+
+void cppw::Sqlite3Result::Reset()
+{
+    if(sqlite3_reset(m_statement) != SQLITE_OK)
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement));
+}
