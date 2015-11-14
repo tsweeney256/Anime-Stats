@@ -275,9 +275,9 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
                 editor->DecRef();
                 if(event.GetCol() == col::RELEASE_TYPE)
                     map = &m_allowedReleaseVals;
-                if(event.GetCol() == col::SEASON)
+                else if(event.GetCol() == col::SEASON)
                     map = &m_allowedSeasonVals;
-                if(event.GetCol() == col::WATCHED_STATUS)
+                else if(event.GetCol() == col::WATCHED_STATUS)
                     map = &m_allowedWatchedVals;
             }
             else{
