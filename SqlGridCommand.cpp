@@ -97,6 +97,7 @@ void InsertCommand::Execute()
     m_grid->SetCellValue(m_grid->GetNumberRows()-2, col::ID_SERIES, std::to_string(m_idSeries));
     m_grid->SetCellValue(m_grid->GetNumberRows()-2, col::TITLE, wxString::FromUTF8(m_title.c_str()));
     m_grid->GoToCell(m_grid->GetNumberRows()-2, col::TITLE);
+    m_grid->SelectRow(m_grid->GetNumberRows()-2);
 }
 
 void InsertCommand::UnExecute()
@@ -165,6 +166,9 @@ void DeleteCommand::UnExecute()
         InsertIntoTitle(m_titlesGroup[i], std::to_string(m_idSeries[i]));
     }
     m_grid->GoToCell(insertLoc, col::TITLE);
+    for(unsigned int i = 0; i < m_series.size(); ++i){
+        m_grid->SelectRow(insertLoc + i, true);
+    }
 }
 
 void DeleteCommand::ExecuteCommon()
@@ -242,6 +246,7 @@ void UpdateCommand::Execute()
     int row = GetRowWithIdSeries(m_idSeries);
     m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_newGridVal)] : m_newGridVal));
     m_grid->GoToCell(row, m_col);
+    m_grid->SelectBlock(row, m_col, row, m_col);
 }
 
 void UpdateCommand::UnExecute()
@@ -250,6 +255,7 @@ void UpdateCommand::UnExecute()
     int row = GetRowWithIdSeries(m_idSeries);
     m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_oldGridVal)] : m_oldGridVal));
     m_grid->GoToCell(row, m_col);
+    m_grid->SelectBlock(row, m_col, row, m_col);
 }
 
 void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string& oldVal)
