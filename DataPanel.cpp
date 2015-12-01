@@ -279,8 +279,10 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
                     map = &m_allowedReleaseVals;
                 else if(event.GetCol() == col::SEASON)
                     map = &m_allowedSeasonVals;
-                else if(event.GetCol() == col::WATCHED_STATUS)
+                else if(event.GetCol() == col::WATCHED_STATUS){
                     map = &m_allowedWatchedVals;
+                    SetWatchedStatusColor(event.GetRow(), std::string(event.GetString().utf8_str()));
+                }
             }
             else{
                 if(event.GetCol() == col::RATING){
