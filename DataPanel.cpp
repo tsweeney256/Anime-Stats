@@ -138,6 +138,7 @@ void DataPanel::Undo()
     try{
         if(m_commandLevel > 0){
             m_commands[--m_commandLevel]->UnExecute();
+            HandleUndoRedoColorChange();
         }
     }
     catch(cppw::Sqlite3Exception& e){
@@ -151,6 +152,7 @@ void DataPanel::Redo()
     try{
         if(m_commandLevel <= static_cast<int>(m_commands.size()) - 1){
             m_commands[m_commandLevel++]->Execute();
+            HandleUndoRedoColorChange();
         }
     }
     catch(cppw::Sqlite3Exception& e){
@@ -557,5 +559,24 @@ void DataPanel::SetWatchedStatusColor(int row, const std::string& valStr)
             }
         wxASSERT_MSG(idx > -1, "Illegal Watched Status value.");
         m_grid->SetCellBackgroundColour(row, col::WATCHED_STATUS, wxColour(m_watchedStatusColor[idx]));
+    }
+}
+
+void DataPanel::HandleUndoRedoColorChange()
+{
+    auto rows = m_grid->GetSelectedRows();
+    for(unsigned int i = 0; i < rows.Count(); ++i){
+        SetRatingColor(rows.Item(i), m_grid->GetCellValue(rows.Item(i), col::RATING).ToUTF8());
+        SetWatchedStatusColor(rows.Item(i), std::string(m_grid->GetCellValue(rows.Item(i), col::WATCHED_STATUS).utf8_str()));
+    }
+    auto cells = m_grid->GetSelectionBlockTopLeft();
+    if(cells.Count() == 1){ //there should never be more than one cell selected from undoing/redoing
+        if(cells.Item(0).GetCol() == col::RATING){
+            SetRatingColor(cells.Item(0).GetRow(), m_grid->GetCellValue(cells.Item(0).GetRow(), col::RATING).ToUTF8());
+        }
+        else if(cells.Item(0).GetCol() == col::WATCHED_STATUS){
+            SetWatchedStatusColor(cells.Item(0).GetRow(),
+                    std::string(m_grid->GetCellValue(cells.Item(0).GetRow(), col::WATCHED_STATUS).utf8_str()));
+        }
     }
 }

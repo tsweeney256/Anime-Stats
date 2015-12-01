@@ -48,6 +48,7 @@ private:
     void BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr);
     void SetRatingColor(int row, const char* valStr);
     void SetWatchedStatusColor(int row, const std::string& valStr);
+    void HandleUndoRedoColorChange();
 
     class ratingColor{
     public:
