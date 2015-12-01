@@ -311,7 +311,7 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 {
     wxGridUpdateLocker lock(m_grid);
     if(m_grid->GetNumberRows() > 0)
-        m_grid->DeleteRows(0, m_grid->GetNumberRows() - 1);
+        m_grid->DeleteRows(0, m_grid->GetNumberRows());
     if(results->NextRow()){
         int rowPos = 0;
         wxASSERT_MSG(results->GetColumnCount() == numViewCols, "Basic Select Results have wrong number of columns.");
