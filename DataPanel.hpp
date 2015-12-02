@@ -88,6 +88,7 @@ private:
     int m_minRating = 0;
     int m_midRating = 5;
     int m_maxRating = 9;
+    wxBoxSizer* m_panelSizer;
 
     DECLARE_EVENT_TABLE()
 };

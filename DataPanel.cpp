@@ -74,7 +74,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	auto checkBoxSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, this, _("Filter Watched Status"));
 	auto titleFilterSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _("Filter Title"));
 	auto topControlBarSizer = new wxBoxSizer(wxHORIZONTAL);
-	auto panelSizer = new wxBoxSizer(wxVERTICAL);
+	m_panelSizer = new wxBoxSizer(wxVERTICAL);
 	auto btnSizer = new wxGridSizer(2, 2, 0, 0);
 
 	checkBoxSizerOutline->Add(checkBoxSizer, wxSizerFlags(0).Border(wxALL, 5));
@@ -124,9 +124,9 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	//
 	//panel sizer
 	//
-	panelSizer->Add(topControlBarSizer, wxSizerFlags(0).Border(wxALL, 2));
-	panelSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
-	SetSizerAndFit(panelSizer);
+	m_panelSizer->Add(topControlBarSizer, wxSizerFlags(0).Border(wxALL, 2));
+	m_panelSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
+	SetSizerAndFit(m_panelSizer);
 }
 
 bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
@@ -419,7 +419,7 @@ void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool wat
             m_allCheck->Enable();
         }
         m_titleFilterTextField->SetValue(filterStr);
-        Fit();
+        m_panelSizer->Layout();
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error applying filter.\n" + e.GetErrorMessage());
@@ -445,7 +445,7 @@ void DataPanel::ApplyFullGrid()
                 "order by " + m_curOrderCol + " " + m_curOrderDir);
         auto results = statement->GetResults();
         ResetTable(results);
-        Fit();
+        m_panelSizer->Layout();
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error preparing basic select statement.\n" + e.GetErrorMessage());
