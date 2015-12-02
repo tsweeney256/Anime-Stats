@@ -282,9 +282,13 @@ std::string UpdateCommand::FormatUpdate(const std::string& val)
     std::string output = val;
     if(!output.compare(""))
             output = "null";
-    else
+    else{
         //we could avoid 1 string construction by changing this function, but eh.
         FormatString(output);
+        //could avoid even more string constructions by only doing this for colums with internal db string types
+        //but doing it this way makes it so we don't have to update this function if we ever add more columns to the table
+        output = "'" + val + "'";
+    }
     return output;
 }
 
