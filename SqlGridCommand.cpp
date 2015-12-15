@@ -11,15 +11,6 @@
 SqlGridCommand::SqlGridCommand(cppw::Sqlite3Connection* connection, wxGrid* grid)
     : m_connection(connection), m_grid(grid) {}
 
-void SqlGridCommand::FormatString(std::string& str)
-{
-    //replace ' with ''
-    size_t pos = 0;
-    while((pos = str.find("'", pos)) != std::string::npos){
-        str.replace(pos, 2, "''");
-    }
-}
-
 int SqlGridCommand::GetRowWithIdSeries(int64_t idSeries)
 {
     //linear should be good enough considering how small the n should be
@@ -85,6 +76,9 @@ InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, 
     m_grid->SetCellValue(m_grid->GetNumberRows()-1, col::ID_SERIES, std::to_string(m_idSeries));
 }
 
+std::unique_ptr<cppw::Sqlite3Statement> InsertCommand::m_deleteRowStmt(nullptr);
+std::unique_ptr<cppw::Sqlite3Statement> InsertCommand::m_insertBlankStmt(nullptr);
+
 void InsertCommand::Execute()
 {
     ExecuteCommon();
@@ -105,13 +99,24 @@ void InsertCommand::UnExecute()
     //backup all titles associated with the series
     m_titles = getTitlesOfSeries(m_idSeries);
     //deletes all associated entries in Title too because of cascading foreign keys
-    m_connection->ExecuteQuery("delete from Series where idSeries=" + std::to_string(m_idSeries));
+    if(!m_deleteRowStmt)
+        m_deleteRowStmt = m_connection->PrepareStatement("delete from Series where idSeries=?");
+    m_deleteRowStmt->Reset();
+    m_deleteRowStmt->ClearBindings();
+    m_deleteRowStmt->Bind(1, m_idSeries);
+    auto results = m_deleteRowStmt->GetResults();
+    results->NextRow();
     m_grid->DeleteRows(GetRowWithIdSeries(m_idSeries));
 }
 
 void InsertCommand::ExecuteCommon()
 {
-    m_connection->ExecuteQuery("insert into Series (rating) values (null)"); //just to generate an idSeries
+    //insert blank into Series to create the needed key
+    if(!m_insertBlankStmt)
+        m_insertBlankStmt = m_connection->PrepareStatement("insert into Series (rating) values (null)");
+    m_insertBlankStmt->Reset();
+    auto result = m_insertBlankStmt->GetResults();
+    result->NextRow();
     m_idSeries = m_connection->GetLastInsertRowID();
     InsertIntoTitle(m_titles, std::to_string(m_idSeries));
 }
@@ -125,6 +130,7 @@ DeleteCommand::DeleteCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, 
 std::unique_ptr<cppw::Sqlite3Statement> DeleteCommand::m_seriesSelectStmt(nullptr);
 std::unique_ptr<cppw::Sqlite3Statement> DeleteCommand::m_seriesViewSelectStmt(nullptr);
 std::unique_ptr<cppw::Sqlite3Statement> DeleteCommand::m_seriesInsertStmt(nullptr);
+std::unique_ptr<cppw::Sqlite3Statement> DeleteCommand::m_seriesDeleteStmt(nullptr);
 
 void DeleteCommand::Execute()
 {
@@ -204,7 +210,7 @@ void DeleteCommand::ExecuteCommon()
             std::array<std::string, numSeriesCols> row;
             for(int k = 0; k < seriesResults->GetColumnCount(); ++k){
                 row[k] = seriesResults->GetString(k);
-                FormatString(row[k]);
+                //FormatString(row[k]);
             }
             m_series.push_back(row);
         }
@@ -221,7 +227,13 @@ void DeleteCommand::ExecuteCommon()
         }
         auto titles = getTitlesOfSeries(m_idSeries[i]);
         m_titlesGroup.push_back(titles);
-        m_connection->ExecuteQuery("delete from Series where idSeries=" + std::to_string(m_idSeries[i]));
+        if(!m_seriesDeleteStmt)
+            m_seriesDeleteStmt = m_connection->PrepareStatement("delete from Series where idSeries=?");
+        m_seriesDeleteStmt->Reset();
+        m_seriesDeleteStmt->ClearBindings();
+        m_seriesDeleteStmt->Bind(1, m_idSeries[i]);
+        auto results = m_seriesDeleteStmt->GetResults();
+        results->NextRow();
         wxGridUpdateLocker lock(m_grid);
         m_grid->DeleteRows(GetRowWithIdSeries(m_idSeries[i]));
     }
@@ -230,30 +242,29 @@ void DeleteCommand::ExecuteCommon()
 
 UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, int64_t idSeries, std::string newVal,
         std::string oldVal, int wxGridCol, const std::vector<wxString>* map)
-    : SqlGridCommand(connection, grid), m_idSeries(idSeries), m_newGridVal(newVal), m_oldGridVal(oldVal), m_col(wxGridCol),
+    : SqlGridCommand(connection, grid), m_idSeries(idSeries), m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol),
       m_map(map)
 {
-    m_newDbVal = FormatUpdate(newVal);
-    m_oldDbVal = FormatUpdate(oldVal);
-    ExecutionCommon(m_newDbVal, m_oldDbVal);
+    ExecutionCommon(m_newVal, m_oldVal);
 }
 
 std::unique_ptr<cppw::Sqlite3Statement> UpdateCommand::m_selectIdTitleStmt(nullptr);
+std::unique_ptr<cppw::Sqlite3Statement> UpdateCommand::m_updateTitleStmt(nullptr);
 
 void UpdateCommand::Execute()
 {
-    ExecutionCommon(m_newDbVal, m_oldDbVal);
+    ExecutionCommon(m_newVal, m_oldVal);
     int row = GetRowWithIdSeries(m_idSeries);
-    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_newGridVal)] : m_newGridVal));
+    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_newVal)] : m_newVal));
     m_grid->GoToCell(row, m_col);
     m_grid->SelectBlock(row, m_col, row, m_col);
 }
 
 void UpdateCommand::UnExecute()
 {
-    ExecutionCommon(m_oldDbVal, m_newDbVal);
+    ExecutionCommon(m_oldVal, m_newVal);
     int row = GetRowWithIdSeries(m_idSeries);
-    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_oldGridVal)] : m_oldGridVal));
+    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_oldVal)] : m_oldVal));
     m_grid->GoToCell(row, m_col);
     m_grid->SelectBlock(row, m_col, row, m_col);
 }
@@ -262,6 +273,7 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
 {
     if(m_col == col::TITLE){
         if(!m_selectIdTitleStmt)
+            //so that we only grab the main title's id
             m_selectIdTitleStmt = m_connection->PrepareStatement("select idName from Title inner join Label "
                     "on Title.idLabel = Label.idLabel where name = ? and Main=1");
         m_selectIdTitleStmt->Reset();
@@ -270,26 +282,26 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
         auto result = m_selectIdTitleStmt->GetResults();
         result->NextRow();
         auto idName = result->GetString(0);
-        m_connection->ExecuteQuery("update Title set name='" + newVal + "' where idName=" + idName);
+        //now actually update the title
+        if(!m_updateTitleStmt)
+            m_updateTitleStmt = m_connection->PrepareStatement("update Title set name=? where idName=?");
+        m_updateTitleStmt->Reset();
+        m_updateTitleStmt->ClearBindings();
+        m_updateTitleStmt->Bind(1, newVal);
+        m_updateTitleStmt->Bind(2, idName);
+        auto updateResult = m_updateTitleStmt->GetResults();
+        updateResult->NextRow();
     }
-    else
-        m_connection->ExecuteQuery("update Series set " + colViewName[m_col] + "=" +
-                newVal + " where idSeries=" + std::to_string(m_idSeries));
-}
-
-std::string UpdateCommand::FormatUpdate(const std::string& val)
-{
-    std::string output = val;
-    if(!output.compare(""))
-            output = "null";
     else{
-        //we could avoid 1 string construction by changing this function, but eh.
-        FormatString(output);
-        //could avoid even more string constructions by only doing this for colums with internal db string types
-        //but doing it this way makes it so we don't have to update this function if we ever add more columns to the table
-        output = "'" + val + "'";
+        auto updateColStmt = m_connection->PrepareStatement("update Series set " + colViewName[m_col] + "=? where idSeries=?");
+        if(!newVal.compare(""))
+            updateColStmt->BindNull(1);
+        else
+            updateColStmt->Bind(1, newVal);
+        updateColStmt->Bind(2, m_idSeries);
+        auto result = updateColStmt->GetResults();
+        result->NextRow();
     }
-    return output;
 }
 
 //truly, truly obnoxious

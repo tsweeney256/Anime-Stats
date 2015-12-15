@@ -21,8 +21,6 @@ public:
     virtual void UnExecute() = 0;
 
 protected:
-    //does things like replace ' with '' and replace the empty string with null
-    void FormatString(std::string& str);
     int GetRowWithIdSeries(int64_t idSeries);
 
     cppw::Sqlite3Connection* m_connection;
@@ -66,6 +64,8 @@ private:
     //vector of strings instead of vector of tuples to avoid string conversions, even if it takes a bit more memory
     //numTitleCols-2 because we're not going to save idTitle and idSeries
     std::vector<std::array<std::string, selectedTitleCols>> m_titles;
+    static std::unique_ptr<cppw::Sqlite3Statement> m_deleteRowStmt;
+    static std::unique_ptr<cppw::Sqlite3Statement> m_insertBlankStmt;
 };
 
 class DeleteCommand : public InsertDeleteCommand
@@ -88,6 +88,7 @@ private:
     static std::unique_ptr<cppw::Sqlite3Statement> m_seriesSelectStmt;
     static std::unique_ptr<cppw::Sqlite3Statement> m_seriesInsertStmt;
     static std::unique_ptr<cppw::Sqlite3Statement> m_seriesViewSelectStmt;
+    static std::unique_ptr<cppw::Sqlite3Statement> m_seriesDeleteStmt;
     const std::string seriesColNames = " idSeries, rating, idReleaseType, idWatchedStatus, year, idSeason, episodesWatched, "
             "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished ";
 };
@@ -103,17 +104,15 @@ public:
 
 private:
     void ExecutionCommon(const std::string& newVal, const std::string& oldVal);
-    std::string FormatUpdate(const std::string& val);
 
     int64_t m_idSeries;
-    std::string m_newGridVal;
-    std::string m_oldGridVal;
-    std::string m_newDbVal;
-    std::string m_oldDbVal;
+    std::string m_newVal;
+    std::string m_oldVal;
     int m_col;
     const std::vector<wxString>* m_map;
 
     static std::unique_ptr<cppw::Sqlite3Statement> m_selectIdTitleStmt;
+    static std::unique_ptr<cppw::Sqlite3Statement> m_updateTitleStmt;
 };
 
 class FilterCommand : public SqlGridCommand
