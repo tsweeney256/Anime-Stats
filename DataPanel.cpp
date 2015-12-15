@@ -401,8 +401,8 @@ void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool wat
         if(!firstStatus)
             statusStr += " ) ";
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) +
-                    " where Title like '%" + filterStr + "%'" +
-                    statusStr + " order by " + m_curOrderCol + " "+ m_curOrderDir);
+                    " where Title like ? " + statusStr + " order by " + m_curOrderCol + " "+ m_curOrderDir);
+        statement->Bind("%" + filterStr + "%");
         auto results = statement->GetResults();
         ResetTable(results);
         m_watchedCheck->SetValue(watched);
