@@ -63,7 +63,8 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	auto resetFilterButton = new wxButton(this, ID_RESET_FILTER_BTN, "Reset Filter");
 	m_titleFilterTextField = new wxTextCtrl(this, ID_TITLE_FILTER_FIELD, wxEmptyString,
 			wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
-
+	auto advFilterButton = new wxButton(this, ID_ADV_FILTER_BTN, "Adv. Filter");
+	auto refreshButton = new wxButton(this, ID_REFRESH_BTN, "Refresh");
 	auto addRowButton = new wxButton(this, ID_ADD_ROW_BTN, "Add Row");
 	auto deleteRowButton = new wxButton(this, ID_DELETE_ROW_BTN, "Delete Rows");
 
@@ -75,7 +76,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	auto titleFilterSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _("Filter Title"));
 	auto topControlBarSizer = new wxBoxSizer(wxHORIZONTAL);
 	m_panelSizer = new wxBoxSizer(wxVERTICAL);
-	auto btnSizer = new wxGridSizer(2, 2, 0, 0);
+	auto btnSizer = new wxGridSizer(2, 3, 0, 0);
 
 	checkBoxSizerOutline->Add(checkBoxSizer, wxSizerFlags(0).Border(wxALL, 5));
 	checkBoxSizer->Add(m_watchedCheck, wxSizerFlags(0));
@@ -86,10 +87,13 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	checkBoxSizer->Add(m_allCheck, wxSizerFlags(0));
 
 	titleFilterSizer->Add(m_titleFilterTextField, wxSizerFlags(0).Border(wxALL, 5).Center());
-
+	//row 1
 	btnSizer->Add(applyFilterButton, wxSizerFlags(0).Bottom().Expand());
+	btnSizer->Add(advFilterButton, wxSizerFlags(0).Bottom().Expand());
 	btnSizer->Add(addRowButton, wxSizerFlags(0).Bottom().Expand());
+	//row 2
 	btnSizer->Add(resetFilterButton, wxSizerFlags(0).Bottom().Expand());
+	btnSizer->Add(refreshButton, wxSizerFlags(0).Bottom().Expand());
 	btnSizer->Add(deleteRowButton, wxSizerFlags(0).Bottom().Expand());
 
 	topControlBarSizer->Add(checkBoxSizerOutline, wxSizerFlags(0).Bottom().Border(wxRIGHT|wxLEFT, 2));
