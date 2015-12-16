@@ -31,8 +31,6 @@ class InsertDeleteCommand : public SqlGridCommand
 {
 public:
     InsertDeleteCommand(cppw::Sqlite3Connection* connection, wxGrid* grid);
-    void Execute() override = 0;
-    void UnExecute() override = 0;
 
 protected:
     static const int selectedTitleCols = numTitleCols-2;
