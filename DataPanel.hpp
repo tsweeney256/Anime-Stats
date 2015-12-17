@@ -50,6 +50,7 @@ private:
     void SetRatingColor(int row, const char* valStr);
     void SetWatchedStatusColor(int row, const std::string& valStr);
     void HandleUndoRedoColorChange();
+    void UpdateOldFilterData();
 
     class ratingColor{
     public:

@@ -402,9 +402,8 @@ void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool wat
             AppendStatusStr(statusStr, "= 0 ", firstStatus);
         if(!firstStatus)
             statusStr += " ) ";
-        auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) +
-                    " where Title like ? " + statusStr + (command ? command->GetAddedRowsSqlStr() : "") +
-                    " order by " + m_curOrderCol + " "+ m_curOrderDir);
+        auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) + " where Title like ? " +
+                statusStr + (command ? command->GetAddedRowsSqlStr() : "") + " order by " + m_curOrderCol + " "+ m_curOrderDir);
         statement->Bind(1, "%" + filterStr + "%");
         auto results = statement->GetResults();
         ResetTable(results);
@@ -422,6 +421,7 @@ void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool wat
             m_allCheck->Enable();
         }
         m_titleFilterTextField->SetValue(filterStr);
+        UpdateOldFilterData();
         m_panelSizer->Layout();
     }
     catch(cppw::Sqlite3Exception& e){
@@ -491,13 +491,7 @@ void DataPanel::NewFilter()
     m_commands.push_back(std::make_unique<FilterCommand>(this, newFilterStr, m_oldFilterStr, m_watchedCheck->GetValue(),
             m_watchingCheck->GetValue(), m_stalledCheck->GetValue(), m_droppedCheck->GetValue(), m_blankCheck->GetValue(),
             m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank));
-
-    m_oldFilterStr = newFilterStr;
-    m_oldWatched = m_watchedCheck->GetValue();
-    m_oldWatching = m_watchingCheck->GetValue();
-    m_oldStalled = m_stalledCheck->GetValue();
-    m_oldDropped = m_droppedCheck->GetValue();
-    m_oldBlank = m_blankCheck->GetValue();
+    UpdateOldFilterData();
     //keep track of any inserts or updates that happened in the last view so that they can properly be undone
     m_lastFilter = static_cast<FilterCommand*>(m_commands.back().get()); //don't ever free this
     m_lastFilter->addRows(std::move(m_changedRows));
@@ -588,4 +582,15 @@ void DataPanel::HandleUndoRedoColorChange()
                     std::string(m_grid->GetCellValue(cells.Item(0).GetRow(), col::WATCHED_STATUS).utf8_str()));
         }
     }
+}
+
+void DataPanel::UpdateOldFilterData()
+{
+    m_oldFilterStr = std::string(m_titleFilterTextField->GetValue().utf8_str());
+    m_oldWatched = m_watchedCheck->GetValue();
+    m_oldWatching = m_watchingCheck->GetValue();
+    m_oldStalled = m_stalledCheck->GetValue();
+    m_oldDropped = m_droppedCheck->GetValue();
+    m_oldBlank = m_blankCheck->GetValue();
+
 }
