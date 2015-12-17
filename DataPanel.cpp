@@ -161,7 +161,7 @@ void DataPanel::Redo()
     }
 }
 
-void DataPanel::OnGeneralWatchedStatusCheckbox(wxCommandEvent& event)
+void DataPanel::OnGeneralWatchedStatusCheckbox(wxCommandEvent& WXUNUSED(event))
 {
     if(m_watchedCheck->GetValue() && m_watchingCheck->GetValue() && m_stalledCheck->GetValue()
             && m_droppedCheck->GetValue() && m_blankCheck->GetValue()){
@@ -174,7 +174,7 @@ void DataPanel::OnGeneralWatchedStatusCheckbox(wxCommandEvent& event)
     }
 }
 
-void DataPanel::OnEnableAllCheckbox(wxCommandEvent& event)
+void DataPanel::OnEnableAllCheckbox(wxCommandEvent& WXUNUSED(event))
 {
     m_allCheck->Disable();
     m_watchedCheck->SetValue(true);
@@ -184,17 +184,17 @@ void DataPanel::OnEnableAllCheckbox(wxCommandEvent& event)
     m_blankCheck->SetValue(true);
 }
 
-void DataPanel::OnTextEnter(wxCommandEvent& event)
+void DataPanel::OnTextEnter(wxCommandEvent& WXUNUSED(event))
 {
     NewFilter();
 }
 
-void DataPanel::OnApplyFilter(wxCommandEvent& event)
+void DataPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
 {
     NewFilter();
 }
 
-void DataPanel::OnResetFilter(wxCommandEvent& event)
+void DataPanel::OnResetFilter(wxCommandEvent& WXUNUSED(event))
 {
     m_watchedCheck->SetValue(true);
     m_watchingCheck->SetValue(true);
@@ -206,12 +206,12 @@ void DataPanel::OnResetFilter(wxCommandEvent& event)
     NewFilter();
 }
 
-void DataPanel::OnAddRow(wxCommandEvent& event)
+void DataPanel::OnAddRow(wxCommandEvent& WXUNUSED(event))
 {
     m_grid->GoToCell(m_grid->GetNumberRows()-1, col::TITLE);
 }
 
-void DataPanel::OnDeleteRow(wxCommandEvent& event)
+void DataPanel::OnDeleteRow(wxCommandEvent& WXUNUSED(event))
 {
     auto rows = m_grid->GetSelectedRows();
     std::vector<int64_t> idSeries(rows.GetCount());
