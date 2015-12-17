@@ -124,7 +124,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
         Destroy();
 }
 
-void MainFrame::OnSave(wxCommandEvent &event)
+void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
     try{
         m_connection->Commit();
@@ -136,12 +136,12 @@ void MainFrame::OnSave(wxCommandEvent &event)
     m_dataPanel->SetUnsavedChanges(false);
 }
 
-void MainFrame::OnExit(wxCommandEvent &event)
+void MainFrame::OnExit(wxCommandEvent& WXUNUSED(event))
 {
 	Close(false);
 }
 
-void MainFrame::OnAbout(wxCommandEvent &event)
+void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
 	wxAboutDialogInfo info;
 	info.SetName(_("Anime Stats"));
@@ -152,6 +152,6 @@ void MainFrame::OnAbout(wxCommandEvent &event)
 	wxAboutBox(info);
 }
 
-void MainFrame::OnUndo(wxCommandEvent& event) { m_dataPanel->Undo(); }
+void MainFrame::OnUndo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Undo(); }
 
-void MainFrame::OnRedo(wxCommandEvent& event) { m_dataPanel->Redo(); }
+void MainFrame::OnRedo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Redo(); }
