@@ -331,9 +331,10 @@ void FilterCommand::addRows(std::unique_ptr<std::vector<wxString>> idSeries)
 
 std::string FilterCommand::GetAddedRowsSqlStr()
 {
-    std::string output = " or (";
+    std::string output;
 
-    if(m_idSeries->size()){
+    if(m_idSeries && m_idSeries->size()){
+        output = " or (";
         for(unsigned int i = 0; i < m_idSeries->size() - 1; ++i){
             output += " Series.idSeries=" + std::string((*m_idSeries)[i].utf8_str()) + " or ";
         }
