@@ -301,7 +301,8 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
     }
     ++m_commandLevel;
     HandleCommandChecking();
-    m_changedRows->push_back(m_grid->GetCellValue(event.GetRow(), col::ID_SERIES));
+    if(m_changedRows)
+        m_changedRows->push_back(m_grid->GetCellValue(event.GetRow(), col::ID_SERIES));
     m_unsavedChanges = true;
 }
 
