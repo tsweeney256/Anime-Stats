@@ -24,7 +24,8 @@ public:
     void SetUnsavedChanges(bool);
     void Undo();
     void Redo();
-    void ApplyFilter(const std::string& filterStr, bool Watched, bool Watching, bool Stalled, bool Dropped, bool Blank);
+    void ApplyFilter(const std::string& filterStr, bool Watched, bool Watching, bool Stalled,
+            bool Dropped, bool Blank, FilterCommand* command = nullptr);
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);
@@ -89,6 +90,8 @@ private:
     int m_midRating = 5;
     int m_maxRating = 9;
     wxBoxSizer* m_panelSizer;
+    FilterCommand* m_lastFilter = nullptr; //don't ever free this
+    std::unique_ptr<std::vector<wxString>> m_changedRows;
 
     DECLARE_EVENT_TABLE()
 };

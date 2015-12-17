@@ -321,5 +321,23 @@ void FilterCommand::Execute()
 
 void FilterCommand::UnExecute()
 {
-    m_dataPanel->ApplyFilter(m_oldFilterStr, m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank);
+    m_dataPanel->ApplyFilter(m_oldFilterStr, m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, this);
+}
+
+void FilterCommand::addRows(std::unique_ptr<std::vector<wxString>> idSeries)
+{
+    m_idSeries = std::move(idSeries);
+}
+
+std::string FilterCommand::GetAddedRowsSqlStr()
+{
+    std::string output = " or (";
+
+    if(m_idSeries->size()){
+        for(unsigned int i = 0; i < m_idSeries->size() - 1; ++i){
+            output += " Series.idSeries=" + std::string((*m_idSeries)[i].utf8_str()) + " or ";
+        }
+        output += " Series.idSeries=" + std::string(m_idSeries->back().utf8_str()) + ")";
+    }
+    return output;
 }

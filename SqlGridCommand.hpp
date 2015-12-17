@@ -122,10 +122,13 @@ public:
             bool oldBlank); //this is obnoxious
     void Execute() override;
     void UnExecute() override;
+    void addRows(std::unique_ptr<std::vector<wxString>> idSeries);
+    std::string GetAddedRowsSqlStr();
 private:
     DataPanel* m_dataPanel;
     std::string m_newFilterStr;
     std::string m_oldFilterStr;
+    std::unique_ptr<std::vector<wxString>> m_idSeries;
     bool m_newWatched, m_newWatching, m_newStalled, m_newDropped, m_newBlank;
     bool m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank;
 };
