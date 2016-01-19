@@ -306,10 +306,12 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
 
 //truly, truly obnoxious
 FilterCommand::FilterCommand(DataPanel* dataPanel, std::string newFilterStr, std::string oldFilterStr, bool newWatched, bool newWatching,
-        bool newStalled, bool newDropped, bool newBlank, bool oldWatched, bool oldWatching, bool oldStalled, bool oldDropped, bool oldBlank)
+        bool newStalled, bool newDropped, bool newBlank, bool oldWatched, bool oldWatching, bool oldStalled, bool oldDropped, bool oldBlank,
+        std::unique_ptr<std::vector<wxString>> addedRowIDs)
     : SqlGridCommand(nullptr, nullptr), m_dataPanel(dataPanel), m_newFilterStr(newFilterStr), m_oldFilterStr(oldFilterStr),
       m_newWatched(newWatched), m_newWatching(newWatching), m_newStalled(newStalled), m_newDropped(newDropped), m_newBlank(newBlank),
-      m_oldWatched(oldWatched), m_oldWatching(oldWatching), m_oldStalled(oldStalled), m_oldDropped(oldDropped), m_oldBlank(oldBlank)
+      m_oldWatched(oldWatched), m_oldWatching(oldWatching), m_oldStalled(oldStalled), m_oldDropped(oldDropped), m_oldBlank(oldBlank),
+      m_addedRowIDs(std::move(addedRowIDs))
 {
     Execute();
 }
@@ -321,24 +323,5 @@ void FilterCommand::Execute()
 
 void FilterCommand::UnExecute()
 {
-    m_dataPanel->ApplyFilter(m_oldFilterStr, m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, this);
-}
-
-void FilterCommand::addRows(std::unique_ptr<std::vector<wxString>> idSeries)
-{
-    m_idSeries = std::move(idSeries);
-}
-
-std::string FilterCommand::GetAddedRowsSqlStr()
-{
-    std::string output;
-
-    if(m_idSeries && m_idSeries->size()){
-        output = " or (";
-        for(unsigned int i = 0; i < m_idSeries->size() - 1; ++i){
-            output += " Series.idSeries=" + std::string((*m_idSeries)[i].utf8_str()) + " or ";
-        }
-        output += " Series.idSeries=" + std::string(m_idSeries->back().utf8_str()) + ")";
-    }
-    return output;
+    m_dataPanel->ApplyFilter(m_oldFilterStr, m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, m_addedRowIDs.get());
 }

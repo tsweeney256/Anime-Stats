@@ -119,18 +119,16 @@ public:
     FilterCommand() = delete;
     FilterCommand(DataPanel* dataPanel, std::string newFilterStr, std::string oldFilterStr, bool newWatched, bool newWatching,
             bool newStalled, bool newDropped, bool newBlank, bool oldWatched, bool oldWatching, bool oldStalled, bool oldDropped,
-            bool oldBlank); //this is obnoxious
+            bool oldBlank, std::unique_ptr<std::vector<wxString>> addedRowIDs); //this is obnoxious
     void Execute() override;
     void UnExecute() override;
-    void addRows(std::unique_ptr<std::vector<wxString>> idSeries);
-    std::string GetAddedRowsSqlStr();
 private:
     DataPanel* m_dataPanel;
     std::string m_newFilterStr;
     std::string m_oldFilterStr;
-    std::unique_ptr<std::vector<wxString>> m_idSeries;
     bool m_newWatched, m_newWatching, m_newStalled, m_newDropped, m_newBlank;
     bool m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank;
+    std::unique_ptr<std::vector<wxString>> m_addedRowIDs;
 };
 
 #endif

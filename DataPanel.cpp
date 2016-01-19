@@ -385,7 +385,8 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 }
 
 void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool watching, bool stalled,
-        bool dropped, bool blank, FilterCommand* command)
+        bool dropped, bool blank, std::vector<wxString>* changedRows)
+//don't ever free changedRows
 {
     try{
         //setting up the where part of the sql statement to filter by watched statuses
@@ -404,7 +405,7 @@ void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool wat
         if(!firstStatus)
             statusStr += " ) ";
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) + " where Title like ? " +
-                statusStr + (command ? command->GetAddedRowsSqlStr() : "") + " order by " + m_curOrderCol + " "+ m_curOrderDir);
+                statusStr + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") + " order by " + m_curOrderCol + " "+ m_curOrderDir);
         statement->Bind(1, "%" + filterStr + "%");
         auto results = statement->GetResults();
         ResetTable(results);
@@ -491,11 +492,9 @@ void DataPanel::NewFilter()
     std::string newFilterStr = std::string(m_titleFilterTextField->GetValue().utf8_str());
     m_commands.push_back(std::make_unique<FilterCommand>(this, newFilterStr, m_oldFilterStr, m_watchedCheck->GetValue(),
             m_watchingCheck->GetValue(), m_stalledCheck->GetValue(), m_droppedCheck->GetValue(), m_blankCheck->GetValue(),
-            m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank));
+            m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, std::move(m_changedRows)));
     UpdateOldFilterData();
     //keep track of any inserts or updates that happened in the last view so that they can properly be undone
-    m_lastFilter = static_cast<FilterCommand*>(m_commands.back().get()); //don't ever free this
-    m_lastFilter->addRows(std::move(m_changedRows));
     m_changedRows = std::make_unique<std::vector<wxString>>();
     ++m_commandLevel;
     HandleCommandChecking();
@@ -594,4 +593,18 @@ void DataPanel::UpdateOldFilterData()
     m_oldDropped = m_droppedCheck->GetValue();
     m_oldBlank = m_blankCheck->GetValue();
 
+}
+
+std::string DataPanel::GetAddedRowsSqlStr(std::vector<wxString>* changedRows)
+{
+    std::string output;
+
+    if(changedRows && changedRows->size()){
+        output = " or (";
+        for(unsigned int i = 0; i < changedRows->size() - 1; ++i){
+            output += " Series.idSeries=" + std::string((*changedRows)[i].utf8_str()) + " or ";
+        }
+        output += " Series.idSeries=" + std::string(changedRows->back().utf8_str()) + ")";
+    }
+    return output;
 }
