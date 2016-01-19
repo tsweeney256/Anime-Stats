@@ -66,13 +66,13 @@ void InsertDeleteCommand::InsertIntoTitle(const std::vector<std::array<std::stri
     }
 }
 
-InsertableOrDeletable::InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs, DataPanel* dataPanel)
+InsertableOrUpdatable::InsertableOrUpdatable(std::shared_ptr<std::vector<wxString>> addedRowIDs, DataPanel* dataPanel)
     : m_addedRowIDs(addedRowIDs), m_dataPanel(dataPanel) {}
 
-InsertableOrDeletable::InsertableOrDeletable(std::shared_ptr<std::vector<wxString> > addedRowIDs, DataPanel* dataPanel, int64_t idSeries)
+InsertableOrUpdatable::InsertableOrUpdatable(std::shared_ptr<std::vector<wxString> > addedRowIDs, DataPanel* dataPanel, int64_t idSeries)
     : m_idSeries(idSeries), m_addedRowIDs(addedRowIDs), m_dataPanel(dataPanel) {}
 
-void InsertableOrDeletable::AddRowIDToFilterList()
+void InsertableOrUpdatable::AddRowIDToFilterList()
 {
     //this will only be null on the starting screen which should show every entry anyway
     if(m_addedRowIDs){
@@ -82,7 +82,7 @@ void InsertableOrDeletable::AddRowIDToFilterList()
     }
 }
 
-void InsertableOrDeletable::RemoveRowIDFromFilterList()
+void InsertableOrUpdatable::RemoveRowIDFromFilterList()
 {
     if(m_addedRowIDs){
         wxString temp;
@@ -93,7 +93,7 @@ void InsertableOrDeletable::RemoveRowIDFromFilterList()
 
 InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, std::string title,
         int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs)
-    : InsertDeleteCommand(connection, grid), InsertableOrDeletable(addedRowIDs, dataPanel), m_title(title), m_idLabel(idLabel)
+    : InsertDeleteCommand(connection, grid), InsertableOrUpdatable(addedRowIDs, dataPanel), m_title(title), m_idLabel(idLabel)
 {
     //ExecuteCommon uses the m_titles vector, not the singular m_title
     std::array<std::string, selectedTitleCols> temp {m_title, std::to_string(m_idLabel)};
@@ -271,7 +271,7 @@ void DeleteCommand::ExecuteCommon()
 
 UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries, std::string newVal,
         std::string oldVal, int wxGridCol, const std::vector<wxString>* map, std::shared_ptr<std::vector<wxString>> addedRowIDs)
-    : SqlGridCommand(connection, grid), InsertableOrDeletable(addedRowIDs, dataPanel, idSeries),
+    : SqlGridCommand(connection, grid), InsertableOrUpdatable(addedRowIDs, dataPanel, idSeries),
       m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol), m_map(map)
 {
     ExecutionCommon(m_newVal, m_oldVal);

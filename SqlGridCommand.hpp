@@ -45,13 +45,13 @@ protected:
 };
 
 //just for managing the list of modified row IDs
-class InsertableOrDeletable
+class InsertableOrUpdatable
 {
 public:
-    InsertableOrDeletable() = delete;
-    InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs, DataPanel* dataPanel);
-    InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs, DataPanel* dataPanel, int64_t idSeries);
-    virtual ~InsertableOrDeletable() = default;
+    InsertableOrUpdatable() = delete;
+    InsertableOrUpdatable(std::shared_ptr<std::vector<wxString>> addedRowIDs, DataPanel* dataPanel);
+    InsertableOrUpdatable(std::shared_ptr<std::vector<wxString>> addedRowIDs, DataPanel* dataPanel, int64_t idSeries);
+    virtual ~InsertableOrUpdatable() = default;
 
 protected:
     virtual void AbstractDummy() = 0; //just to keep the class abstract
@@ -63,7 +63,7 @@ protected:
     std::shared_ptr<std::vector<wxString>> m_addedRowIDs;
 };
 
-class InsertCommand : public InsertDeleteCommand, public InsertableOrDeletable
+class InsertCommand : public InsertDeleteCommand, public InsertableOrUpdatable
 {
 public:
     InsertCommand() = delete;
@@ -110,7 +110,7 @@ private:
             "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished ";
 };
 
-class UpdateCommand : public SqlGridCommand, public InsertableOrDeletable
+class UpdateCommand : public SqlGridCommand, public InsertableOrUpdatable
 {
 public:
     UpdateCommand() = delete;
