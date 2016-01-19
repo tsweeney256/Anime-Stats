@@ -488,7 +488,8 @@ void DataPanel::ApplyFilterEasy()
             m_watchingCheck->GetValue(),
             m_stalledCheck->GetValue(),
             m_droppedCheck->GetValue(),
-            m_blankCheck->GetValue());
+            m_blankCheck->GetValue(),
+            m_changedRows.get());
 }
 
 void DataPanel::NewFilter()
