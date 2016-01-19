@@ -74,6 +74,7 @@ InsertableOrDeletable::InsertableOrDeletable(std::shared_ptr<std::vector<wxStrin
 
 void InsertableOrDeletable::AddRowIDToFilterList()
 {
+    //this will only be null on the starting screen which should show every entry anyway
     if(m_addedRowIDs){
         wxString temp;
         temp << m_idSeries;
