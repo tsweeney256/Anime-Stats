@@ -49,8 +49,8 @@ class InsertableOrDeletable
 {
 public:
     InsertableOrDeletable() = delete;
-    InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs);
-    InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs, int64_t idSeries);
+    InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs, DataPanel* dataPanel);
+    InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs, DataPanel* dataPanel, int64_t idSeries);
     virtual ~InsertableOrDeletable() = default;
 
 protected:
@@ -59,6 +59,7 @@ protected:
     void RemoveRowIDFromFilterList();
 
     int64_t m_idSeries = -1;
+    DataPanel* m_dataPanel;
     std::shared_ptr<std::vector<wxString>> m_addedRowIDs;
 };
 
@@ -66,7 +67,7 @@ class InsertCommand : public InsertDeleteCommand, public InsertableOrDeletable
 {
 public:
     InsertCommand() = delete;
-    InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, std::string title,
+    InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, std::string title,
             int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs); //updates the database upon construction
     void Execute() override;
     void UnExecute() override;
@@ -113,7 +114,7 @@ class UpdateCommand : public SqlGridCommand, public InsertableOrDeletable
 {
 public:
     UpdateCommand() = delete;
-    UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, int64_t idSeries,
+    UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries,
             std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map,
             std::shared_ptr<std::vector<wxString>> addedRowIDs);
     void Execute() override;

@@ -66,11 +66,11 @@ void InsertDeleteCommand::InsertIntoTitle(const std::vector<std::array<std::stri
     }
 }
 
-InsertableOrDeletable::InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs)
-    : m_addedRowIDs(addedRowIDs) {}
+InsertableOrDeletable::InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs, DataPanel* dataPanel)
+    : m_addedRowIDs(addedRowIDs), m_dataPanel(dataPanel) {}
 
-InsertableOrDeletable::InsertableOrDeletable(std::shared_ptr<std::vector<wxString> > addedRowIDs, int64_t idSeries)
-    : m_idSeries(idSeries), m_addedRowIDs(addedRowIDs) {}
+InsertableOrDeletable::InsertableOrDeletable(std::shared_ptr<std::vector<wxString> > addedRowIDs, DataPanel* dataPanel, int64_t idSeries)
+    : m_idSeries(idSeries), m_addedRowIDs(addedRowIDs), m_dataPanel(dataPanel) {}
 
 void InsertableOrDeletable::AddRowIDToFilterList()
 {
@@ -86,9 +86,9 @@ void InsertableOrDeletable::RemoveRowIDFromFilterList()
     std::remove(m_addedRowIDs->begin(), m_addedRowIDs->end(), temp);
 }
 
-InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, std::string title,
+InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, std::string title,
         int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs)
-    : InsertDeleteCommand(connection, grid), InsertableOrDeletable(addedRowIDs), m_title(title), m_idLabel(idLabel)
+    : InsertDeleteCommand(connection, grid), InsertableOrDeletable(addedRowIDs, dataPanel), m_title(title), m_idLabel(idLabel)
 {
     //ExecuteCommon uses the m_titles vector, not the singular m_title
     std::array<std::string, selectedTitleCols> temp {m_title, std::to_string(m_idLabel)};
@@ -142,6 +142,7 @@ void InsertCommand::ExecuteCommon()
     m_idSeries = m_connection->GetLastInsertRowID();
     InsertIntoTitle(m_titles, std::to_string(m_idSeries));
     AddRowIDToFilterList();
+    m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
 }
 
 DeleteCommand::DeleteCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, std::vector<int64_t> idSeries)
@@ -263,9 +264,9 @@ void DeleteCommand::ExecuteCommon()
 
 }
 
-UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, int64_t idSeries, std::string newVal,
+UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries, std::string newVal,
         std::string oldVal, int wxGridCol, const std::vector<wxString>* map, std::shared_ptr<std::vector<wxString>> addedRowIDs)
-    : SqlGridCommand(connection, grid), InsertableOrDeletable(addedRowIDs, idSeries),
+    : SqlGridCommand(connection, grid), InsertableOrDeletable(addedRowIDs, dataPanel, idSeries),
       m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol), m_map(map)
 {
     ExecutionCommon(m_newVal, m_oldVal);
@@ -279,6 +280,7 @@ void UpdateCommand::Execute()
 {
     ExecutionCommon(m_newVal, m_oldVal);
     AddRowIDToFilterList();
+    m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
     int row = GetRowWithIdSeries(m_idSeries);
     m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_newVal)] : m_newVal));
     m_grid->GoToCell(row, m_col);
