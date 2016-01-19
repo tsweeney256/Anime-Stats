@@ -307,11 +307,11 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
 //truly, truly obnoxious
 FilterCommand::FilterCommand(DataPanel* dataPanel, std::string newFilterStr, std::string oldFilterStr, bool newWatched, bool newWatching,
         bool newStalled, bool newDropped, bool newBlank, bool oldWatched, bool oldWatching, bool oldStalled, bool oldDropped, bool oldBlank,
-        std::unique_ptr<std::vector<wxString>> addedRowIDs)
+        std::shared_ptr<std::vector<wxString>> addedRowIDs)
     : SqlGridCommand(nullptr, nullptr), m_dataPanel(dataPanel), m_newFilterStr(newFilterStr), m_oldFilterStr(oldFilterStr),
       m_newWatched(newWatched), m_newWatching(newWatching), m_newStalled(newStalled), m_newDropped(newDropped), m_newBlank(newBlank),
       m_oldWatched(oldWatched), m_oldWatching(oldWatching), m_oldStalled(oldStalled), m_oldDropped(oldDropped), m_oldBlank(oldBlank),
-      m_addedRowIDs(std::move(addedRowIDs))
+      m_addedRowIDs(addedRowIDs)
 {
     Execute();
 }

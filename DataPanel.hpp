@@ -92,7 +92,7 @@ private:
     int m_midRating = 5;
     int m_maxRating = 9;
     wxBoxSizer* m_panelSizer;
-    std::unique_ptr<std::vector<wxString>> m_changedRows;
+    std::shared_ptr<std::vector<wxString>> m_changedRows;
 
     DECLARE_EVENT_TABLE()
 };

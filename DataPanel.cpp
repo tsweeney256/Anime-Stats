@@ -492,10 +492,10 @@ void DataPanel::NewFilter()
     std::string newFilterStr = std::string(m_titleFilterTextField->GetValue().utf8_str());
     m_commands.push_back(std::make_unique<FilterCommand>(this, newFilterStr, m_oldFilterStr, m_watchedCheck->GetValue(),
             m_watchingCheck->GetValue(), m_stalledCheck->GetValue(), m_droppedCheck->GetValue(), m_blankCheck->GetValue(),
-            m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, std::move(m_changedRows)));
+            m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, m_changedRows));
     UpdateOldFilterData();
     //keep track of any inserts or updates that happened in the last view so that they can properly be undone
-    m_changedRows = std::make_unique<std::vector<wxString>>();
+    m_changedRows = std::make_shared<std::vector<wxString>>();
     ++m_commandLevel;
     HandleCommandChecking();
 }
