@@ -26,6 +26,7 @@ public:
     void Redo();
     void ApplyFilter(const std::string& filterStr, bool Watched, bool Watching, bool Stalled,
             bool Dropped, bool Blank, std::vector<wxString>* changedRows = nullptr);
+    void SetAddedFilterRows(std::shared_ptr<std::vector<wxString>> changedRows);
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);
@@ -92,7 +93,7 @@ private:
     int m_midRating = 5;
     int m_maxRating = 9;
     wxBoxSizer* m_panelSizer;
-    std::shared_ptr<std::vector<wxString>> m_changedRows;
+    std::shared_ptr<std::vector<wxString>> m_changedRows; //managed by the command classes
 
     DECLARE_EVENT_TABLE()
 };

@@ -44,19 +44,37 @@ protected:
     static std::unique_ptr<cppw::Sqlite3Statement> m_titleInsertStmt;
 };
 
-class InsertCommand : public InsertDeleteCommand
+//just for managing the list of modified row IDs
+class InsertableOrDeletable
+{
+public:
+    InsertableOrDeletable() = delete;
+    InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs);
+    InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs, int64_t idSeries);
+    virtual ~InsertableOrDeletable() = default;
+
+protected:
+    virtual void AbstractDummy() = 0; //just to keep the class abstract
+    void AddRowIDToFilterList();
+    void RemoveRowIDFromFilterList();
+
+    int64_t m_idSeries = -1;
+    std::shared_ptr<std::vector<wxString>> m_addedRowIDs;
+};
+
+class InsertCommand : public InsertDeleteCommand, public InsertableOrDeletable
 {
 public:
     InsertCommand() = delete;
     InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, std::string title,
-            int idLabel); //updates the database upon construction
+            int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs); //updates the database upon construction
     void Execute() override;
     void UnExecute() override;
 
 private:
+    void AbstractDummy() override {}
     void ExecuteCommon();
 
-    int64_t m_idSeries;
     std::string m_title;
     int m_idLabel;
     //vector of strings instead of vector of tuples to avoid string conversions, even if it takes a bit more memory
@@ -91,19 +109,20 @@ private:
             "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished ";
 };
 
-class UpdateCommand : public SqlGridCommand
+class UpdateCommand : public SqlGridCommand, public InsertableOrDeletable
 {
 public:
     UpdateCommand() = delete;
     UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, int64_t idSeries,
-            std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map);
+            std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map,
+            std::shared_ptr<std::vector<wxString>> addedRowIDs);
     void Execute() override;
     void UnExecute() override;
 
 private:
+    void AbstractDummy() override {}
     void ExecutionCommon(const std::string& newVal, const std::string& oldVal);
 
-    int64_t m_idSeries;
     std::string m_newVal;
     std::string m_oldVal;
     int m_col;

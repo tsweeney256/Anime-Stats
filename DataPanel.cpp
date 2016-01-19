@@ -161,6 +161,11 @@ void DataPanel::Redo()
     }
 }
 
+void DataPanel::SetAddedFilterRows(std::shared_ptr<std::vector<wxString> > changedRows)
+{
+    m_changedRows = changedRows;
+}
+
 void DataPanel::OnGeneralWatchedStatusCheckbox(wxCommandEvent& WXUNUSED(event))
 {
     if(m_watchedCheck->GetValue() && m_watchingCheck->GetValue() && m_stalledCheck->GetValue()
@@ -252,7 +257,8 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
     //if adding a new entry
     if(event.GetRow() == m_grid->GetNumberRows()-1 && event.GetCol() == col::TITLE){
         try{
-            m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_grid, std::string(event.GetString().utf8_str()), 1));
+            m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_grid, std::string(event.GetString().utf8_str()), 1,
+                    m_changedRows));
         }
         catch(cppw::Sqlite3Exception& e){
             wxMessageBox("Error making InsertCommand.\n" + e.GetErrorMessage());
@@ -292,7 +298,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
                 oldVal = std::string(m_grid->GetCellValue(event.GetRow(), event.GetCol()).utf8_str());
             }
 
-            m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_grid, idSeries, newVal, oldVal, col, map));
+            m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_grid, idSeries, newVal, oldVal, col, map, m_changedRows));
         }
         catch(cppw::Sqlite3Exception& e){
             wxMessageBox("Error making UpdateCommand.\n" + e.GetErrorMessage());
@@ -301,8 +307,6 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
     }
     ++m_commandLevel;
     HandleCommandChecking();
-    if(m_changedRows)
-        m_changedRows->push_back(m_grid->GetCellValue(event.GetRow(), col::ID_SERIES));
     m_unsavedChanges = true;
 }
 
@@ -494,8 +498,6 @@ void DataPanel::NewFilter()
             m_watchingCheck->GetValue(), m_stalledCheck->GetValue(), m_droppedCheck->GetValue(), m_blankCheck->GetValue(),
             m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, m_changedRows));
     UpdateOldFilterData();
-    //keep track of any inserts or updates that happened in the last view so that they can properly be undone
-    m_changedRows = std::make_shared<std::vector<wxString>>();
     ++m_commandLevel;
     HandleCommandChecking();
 }

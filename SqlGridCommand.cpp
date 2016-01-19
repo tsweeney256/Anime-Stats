@@ -2,6 +2,7 @@
 #include <wx/file.h>
 #include <wx/filename.h>
 #include <wx/string.h>
+#include <algorithm>
 #include <cstdlib>
 #include "cppw/Sqlite3.hpp"
 #include "SqlGridCommand.hpp"
@@ -65,9 +66,29 @@ void InsertDeleteCommand::InsertIntoTitle(const std::vector<std::array<std::stri
     }
 }
 
+InsertableOrDeletable::InsertableOrDeletable(std::shared_ptr<std::vector<wxString>> addedRowIDs)
+    : m_addedRowIDs(addedRowIDs) {}
+
+InsertableOrDeletable::InsertableOrDeletable(std::shared_ptr<std::vector<wxString> > addedRowIDs, int64_t idSeries)
+    : m_idSeries(idSeries), m_addedRowIDs(addedRowIDs) {}
+
+void InsertableOrDeletable::AddRowIDToFilterList()
+{
+    wxString temp;
+    temp << m_idSeries;
+    m_addedRowIDs->push_back(temp);
+}
+
+void InsertableOrDeletable::RemoveRowIDFromFilterList()
+{
+    wxString temp;
+    temp << m_idSeries;
+    std::remove(m_addedRowIDs->begin(), m_addedRowIDs->end(), temp);
+}
+
 InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, std::string title,
-        int idLabel)
-    : InsertDeleteCommand(connection, grid), m_title(title), m_idLabel(idLabel)
+        int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs)
+    : InsertDeleteCommand(connection, grid), InsertableOrDeletable(addedRowIDs), m_title(title), m_idLabel(idLabel)
 {
     //ExecuteCommon uses the m_titles vector, not the singular m_title
     std::array<std::string, selectedTitleCols> temp {m_title, std::to_string(m_idLabel)};
@@ -107,6 +128,7 @@ void InsertCommand::UnExecute()
     auto results = m_deleteRowStmt->GetResults();
     results->NextRow();
     m_grid->DeleteRows(GetRowWithIdSeries(m_idSeries));
+    RemoveRowIDFromFilterList();
 }
 
 void InsertCommand::ExecuteCommon()
@@ -119,6 +141,7 @@ void InsertCommand::ExecuteCommon()
     result->NextRow();
     m_idSeries = m_connection->GetLastInsertRowID();
     InsertIntoTitle(m_titles, std::to_string(m_idSeries));
+    AddRowIDToFilterList();
 }
 
 DeleteCommand::DeleteCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, std::vector<int64_t> idSeries)
@@ -241,11 +264,12 @@ void DeleteCommand::ExecuteCommon()
 }
 
 UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, int64_t idSeries, std::string newVal,
-        std::string oldVal, int wxGridCol, const std::vector<wxString>* map)
-    : SqlGridCommand(connection, grid), m_idSeries(idSeries), m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol),
-      m_map(map)
+        std::string oldVal, int wxGridCol, const std::vector<wxString>* map, std::shared_ptr<std::vector<wxString>> addedRowIDs)
+    : SqlGridCommand(connection, grid), InsertableOrDeletable(addedRowIDs, idSeries),
+      m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol), m_map(map)
 {
     ExecutionCommon(m_newVal, m_oldVal);
+    AddRowIDToFilterList();
 }
 
 std::unique_ptr<cppw::Sqlite3Statement> UpdateCommand::m_selectIdTitleStmt(nullptr);
@@ -254,6 +278,7 @@ std::unique_ptr<cppw::Sqlite3Statement> UpdateCommand::m_updateTitleStmt(nullptr
 void UpdateCommand::Execute()
 {
     ExecutionCommon(m_newVal, m_oldVal);
+    AddRowIDToFilterList();
     int row = GetRowWithIdSeries(m_idSeries);
     m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_newVal)] : m_newVal));
     m_grid->GoToCell(row, m_col);
@@ -263,6 +288,7 @@ void UpdateCommand::Execute()
 void UpdateCommand::UnExecute()
 {
     ExecutionCommon(m_oldVal, m_newVal);
+    RemoveRowIDFromFilterList();
     int row = GetRowWithIdSeries(m_idSeries);
     m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_oldVal)] : m_oldVal));
     m_grid->GoToCell(row, m_col);
@@ -319,9 +345,11 @@ FilterCommand::FilterCommand(DataPanel* dataPanel, std::string newFilterStr, std
 void FilterCommand::Execute()
 {
     m_dataPanel->ApplyFilter(m_newFilterStr, m_newWatched, m_newWatching, m_newStalled, m_newDropped, m_newBlank);
+    m_dataPanel->SetAddedFilterRows(std::make_shared<std::vector<wxString>>());
 }
 
 void FilterCommand::UnExecute()
 {
     m_dataPanel->ApplyFilter(m_oldFilterStr, m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, m_addedRowIDs.get());
+    m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
 }
