@@ -74,16 +74,20 @@ InsertableOrDeletable::InsertableOrDeletable(std::shared_ptr<std::vector<wxStrin
 
 void InsertableOrDeletable::AddRowIDToFilterList()
 {
-    wxString temp;
-    temp << m_idSeries;
-    m_addedRowIDs->push_back(temp);
+    if(m_addedRowIDs){
+        wxString temp;
+        temp << m_idSeries;
+        m_addedRowIDs->push_back(temp);
+    }
 }
 
 void InsertableOrDeletable::RemoveRowIDFromFilterList()
 {
-    wxString temp;
-    temp << m_idSeries;
-    std::remove(m_addedRowIDs->begin(), m_addedRowIDs->end(), temp);
+    if(m_addedRowIDs){
+        wxString temp;
+        temp << m_idSeries;
+        std::remove(m_addedRowIDs->begin(), m_addedRowIDs->end(), temp);
+    }
 }
 
 InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, std::string title,
