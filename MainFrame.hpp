@@ -2,6 +2,7 @@
 #define MAINFRAME_HPP
 
 #include <wx/frame.h>
+#include <memory>
 #include "cppw/Sqlite3.hpp"
 
 class DataPanel;
@@ -23,7 +24,7 @@ private:
 
     wxDECLARE_EVENT_TABLE();
 
-    cppw::Sqlite3Connection* m_connection;
+    std::unique_ptr<cppw::Sqlite3Connection> m_connection;
     DataPanel* m_dataPanel = nullptr;
 };
 

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <memory>
+#include <exception>
 #include "AppIDs.hpp"
 
 namespace cppw { class Sqlite3Connection;
@@ -44,21 +45,43 @@ protected:
     static std::unique_ptr<cppw::Sqlite3Statement> m_titleInsertStmt;
 };
 
-class InsertCommand : public InsertDeleteCommand
+//various functions and data common to both insert and update commands
+class InsertableOrUpdatable
+{
+public:
+    InsertableOrUpdatable() = delete;
+    InsertableOrUpdatable(cppw::Sqlite3Connection* connection, DataPanel* dataPanel,
+            std::shared_ptr<std::vector<wxString>> addedRowIDs, int label, int64_t idSeries = -1);
+    virtual ~InsertableOrUpdatable() = default;
+
+protected:
+    virtual void AbstractDummy() = 0; //just to keep the class abstract
+    void AddRowIDToFilterList();
+    void RemoveRowIDFromFilterList();
+    void CheckIfLegalTitle(std::string title);
+
+    int m_idLabel;
+    int64_t m_idSeries;
+    DataPanel* m_dataPanel;
+    std::shared_ptr<std::vector<wxString>> m_addedRowIDs;
+
+    static std::unique_ptr<cppw::Sqlite3Statement> m_dupeTitleCheckStmt;
+};
+
+class InsertCommand : public InsertDeleteCommand, public InsertableOrUpdatable
 {
 public:
     InsertCommand() = delete;
-    InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, std::string title,
-            int idLabel); //updates the database upon construction
+    InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, std::string title,
+            int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs); //updates the database upon construction
     void Execute() override;
     void UnExecute() override;
 
 private:
+    void AbstractDummy() override {}
     void ExecuteCommon();
 
-    int64_t m_idSeries;
     std::string m_title;
-    int m_idLabel;
     //vector of strings instead of vector of tuples to avoid string conversions, even if it takes a bit more memory
     //numTitleCols-2 because we're not going to save idTitle and idSeries
     std::vector<std::array<std::string, selectedTitleCols>> m_titles;
@@ -91,19 +114,20 @@ private:
             "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished ";
 };
 
-class UpdateCommand : public SqlGridCommand
+class UpdateCommand : public SqlGridCommand, public InsertableOrUpdatable
 {
 public:
     UpdateCommand() = delete;
-    UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, int64_t idSeries,
-            std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map);
+    UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries,
+            std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map, int label,
+            std::shared_ptr<std::vector<wxString>> addedRowIDs);
     void Execute() override;
     void UnExecute() override;
 
 private:
+    void AbstractDummy() override {}
     void ExecutionCommon(const std::string& newVal, const std::string& oldVal);
 
-    int64_t m_idSeries;
     std::string m_newVal;
     std::string m_oldVal;
     int m_col;
@@ -119,18 +143,37 @@ public:
     FilterCommand() = delete;
     FilterCommand(DataPanel* dataPanel, std::string newFilterStr, std::string oldFilterStr, bool newWatched, bool newWatching,
             bool newStalled, bool newDropped, bool newBlank, bool oldWatched, bool oldWatching, bool oldStalled, bool oldDropped,
-            bool oldBlank); //this is obnoxious
+            bool oldBlank, std::shared_ptr<std::vector<wxString>> addedRowIDs); //this is obnoxious
     void Execute() override;
     void UnExecute() override;
-    void addRows(std::unique_ptr<std::vector<wxString>> idSeries);
-    std::string GetAddedRowsSqlStr();
+
 private:
     DataPanel* m_dataPanel;
     std::string m_newFilterStr;
     std::string m_oldFilterStr;
-    std::unique_ptr<std::vector<wxString>> m_idSeries;
     bool m_newWatched, m_newWatching, m_newStalled, m_newDropped, m_newBlank;
     bool m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank;
+    std::shared_ptr<std::vector<wxString>> m_addedRowIDs;
+};
+
+class SqlGridCommandException : public std::exception { protected: virtual void AbstractDummy() = 0; };
+
+class EmptyTitleException : public SqlGridCommandException
+{
+public:
+    virtual const char* what() const noexcept override {return "Title may not be empty.";}
+
+protected:
+    void AbstractDummy() {}
+};
+
+class DupeTitleException : public SqlGridCommandException
+{
+public:
+    virtual const char* what() const noexcept override {return "Entry with this title already exists.";}
+
+protected:
+    void AbstractDummy() {}
 };
 
 #endif

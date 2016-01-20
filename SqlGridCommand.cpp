@@ -2,7 +2,10 @@
 #include <wx/file.h>
 #include <wx/filename.h>
 #include <wx/string.h>
+#include <wx/msgdlg.h>
+#include <algorithm>
 #include <cstdlib>
+#include <cctype>
 #include "cppw/Sqlite3.hpp"
 #include "SqlGridCommand.hpp"
 #include "AppIDs.hpp"
@@ -65,10 +68,68 @@ void InsertDeleteCommand::InsertIntoTitle(const std::vector<std::array<std::stri
     }
 }
 
-InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, std::string title,
-        int idLabel)
-    : InsertDeleteCommand(connection, grid), m_title(title), m_idLabel(idLabel)
+InsertableOrUpdatable::InsertableOrUpdatable(cppw::Sqlite3Connection* connection, DataPanel* dataPanel,
+        std::shared_ptr<std::vector<wxString> > addedRowIDs, int label, int64_t idSeries)
+    : m_idLabel(label), m_idSeries(idSeries), m_dataPanel(dataPanel), m_addedRowIDs(addedRowIDs)
 {
+    if(!m_dupeTitleCheckStmt){
+        m_dupeTitleCheckStmt = connection->PrepareStatement("select idName from Title where idLabel=? and name=?");
+    }
+}
+
+std::unique_ptr<cppw::Sqlite3Statement> InsertableOrUpdatable::m_dupeTitleCheckStmt(nullptr);
+
+void InsertableOrUpdatable::AddRowIDToFilterList()
+{
+    //this will only be null on the starting screen which should show every entry anyway
+    if(m_addedRowIDs){
+        wxString temp;
+        temp << m_idSeries;
+        m_addedRowIDs->push_back(temp);
+    }
+}
+
+void InsertableOrUpdatable::RemoveRowIDFromFilterList()
+{
+    if(m_addedRowIDs){
+        wxString temp;
+        temp << m_idSeries;
+        std::remove(m_addedRowIDs->begin(), m_addedRowIDs->end(), temp);
+    }
+}
+
+void InsertableOrUpdatable::CheckIfLegalTitle(std::string title)
+{
+    //may not be empty
+    if(title.empty())
+        throw EmptyTitleException();
+
+    //may not be purely whitespace
+    bool justWhiteSpace = true;
+    for(char c : title){
+        if(!isspace(c))
+            justWhiteSpace = false;
+    }
+    if(justWhiteSpace)
+        throw EmptyTitleException();
+
+    //may not be a duplicate title within the same label group
+    m_dupeTitleCheckStmt->Reset();
+    m_dupeTitleCheckStmt->ClearBindings();
+    m_dupeTitleCheckStmt->Bind(1, m_idLabel);
+    m_dupeTitleCheckStmt->Bind(2, title);
+    auto results = m_dupeTitleCheckStmt->GetResults();
+    if(results->NextRow())
+        throw DupeTitleException();
+
+    //return true
+}
+
+InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, std::string title,
+        int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs)
+    : InsertDeleteCommand(connection, grid), InsertableOrUpdatable(connection, dataPanel, addedRowIDs, idLabel), m_title(title)
+{
+    CheckIfLegalTitle(title); //throws and cancels the construction if not legal
     //ExecuteCommon uses the m_titles vector, not the singular m_title
     std::array<std::string, selectedTitleCols> temp {m_title, std::to_string(m_idLabel)};
     m_titles.push_back(temp);
@@ -107,6 +168,7 @@ void InsertCommand::UnExecute()
     auto results = m_deleteRowStmt->GetResults();
     results->NextRow();
     m_grid->DeleteRows(GetRowWithIdSeries(m_idSeries));
+    RemoveRowIDFromFilterList();
 }
 
 void InsertCommand::ExecuteCommon()
@@ -119,6 +181,8 @@ void InsertCommand::ExecuteCommon()
     result->NextRow();
     m_idSeries = m_connection->GetLastInsertRowID();
     InsertIntoTitle(m_titles, std::to_string(m_idSeries));
+    AddRowIDToFilterList();
+    m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
 }
 
 DeleteCommand::DeleteCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, std::vector<int64_t> idSeries)
@@ -240,12 +304,16 @@ void DeleteCommand::ExecuteCommon()
 
 }
 
-UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, int64_t idSeries, std::string newVal,
-        std::string oldVal, int wxGridCol, const std::vector<wxString>* map)
-    : SqlGridCommand(connection, grid), m_idSeries(idSeries), m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol),
-      m_map(map)
+UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries,
+        std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map, int label,
+        std::shared_ptr<std::vector<wxString>> addedRowIDs)
+    : SqlGridCommand(connection, grid), InsertableOrUpdatable(connection, dataPanel, addedRowIDs, label, idSeries),
+      m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol), m_map(map)
 {
+    if(m_col == col::TITLE)
+        CheckIfLegalTitle(m_newVal); //throws and cancels the construction if not a legal title
     ExecutionCommon(m_newVal, m_oldVal);
+    AddRowIDToFilterList();
 }
 
 std::unique_ptr<cppw::Sqlite3Statement> UpdateCommand::m_selectIdTitleStmt(nullptr);
@@ -254,6 +322,8 @@ std::unique_ptr<cppw::Sqlite3Statement> UpdateCommand::m_updateTitleStmt(nullptr
 void UpdateCommand::Execute()
 {
     ExecutionCommon(m_newVal, m_oldVal);
+    AddRowIDToFilterList();
+    m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
     int row = GetRowWithIdSeries(m_idSeries);
     m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_newVal)] : m_newVal));
     m_grid->GoToCell(row, m_col);
@@ -263,6 +333,7 @@ void UpdateCommand::Execute()
 void UpdateCommand::UnExecute()
 {
     ExecutionCommon(m_oldVal, m_newVal);
+    RemoveRowIDFromFilterList();
     int row = GetRowWithIdSeries(m_idSeries);
     m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_oldVal)] : m_oldVal));
     m_grid->GoToCell(row, m_col);
@@ -306,10 +377,12 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
 
 //truly, truly obnoxious
 FilterCommand::FilterCommand(DataPanel* dataPanel, std::string newFilterStr, std::string oldFilterStr, bool newWatched, bool newWatching,
-        bool newStalled, bool newDropped, bool newBlank, bool oldWatched, bool oldWatching, bool oldStalled, bool oldDropped, bool oldBlank)
+        bool newStalled, bool newDropped, bool newBlank, bool oldWatched, bool oldWatching, bool oldStalled, bool oldDropped, bool oldBlank,
+        std::shared_ptr<std::vector<wxString>> addedRowIDs)
     : SqlGridCommand(nullptr, nullptr), m_dataPanel(dataPanel), m_newFilterStr(newFilterStr), m_oldFilterStr(oldFilterStr),
       m_newWatched(newWatched), m_newWatching(newWatching), m_newStalled(newStalled), m_newDropped(newDropped), m_newBlank(newBlank),
-      m_oldWatched(oldWatched), m_oldWatching(oldWatching), m_oldStalled(oldStalled), m_oldDropped(oldDropped), m_oldBlank(oldBlank)
+      m_oldWatched(oldWatched), m_oldWatching(oldWatching), m_oldStalled(oldStalled), m_oldDropped(oldDropped), m_oldBlank(oldBlank),
+      m_addedRowIDs(addedRowIDs)
 {
     Execute();
 }
@@ -317,28 +390,11 @@ FilterCommand::FilterCommand(DataPanel* dataPanel, std::string newFilterStr, std
 void FilterCommand::Execute()
 {
     m_dataPanel->ApplyFilter(m_newFilterStr, m_newWatched, m_newWatching, m_newStalled, m_newDropped, m_newBlank);
+    m_dataPanel->SetAddedFilterRows(std::make_shared<std::vector<wxString>>());
 }
 
 void FilterCommand::UnExecute()
 {
-    m_dataPanel->ApplyFilter(m_oldFilterStr, m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, this);
-}
-
-void FilterCommand::addRows(std::unique_ptr<std::vector<wxString>> idSeries)
-{
-    m_idSeries = std::move(idSeries);
-}
-
-std::string FilterCommand::GetAddedRowsSqlStr()
-{
-    std::string output;
-
-    if(m_idSeries && m_idSeries->size()){
-        output = " or (";
-        for(unsigned int i = 0; i < m_idSeries->size() - 1; ++i){
-            output += " Series.idSeries=" + std::string((*m_idSeries)[i].utf8_str()) + " or ";
-        }
-        output += " Series.idSeries=" + std::string(m_idSeries->back().utf8_str()) + ")";
-    }
-    return output;
+    m_dataPanel->ApplyFilter(m_oldFilterStr, m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, m_addedRowIDs.get());
+    m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
 }

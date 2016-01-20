@@ -25,7 +25,8 @@ public:
     void Undo();
     void Redo();
     void ApplyFilter(const std::string& filterStr, bool Watched, bool Watching, bool Stalled,
-            bool Dropped, bool Blank, FilterCommand* command = nullptr);
+            bool Dropped, bool Blank, std::vector<wxString>* changedRows = nullptr);
+    void SetAddedFilterRows(std::shared_ptr<std::vector<wxString>> changedRows);
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);
@@ -51,6 +52,7 @@ private:
     void SetWatchedStatusColor(int row, const std::string& valStr);
     void HandleUndoRedoColorChange();
     void UpdateOldFilterData();
+    std::string GetAddedRowsSqlStr(std::vector<wxString>* changedRows);
 
     class ratingColor{
     public:
@@ -91,8 +93,7 @@ private:
     int m_midRating = 5;
     int m_maxRating = 9;
     wxBoxSizer* m_panelSizer;
-    FilterCommand* m_lastFilter = nullptr; //don't ever free this
-    std::unique_ptr<std::vector<wxString>> m_changedRows;
+    std::shared_ptr<std::vector<wxString>> m_changedRows; //managed by the command classes
 
     DECLARE_EVENT_TABLE()
 };

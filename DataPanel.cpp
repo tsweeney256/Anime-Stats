@@ -165,6 +165,11 @@ void DataPanel::Redo()
     }
 }
 
+void DataPanel::SetAddedFilterRows(std::shared_ptr<std::vector<wxString> > changedRows)
+{
+    m_changedRows = changedRows;
+}
+
 void DataPanel::OnGeneralWatchedStatusCheckbox(wxCommandEvent& WXUNUSED(event))
 {
     if(m_watchedCheck->GetValue() && m_watchingCheck->GetValue() && m_stalledCheck->GetValue()
@@ -253,16 +258,24 @@ void DataPanel::OnGridColSort(wxGridEvent& event)
 
 void DataPanel::OnGridCellChanging(wxGridEvent& event)
 {
+    bool successfulEdit = true;
+
     //if adding a new entry
     if(event.GetRow() == m_grid->GetNumberRows()-1 && event.GetCol() == col::TITLE){
         try{
-            m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_grid, std::string(event.GetString().utf8_str()), 1));
+            m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_grid, this, std::string(event.GetString().utf8_str()), 1,
+                    m_changedRows));
+            AppendLastGridRow(true);
         }
         catch(cppw::Sqlite3Exception& e){
             wxMessageBox("Error making InsertCommand.\n" + e.GetErrorMessage());
             m_top->Close(true);
         }
-        AppendLastGridRow(true);
+        catch(SqlGridCommandException& e){
+            wxMessageBox("Error: " + std::string(e.what()));
+            successfulEdit = false;
+            event.Veto();
+        }
     }
     else{ //if updating value
         try{
@@ -296,18 +309,24 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
                 oldVal = std::string(m_grid->GetCellValue(event.GetRow(), event.GetCol()).utf8_str());
             }
 
-            m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_grid, idSeries, newVal, oldVal, col, map));
+            m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_grid, this, idSeries, newVal, oldVal, col,
+                    map, 1, m_changedRows));
         }
         catch(cppw::Sqlite3Exception& e){
             wxMessageBox("Error making UpdateCommand.\n" + e.GetErrorMessage());
             m_top->Close(true);
         }
+        catch(SqlGridCommandException& e){
+            wxMessageBox("Error: " + std::string(e.what()));
+            successfulEdit = false;
+            event.Veto();
+        }
     }
-    ++m_commandLevel;
-    HandleCommandChecking();
-    if(m_changedRows)
-        m_changedRows->push_back(m_grid->GetCellValue(event.GetRow(), col::ID_SERIES));
-    m_unsavedChanges = true;
+    if(successfulEdit){
+        ++m_commandLevel;
+        HandleCommandChecking();
+        m_unsavedChanges = true;
+    }
 }
 
 void DataPanel::OnComboDropDown(wxCommandEvent& event)
@@ -389,7 +408,8 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 }
 
 void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool watching, bool stalled,
-        bool dropped, bool blank, FilterCommand* command)
+        bool dropped, bool blank, std::vector<wxString>* changedRows)
+//don't ever free changedRows
 {
     try{
         //setting up the where part of the sql statement to filter by watched statuses
@@ -408,7 +428,7 @@ void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool wat
         if(!firstStatus)
             statusStr += " ) ";
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) + " where Title like ? " +
-                statusStr + (command ? command->GetAddedRowsSqlStr() : "") + " order by " + m_curOrderCol + " "+ m_curOrderDir);
+                statusStr + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") + " order by " + m_curOrderCol + " "+ m_curOrderDir);
         statement->Bind(1, "%" + filterStr + "%");
         auto results = statement->GetResults();
         ResetTable(results);
@@ -487,7 +507,8 @@ void DataPanel::ApplyFilterEasy()
             m_watchingCheck->GetValue(),
             m_stalledCheck->GetValue(),
             m_droppedCheck->GetValue(),
-            m_blankCheck->GetValue());
+            m_blankCheck->GetValue(),
+            m_changedRows.get());
 }
 
 void DataPanel::NewFilter()
@@ -495,12 +516,8 @@ void DataPanel::NewFilter()
     std::string newFilterStr = std::string(m_titleFilterTextField->GetValue().utf8_str());
     m_commands.push_back(std::make_unique<FilterCommand>(this, newFilterStr, m_oldFilterStr, m_watchedCheck->GetValue(),
             m_watchingCheck->GetValue(), m_stalledCheck->GetValue(), m_droppedCheck->GetValue(), m_blankCheck->GetValue(),
-            m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank));
+            m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, m_changedRows));
     UpdateOldFilterData();
-    //keep track of any inserts or updates that happened in the last view so that they can properly be undone
-    m_lastFilter = static_cast<FilterCommand*>(m_commands.back().get()); //don't ever free this
-    m_lastFilter->addRows(std::move(m_changedRows));
-    m_changedRows = std::make_unique<std::vector<wxString>>();
     ++m_commandLevel;
     HandleCommandChecking();
 }
@@ -598,4 +615,18 @@ void DataPanel::UpdateOldFilterData()
     m_oldDropped = m_droppedCheck->GetValue();
     m_oldBlank = m_blankCheck->GetValue();
 
+}
+
+std::string DataPanel::GetAddedRowsSqlStr(std::vector<wxString>* changedRows)
+{
+    std::string output;
+
+    if(changedRows && changedRows->size()){
+        output = " or (";
+        for(unsigned int i = 0; i < changedRows->size() - 1; ++i){
+            output += " Series.idSeries=" + std::string((*changedRows)[i].utf8_str()) + " or ";
+        }
+        output += " Series.idSeries=" + std::string(changedRows->back().utf8_str()) + ")";
+    }
+    return output;
 }
