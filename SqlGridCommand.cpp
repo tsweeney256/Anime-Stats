@@ -2,8 +2,10 @@
 #include <wx/file.h>
 #include <wx/filename.h>
 #include <wx/string.h>
+#include <wx/msgdlg.h>
 #include <algorithm>
 #include <cstdlib>
+#include <cctype>
 #include "cppw/Sqlite3.hpp"
 #include "SqlGridCommand.hpp"
 #include "AppIDs.hpp"
@@ -66,11 +68,16 @@ void InsertDeleteCommand::InsertIntoTitle(const std::vector<std::array<std::stri
     }
 }
 
-InsertableOrUpdatable::InsertableOrUpdatable(std::shared_ptr<std::vector<wxString>> addedRowIDs, DataPanel* dataPanel)
-    : m_addedRowIDs(addedRowIDs), m_dataPanel(dataPanel) {}
+InsertableOrUpdatable::InsertableOrUpdatable(cppw::Sqlite3Connection* connection, DataPanel* dataPanel,
+        std::shared_ptr<std::vector<wxString> > addedRowIDs, int label, int64_t idSeries)
+    : m_idLabel(label), m_idSeries(idSeries), m_dataPanel(dataPanel), m_addedRowIDs(addedRowIDs)
+{
+    if(!m_dupeTitleCheckStmt){
+        m_dupeTitleCheckStmt = connection->PrepareStatement("select idName from Title where idLabel=? and name=?");
+    }
+}
 
-InsertableOrUpdatable::InsertableOrUpdatable(std::shared_ptr<std::vector<wxString> > addedRowIDs, DataPanel* dataPanel, int64_t idSeries)
-    : m_idSeries(idSeries), m_addedRowIDs(addedRowIDs), m_dataPanel(dataPanel) {}
+std::unique_ptr<cppw::Sqlite3Statement> InsertableOrUpdatable::m_dupeTitleCheckStmt(nullptr);
 
 void InsertableOrUpdatable::AddRowIDToFilterList()
 {
@@ -91,10 +98,38 @@ void InsertableOrUpdatable::RemoveRowIDFromFilterList()
     }
 }
 
+void InsertableOrUpdatable::CheckIfLegalTitle(std::string title)
+{
+    //may not be empty
+    if(title.empty())
+        throw EmptyTitleException();
+
+    //may not be purely whitespace
+    bool justWhiteSpace = true;
+    for(char c : title){
+        if(!isspace(c))
+            justWhiteSpace = false;
+    }
+    if(justWhiteSpace)
+        throw EmptyTitleException();
+
+    //may not be a duplicate title within the same label group
+    m_dupeTitleCheckStmt->Reset();
+    m_dupeTitleCheckStmt->ClearBindings();
+    m_dupeTitleCheckStmt->Bind(1, m_idLabel);
+    m_dupeTitleCheckStmt->Bind(2, title);
+    auto results = m_dupeTitleCheckStmt->GetResults();
+    if(results->NextRow())
+        throw DupeTitleException();
+
+    //return true
+}
+
 InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, std::string title,
         int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs)
-    : InsertDeleteCommand(connection, grid), InsertableOrUpdatable(addedRowIDs, dataPanel), m_title(title), m_idLabel(idLabel)
+    : InsertDeleteCommand(connection, grid), InsertableOrUpdatable(connection, dataPanel, addedRowIDs, idLabel), m_title(title)
 {
+    CheckIfLegalTitle(title); //throws and cancels the construction if not legal
     //ExecuteCommon uses the m_titles vector, not the singular m_title
     std::array<std::string, selectedTitleCols> temp {m_title, std::to_string(m_idLabel)};
     m_titles.push_back(temp);
@@ -269,11 +304,14 @@ void DeleteCommand::ExecuteCommon()
 
 }
 
-UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries, std::string newVal,
-        std::string oldVal, int wxGridCol, const std::vector<wxString>* map, std::shared_ptr<std::vector<wxString>> addedRowIDs)
-    : SqlGridCommand(connection, grid), InsertableOrUpdatable(addedRowIDs, dataPanel, idSeries),
+UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries,
+        std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map, int label,
+        std::shared_ptr<std::vector<wxString>> addedRowIDs)
+    : SqlGridCommand(connection, grid), InsertableOrUpdatable(connection, dataPanel, addedRowIDs, label, idSeries),
       m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol), m_map(map)
 {
+    if(m_col == col::TITLE)
+        CheckIfLegalTitle(m_newVal); //throws and cancels the construction if not a legal title
     ExecutionCommon(m_newVal, m_oldVal);
     AddRowIDToFilterList();
 }

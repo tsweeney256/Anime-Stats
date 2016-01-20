@@ -254,17 +254,24 @@ void DataPanel::OnGridColSort(wxGridEvent& event)
 
 void DataPanel::OnGridCellChanging(wxGridEvent& event)
 {
+    bool successfulEdit = true;
+
     //if adding a new entry
     if(event.GetRow() == m_grid->GetNumberRows()-1 && event.GetCol() == col::TITLE){
         try{
             m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_grid, this, std::string(event.GetString().utf8_str()), 1,
                     m_changedRows));
+            AppendLastGridRow(true);
         }
         catch(cppw::Sqlite3Exception& e){
             wxMessageBox("Error making InsertCommand.\n" + e.GetErrorMessage());
             m_top->Close(true);
         }
-        AppendLastGridRow(true);
+        catch(SqlGridCommandException& e){
+            wxMessageBox("Error: " + std::string(e.what()));
+            successfulEdit = false;
+            event.Veto();
+        }
     }
     else{ //if updating value
         try{
@@ -298,16 +305,24 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
                 oldVal = std::string(m_grid->GetCellValue(event.GetRow(), event.GetCol()).utf8_str());
             }
 
-            m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_grid, this, idSeries, newVal, oldVal, col, map, m_changedRows));
+            m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_grid, this, idSeries, newVal, oldVal, col,
+                    map, 1, m_changedRows));
         }
         catch(cppw::Sqlite3Exception& e){
             wxMessageBox("Error making UpdateCommand.\n" + e.GetErrorMessage());
             m_top->Close(true);
         }
+        catch(SqlGridCommandException& e){
+            wxMessageBox("Error: " + std::string(e.what()));
+            successfulEdit = false;
+            event.Veto();
+        }
     }
-    ++m_commandLevel;
-    HandleCommandChecking();
-    m_unsavedChanges = true;
+    if(successfulEdit){
+        ++m_commandLevel;
+        HandleCommandChecking();
+        m_unsavedChanges = true;
+    }
 }
 
 void DataPanel::OnComboDropDown(wxCommandEvent& event)
