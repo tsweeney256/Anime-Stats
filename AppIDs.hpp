@@ -1,6 +1,7 @@
 #ifndef APPIDS_HPP
 #define APPIDS_HPP
 
+#include <vector>
 #include <wx/defs.h>
 
 //the various custom IDs that we use for the application
@@ -22,7 +23,8 @@ enum
 	ID_REFRESH_BTN,
 	ID_ADD_ROW_BTN,
 	ID_DELETE_ROW_BTN,
-    ID_TITLE_FILTER_FIELD
+    ID_TITLE_FILTER_FIELD,
+    ID_ADV_FILTER_FRAME
 };
 
 namespace col

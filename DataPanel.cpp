@@ -12,6 +12,7 @@
 #include "AppIDs.hpp"
 #include "cppw/Sqlite3.hpp"
 #include "GridCellDateEditor.hpp"
+#include "AdvFilterFrame.hpp"
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_CHECKBOX(ID_WATCHED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
@@ -23,11 +24,13 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_TEXT_ENTER(ID_TITLE_FILTER_FIELD, DataPanel::OnTextEnter)
     EVT_BUTTON(ID_APPLY_FILTER_BTN, DataPanel::OnApplyFilter)
     EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
+    EVT_BUTTON(ID_ADV_FILTER_BTN, DataPanel::OnAdvFilter)
     EVT_BUTTON(ID_ADD_ROW_BTN, DataPanel::OnAddRow)
     EVT_BUTTON(ID_DELETE_ROW_BTN, DataPanel::OnDeleteRow)
     EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
     EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
     EVT_COMBOBOX_DROPDOWN(wxID_ANY, DataPanel::OnComboDropDown)
+    EVT_WINDOW_DESTROY(DataPanel::OnAdvFilterFrameDestruction)
 END_EVENT_TABLE()
 
 DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWindow* top, wxWindowID id, const wxPoint& pos,
@@ -63,7 +66,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	auto resetFilterButton = new wxButton(this, ID_RESET_FILTER_BTN, "Reset Filter");
 	m_titleFilterTextField = new wxTextCtrl(this, ID_TITLE_FILTER_FIELD, wxEmptyString,
 			wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
-	auto advFilterButton = new wxButton(this, ID_ADV_FILTER_BTN, "Adv. Filter");
+	m_advFilterButton = new wxButton(this, ID_ADV_FILTER_BTN, "Adv. Filter");
 	auto refreshButton = new wxButton(this, ID_REFRESH_BTN, "Refresh");
 	auto addRowButton = new wxButton(this, ID_ADD_ROW_BTN, "Add Row");
 	auto deleteRowButton = new wxButton(this, ID_DELETE_ROW_BTN, "Delete Rows");
@@ -89,7 +92,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	titleFilterSizer->Add(m_titleFilterTextField, wxSizerFlags(0).Border(wxALL, 5).Center());
 	//row 1
 	btnSizer->Add(applyFilterButton, wxSizerFlags(0).Bottom().Expand());
-	btnSizer->Add(advFilterButton, wxSizerFlags(0).Bottom().Expand());
+	btnSizer->Add(m_advFilterButton, wxSizerFlags(0).Bottom().Expand());
 	btnSizer->Add(addRowButton, wxSizerFlags(0).Bottom().Expand());
 	//row 2
 	btnSizer->Add(resetFilterButton, wxSizerFlags(0).Bottom().Expand());
@@ -215,6 +218,14 @@ void DataPanel::OnResetFilter(wxCommandEvent& WXUNUSED(event))
     NewFilter();
 }
 
+void DataPanel::OnAdvFilter(wxCommandEvent& event)
+{
+    //non-modal
+    auto frame = new AdvFilterFrame(this, "Advanced Filtering", wxPoint(50,50), wxSize(800, 600));
+    frame->Show(true);
+    m_advFilterButton->Disable();
+}
+
 void DataPanel::OnAddRow(wxCommandEvent& WXUNUSED(event))
 {
     m_grid->GoToCell(m_grid->GetNumberRows()-1, col::TITLE);
@@ -335,6 +346,11 @@ void DataPanel::OnComboDropDown(wxCommandEvent& event)
     m_oldCellComboIndex = std::to_string(control->GetCurrentSelection());
 }
 
+void DataPanel::OnAdvFilterFrameDestruction(wxWindowDestroyEvent& event)
+{
+    if(event.GetId() == ID_ADV_FILTER_FRAME)
+        m_advFilterButton->Enable();
+}
 
 void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 {
