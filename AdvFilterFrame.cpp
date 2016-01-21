@@ -7,6 +7,12 @@
 
 BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
     EVT_CLOSE(AdvFilterFrame::OnClose)
+    EVT_CHECKBOX(ID_ADV_FILTER_WATCHED_STATUS, AdvFilterFrame::OnWatchedStatusCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_WATCHED_STATUS_ALL, AdvFilterFrame::OnWatchedStatusAllCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_RELEASE_TYPE, AdvFilterFrame::OnReleaseTypeCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_RELEASE_TYPE_ALL, AdvFilterFrame::OnReleaseTypeAllCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_SEASON, AdvFilterFrame::OnSeasonCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_SEASON_ALL, AdvFilterFrame::OnSeasonAllCheckBox)
 END_EVENT_TABLE()
 
 AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -29,20 +35,20 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_stalledCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_WATCHED_STATUS, _("Stalled"));
     m_droppedCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_WATCHED_STATUS, _("Dropped"));
     m_watchedStatusBlankCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_WATCHED_STATUS, _("Blank"));
-    m_watchedStatusAllCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_WATCHED_STATUS, _("Enable All"));
+    m_watchedStatusAllCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_WATCHED_STATUS_ALL, _("Enable All"));
     m_tvCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("TV"));
     m_ovaCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("OVA"));
     m_onaCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("ONA"));
     m_movieCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("Movie"));
     m_tvSpecialCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("TV Special"));
     m_releaseTypeBlankCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("Blank"));
-    m_releaseTypeAllCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("Enable All"));
+    m_releaseTypeAllCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE_ALL, _("Enable All"));
     m_winterCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_SEASON, _("Winter"));
     m_springCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_SEASON, _("Spring"));
     m_summerCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_SEASON, _("Summer"));
     m_fallCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_SEASON, _("Fall"));
     m_seasonBlankCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_SEASON, _("Blank"));
-    m_seasonAllCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_SEASON, _("Enable All"));
+    m_seasonAllCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_SEASON_ALL, _("Enable All"));
 
     m_watchedCheck->SetValue(true);
     m_watchingCheck->SetValue(true);
@@ -336,6 +342,92 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
 void AdvFilterFrame::OnClose(wxCloseEvent& WXUNUSED(event))
 {
     Destroy();
+}
+
+void AdvFilterFrame::OnWatchedStatusCheckBox(wxCommandEvent& event)
+{
+    if(!event.GetInt()){
+        m_watchedStatusAllCheck->SetValue(false);
+        m_watchedStatusAllCheck->Enable();
+    }
+    else{
+        if(m_watchedCheck->GetValue() &&
+                m_watchingCheck->GetValue() &&
+                m_stalledCheck->GetValue() &&
+                m_droppedCheck->GetValue() &&
+                m_watchedStatusBlankCheck->GetValue()){
+            m_watchedStatusAllCheck->SetValue(true);
+            m_watchedStatusAllCheck->Disable();
+        }
+    }
+}
+
+void AdvFilterFrame::OnWatchedStatusAllCheckBox(wxCommandEvent& WXUNUSED(event))
+{
+    m_watchedCheck->SetValue(true);
+    m_watchingCheck->SetValue(true);
+    m_stalledCheck->SetValue(true);
+    m_droppedCheck->SetValue(true);
+    m_watchedStatusBlankCheck->SetValue(true);
+    m_watchedStatusAllCheck->Disable();
+}
+
+void AdvFilterFrame::OnReleaseTypeCheckBox(wxCommandEvent& event)
+{
+    if(!event.GetInt()){
+        m_releaseTypeAllCheck->SetValue(false);
+        m_releaseTypeAllCheck->Enable();
+    }
+    else{
+        if(m_tvCheck->GetValue() &&
+                m_ovaCheck->GetValue() &&
+                m_onaCheck->GetValue() &&
+                m_movieCheck->GetValue() &&
+                m_tvSpecialCheck->GetValue() &&
+                m_releaseTypeBlankCheck->GetValue()){
+            m_releaseTypeAllCheck->SetValue(true);
+            m_releaseTypeAllCheck->Disable();
+        }
+    }
+}
+
+void AdvFilterFrame::OnReleaseTypeAllCheckBox(wxCommandEvent& WXUNUSED(event))
+{
+    m_tvCheck->SetValue(true);
+    m_ovaCheck->SetValue(true);
+    m_onaCheck->SetValue(true);
+    m_movieCheck->SetValue(true);
+    m_tvSpecialCheck->SetValue(true);
+    m_releaseTypeBlankCheck->SetValue(true);
+    m_releaseTypeAllCheck->Disable();
+}
+
+void AdvFilterFrame::OnSeasonCheckBox(wxCommandEvent& event)
+{
+    if(!event.GetInt()){
+        m_seasonAllCheck->SetValue(false);
+        m_seasonAllCheck->Enable();
+    }
+    else{
+        if(m_winterCheck->GetValue() &&
+                m_springCheck->GetValue() &&
+                m_summerCheck->GetValue() &&
+                m_fallCheck->GetValue() &&
+                m_seasonBlankCheck->GetValue()){
+            m_seasonAllCheck->SetValue(true);
+            m_seasonAllCheck->Disable();
+        }
+    }
+}
+
+void AdvFilterFrame::OnSeasonAllCheckBox(wxCommandEvent& WXUNUSED(event))
+{
+    m_winterCheck->SetValue(true);
+    m_springCheck->SetValue(true);
+    m_summerCheck->SetValue(true);
+    m_fallCheck->SetValue(true);
+    m_seasonBlankCheck->SetValue(true);
+    m_seasonAllCheck->Disable();
 }
 
 wxStaticText* AdvFilterFrame::getLabel(const wxString& text)

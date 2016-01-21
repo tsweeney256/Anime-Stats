@@ -13,6 +13,12 @@ public:
 
 private:
     void OnClose(wxCloseEvent& event);
+    void OnWatchedStatusCheckBox(wxCommandEvent& event);
+    void OnWatchedStatusAllCheckBox(wxCommandEvent& event);
+    void OnReleaseTypeCheckBox(wxCommandEvent& event);
+    void OnReleaseTypeAllCheckBox(wxCommandEvent& event);
+    void OnSeasonCheckBox(wxCommandEvent& event);
+    void OnSeasonAllCheckBox(wxCommandEvent& event);
 
     wxStaticText* getLabel(const wxString& text);
 
