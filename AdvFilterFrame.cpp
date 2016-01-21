@@ -14,6 +14,7 @@ BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
     EVT_CHECKBOX(ID_ADV_FILTER_SEASON, AdvFilterFrame::OnSeasonCheckBox)
     EVT_CHECKBOX(ID_ADV_FILTER_SEASON_ALL, AdvFilterFrame::OnSeasonAllCheckBox)
     EVT_BUTTON(ID_ADV_FILTER_RESET, AdvFilterFrame::OnReset)
+    EVT_BUTTON(ID_ADV_FILTER_CANCEL, AdvFilterFrame::OnCancel)
 END_EVENT_TABLE()
 
 AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -406,42 +407,6 @@ void AdvFilterFrame::OnSeasonAllCheckBox(wxCommandEvent& WXUNUSED(event))
     EnableAllSeason();
 }
 
-wxStaticText* AdvFilterFrame::getLabel(const wxString& text)
-{
-    return new wxStaticText(m_mainPanel, wxID_ANY, text);
-}
-
-void AdvFilterFrame::EnableAllWatchedStatus()
-{
-    m_watchedCheck->SetValue(true);
-    m_watchingCheck->SetValue(true);
-    m_stalledCheck->SetValue(true);
-    m_droppedCheck->SetValue(true);
-    m_watchedStatusBlankCheck->SetValue(true);
-    m_watchedStatusAllCheck->Disable();
-}
-
-void AdvFilterFrame::EnableAllReleaseType()
-{
-    m_tvCheck->SetValue(true);
-    m_ovaCheck->SetValue(true);
-    m_onaCheck->SetValue(true);
-    m_movieCheck->SetValue(true);
-    m_tvSpecialCheck->SetValue(true);
-    m_releaseTypeBlankCheck->SetValue(true);
-    m_releaseTypeAllCheck->Disable();
-}
-
-void AdvFilterFrame::EnableAllSeason()
-{
-    m_winterCheck->SetValue(true);
-    m_springCheck->SetValue(true);
-    m_summerCheck->SetValue(true);
-    m_fallCheck->SetValue(true);
-    m_seasonBlankCheck->SetValue(true);
-    m_seasonAllCheck->Disable();
-}
-
 void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
 {
     EnableAllWatchedStatus();
@@ -479,4 +444,45 @@ void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
     m_finishYearHigh->SetValue(m_maxYear);
     m_finishMonthHigh->SetValue(m_maxMonth);
     m_finishDayHigh->SetValue(m_maxDay);
+}
+
+void AdvFilterFrame::OnCancel(wxCommandEvent& WXUNUSED(event))
+{
+    Close();
+}
+
+wxStaticText* AdvFilterFrame::getLabel(const wxString& text)
+{
+    return new wxStaticText(m_mainPanel, wxID_ANY, text);
+}
+
+void AdvFilterFrame::EnableAllWatchedStatus()
+{
+    m_watchedCheck->SetValue(true);
+    m_watchingCheck->SetValue(true);
+    m_stalledCheck->SetValue(true);
+    m_droppedCheck->SetValue(true);
+    m_watchedStatusBlankCheck->SetValue(true);
+    m_watchedStatusAllCheck->Disable();
+}
+
+void AdvFilterFrame::EnableAllReleaseType()
+{
+    m_tvCheck->SetValue(true);
+    m_ovaCheck->SetValue(true);
+    m_onaCheck->SetValue(true);
+    m_movieCheck->SetValue(true);
+    m_tvSpecialCheck->SetValue(true);
+    m_releaseTypeBlankCheck->SetValue(true);
+    m_releaseTypeAllCheck->Disable();
+}
+
+void AdvFilterFrame::EnableAllSeason()
+{
+    m_winterCheck->SetValue(true);
+    m_springCheck->SetValue(true);
+    m_summerCheck->SetValue(true);
+    m_fallCheck->SetValue(true);
+    m_seasonBlankCheck->SetValue(true);
+    m_seasonAllCheck->Disable();
 }

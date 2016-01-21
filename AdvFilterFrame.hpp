@@ -20,6 +20,7 @@ private:
     void OnSeasonCheckBox(wxCommandEvent& event);
     void OnSeasonAllCheckBox(wxCommandEvent& event);
     void OnReset(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
 
     wxStaticText* getLabel(const wxString& text);
     void EnableAllWatchedStatus();
