@@ -221,7 +221,7 @@ void DataPanel::OnResetFilter(wxCommandEvent& WXUNUSED(event))
 void DataPanel::OnAdvFilter(wxCommandEvent& event)
 {
     //non-modal
-    auto frame = new AdvFilterFrame(this, "Advanced Filtering", wxPoint(50,50), wxSize(800, 600));
+    auto frame = new AdvFilterFrame(this, "Advanced Filtering", wxDefaultPosition, wxDefaultSize);
     frame->Show(true);
     m_advFilterButton->Disable();
 }
