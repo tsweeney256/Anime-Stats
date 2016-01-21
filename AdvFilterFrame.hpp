@@ -19,8 +19,21 @@ private:
     void OnReleaseTypeAllCheckBox(wxCommandEvent& event);
     void OnSeasonCheckBox(wxCommandEvent& event);
     void OnSeasonAllCheckBox(wxCommandEvent& event);
+    void OnReset(wxCommandEvent& event);
 
     wxStaticText* getLabel(const wxString& text);
+    void EnableAllWatchedStatus();
+    void EnableAllReleaseType();
+    void EnableAllSeason();
+
+    const int m_minNum    = 0;
+    const int m_maxNum    = 999999;
+    const int m_minYear   = 0;
+    const int m_maxYear   = 9999;
+    const int m_minMonth  = 1;
+    const int m_maxMonth  = 12;
+    const int m_minDay    = 1;
+    const int m_maxDay    = 31;
 
     wxPanel* m_mainPanel;
 
