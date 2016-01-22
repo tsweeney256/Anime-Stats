@@ -579,6 +579,26 @@ void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
     m_lengthSpinLow->SetValue(m_minNum);
     m_lengthSpinHigh->SetValue(m_maxNum);
 
+    m_ratingsSpinLow->Disable();
+    m_ratingsSpinHigh->Disable();
+    m_yearSpinLow->Disable();
+    m_yearSpinHigh->Disable();
+    m_epsWatchedSpinLow->Disable();
+    m_epsWatchedSpinHigh->Disable();
+    m_epsRewatchedSpinLow->Disable();
+    m_epsRewatchedSpinHigh->Disable();
+    m_totalEpsSpinLow->Disable();
+    m_totalEpsSpinHigh->Disable();
+    m_lengthSpinLow->Disable();
+    m_lengthSpinHigh->Disable();
+
+    m_ratingsEnabled->SetValue(false);
+    m_yearEnabled->SetValue(false);
+    m_epsWatchedEnabled->SetValue(false);
+    m_epsRewatchedEnabled->SetValue(false);
+    m_totalEpsEnabled->SetValue(false);
+    m_lengthEnabled->SetValue(false);
+
     m_startYearLow->SetValue(m_minYear);
     m_startMonthLow->SetValue(m_minMonth);
     m_startDayLow->SetValue(m_minDay);
@@ -591,6 +611,22 @@ void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
     m_finishYearHigh->SetValue(m_maxYear);
     m_finishMonthHigh->SetValue(m_maxMonth);
     m_finishDayHigh->SetValue(m_maxDay);
+
+    m_startYearLow->Disable();
+    m_startMonthLow->Disable();
+    m_startDayLow->Disable();
+    m_startYearHigh->Disable();
+    m_startMonthHigh->Disable();
+    m_startDayHigh->Disable();
+    m_finishYearLow->Disable();
+    m_finishMonthLow->Disable();
+    m_finishDayLow->Disable();
+    m_finishYearHigh->Disable();
+    m_finishMonthHigh->Disable();
+    m_finishDayHigh->Disable();
+
+    m_dateStartedEnabled->SetValue(false);
+    m_dateFinishedEnabled->SetValue(false);
 }
 
 void AdvFilterFrame::OnCancel(wxCommandEvent& WXUNUSED(event))
