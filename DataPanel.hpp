@@ -38,6 +38,7 @@ private:
     void OnApplyFilter(wxCommandEvent& event);
     void OnResetFilter(wxCommandEvent& event);
     void OnAdvFilter(wxCommandEvent& event);
+    void OnRefresh(wxCommandEvent& event);
     void OnAddRow(wxCommandEvent& event);
     void OnDeleteRow(wxCommandEvent& event);
     void OnGridColSort(wxGridEvent& event);

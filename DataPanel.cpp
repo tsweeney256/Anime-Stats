@@ -27,6 +27,7 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_BUTTON(ID_APPLY_FILTER_BTN, DataPanel::OnApplyFilter)
     EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
     EVT_BUTTON(ID_ADV_FILTER_BTN, DataPanel::OnAdvFilter)
+    EVT_BUTTON(ID_REFRESH_BTN, DataPanel::OnRefresh)
     EVT_BUTTON(ID_ADD_ROW_BTN, DataPanel::OnAddRow)
     EVT_BUTTON(ID_DELETE_ROW_BTN, DataPanel::OnDeleteRow)
     EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
@@ -232,6 +233,11 @@ void DataPanel::OnAdvFilter(wxCommandEvent& WXUNUSED(event))
     auto frame = new AdvFilterFrame(this, "Advanced Filtering", wxDefaultPosition, wxDefaultSize);
     frame->Show(true);
     m_advFilterButton->Disable();
+}
+
+void DataPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
+{
+    ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
 }
 
 void DataPanel::OnAddRow(wxCommandEvent& WXUNUSED(event))
