@@ -140,7 +140,8 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	//
 	//Misc initializations
 	//
-	m_oldBasicFilterInfo = BasicFilterInfo::MakeShared(); //already initialized how we want it
+	m_basicFilterInfo = BasicFilterInfo::MakeShared(); //already initialized how we want it
+	m_oldBasicFilterInfo = BasicFilterInfo::MakeShared();
 }
 
 bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
