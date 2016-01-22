@@ -1,3 +1,4 @@
+#include <sstream>
 #include <wx/checkbox.h>
 #include <wx/button.h>
 #include <wx/textctrl.h>
@@ -432,28 +433,89 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         std::shared_ptr<AdvFilterInfo> newAdvFilterInfo, std::vector<wxString>* changedRows)
 //don't ever free changedRows
 {
+    std::string debug;
     try{
         UpdateOldFilterData();
         m_basicFilterInfo = newBasicFilterInfo;
         m_advFilterInfo = newAdvFilterInfo;
 
         //setting up the where part of the sql statement to filter by watched statuses
+        std::string watchedStatus = "WatchedStatus.idWatchedStatus";
+        std::string releaseType = "ReleaseType.idReleaseType";
+        std::string season = "Season.idSeason";
         bool firstStatus = true;
-        std::string statusStr;
+        bool showNothing = false; //if none of the boxes are ticked then nothing should be displayed
+        std::stringstream statusStr;
+
+        //watchedStatus
         if(newBasicFilterInfo->watched)
-            AppendStatusStr(statusStr, "= 1 ", firstStatus);
+            AppendStatusStr(statusStr, watchedStatus + "= 1 ", firstStatus);
         if(newBasicFilterInfo->watching)
-            AppendStatusStr(statusStr, "= 2 ", firstStatus);
+            AppendStatusStr(statusStr, watchedStatus + "= 2 ", firstStatus);
         if(newBasicFilterInfo->stalled)
-            AppendStatusStr(statusStr, "= 3 ", firstStatus);
+            AppendStatusStr(statusStr, watchedStatus + "= 3 ", firstStatus);
         if(newBasicFilterInfo->dropped)
-            AppendStatusStr(statusStr, "= 4 ", firstStatus);
+            AppendStatusStr(statusStr, watchedStatus + "= 4 ", firstStatus);
         if(newBasicFilterInfo->watchedBlank)
-            AppendStatusStr(statusStr, "= 0 ", firstStatus);
+            AppendStatusStr(statusStr, watchedStatus + "= 0 ", firstStatus);
         if(!firstStatus)
-            statusStr += " ) ";
-        auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) + " where Title like ? " +
-                statusStr + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") + " order by " + m_curOrderCol + " "+ m_curOrderDir);
+            statusStr << " ) ";
+        else
+            showNothing = true;
+
+        if(newAdvFilterInfo){
+            //releaseType
+            firstStatus = true;
+            if(newAdvFilterInfo->tv)
+                AppendStatusStr(statusStr, releaseType + "= 1 ", firstStatus);
+            if(newAdvFilterInfo->ova)
+                AppendStatusStr(statusStr, releaseType + "= 2 ", firstStatus);
+            if(newAdvFilterInfo->ona)
+                AppendStatusStr(statusStr, releaseType + "= 3 ", firstStatus);
+            if(newAdvFilterInfo->movie)
+                AppendStatusStr(statusStr, releaseType + "= 4 ", firstStatus);
+            if(newAdvFilterInfo->tvSpecial)
+                AppendStatusStr(statusStr, releaseType + "= 5 ", firstStatus);
+            if(newAdvFilterInfo->releaseBlank)
+                AppendStatusStr(statusStr, releaseType + "= 0 ", firstStatus);
+            if(!firstStatus)
+                statusStr << " ) ";
+            else
+                showNothing = true;
+
+            firstStatus = true;
+            if(newAdvFilterInfo->winter)
+                AppendStatusStr(statusStr, season + "= 1 ", firstStatus);
+            if(newAdvFilterInfo->spring)
+                AppendStatusStr(statusStr, season + "= 2 ", firstStatus);
+            if(newAdvFilterInfo->summer)
+                AppendStatusStr(statusStr, season + "= 3 ", firstStatus);
+            if(newAdvFilterInfo->fall)
+                AppendStatusStr(statusStr, season + "= 4 ", firstStatus);
+            if(newAdvFilterInfo->seasonBlank)
+                AppendStatusStr(statusStr, season + "= 0 ", firstStatus);
+            if(!firstStatus)
+                statusStr << " ) ";
+            else
+                showNothing = true;
+
+            statusStr << "and (series.rating between " << newAdvFilterInfo->ratingLow << " and " << newAdvFilterInfo->ratingHigh <<
+                    ") and (series.year between " << newAdvFilterInfo->yearLow << " and " << newAdvFilterInfo->yearHigh <<
+                    ") and (series.episodesWatched between " << newAdvFilterInfo->epsWatchedLow << " and " << newAdvFilterInfo->epsWatchedHigh <<
+                    ") and (series.totalEpisodes between " << newAdvFilterInfo->totalEpsLow << " and " << newAdvFilterInfo->totalEpsHigh <<
+                    ") and (series.rewatchedEpisodes between " << newAdvFilterInfo->epsRewatchedLow << " and " << newAdvFilterInfo->epsRewatchedHigh <<
+                    ") and (series.episodeLength between " << newAdvFilterInfo->lengthLow << " and " << newAdvFilterInfo->lengthHigh <<
+                    ") and (series.dateStarted between '" << newAdvFilterInfo->yearStartedLow << "-" << newAdvFilterInfo->monthStartedLow <<
+                        "-" << newAdvFilterInfo->dayStartedLow << "' and '" << newAdvFilterInfo->yearStartedHigh << "-" <<
+                        newAdvFilterInfo->monthStartedHigh << "-" << newAdvFilterInfo->dayStartedHigh <<
+                    "') and (series.dateFinished between '" << newAdvFilterInfo->yearFinishedLow << "-" << newAdvFilterInfo->monthFinishedLow <<
+                        "-" << newAdvFilterInfo->dayFinishedLow << "' and '" << newAdvFilterInfo->yearFinishedHigh << "-" <<
+                        newAdvFilterInfo->monthFinishedHigh << "-" << newAdvFilterInfo->dayFinishedHigh << "') ";
+        }
+        debug = std::string(m_basicSelectString.utf8_str()) + " where Title like ? " +
+                (showNothing ? " and 1 <> 1 " : statusStr.str()) + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") +
+                " order by " + m_curOrderCol + " "+ m_curOrderDir;
+        auto statement = m_connection->PrepareStatement(debug);
         statement->Bind(1, "%" + newBasicFilterInfo->title + "%");
         auto results = statement->GetResults();
         ResetTable(results);
@@ -476,19 +538,20 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error applying filter.\n" + e.GetErrorMessage());
+        wxMessageBox(debug);
         m_top->Close(true);
     }
 }
 
-void DataPanel::AppendStatusStr(std::string& statusStr, std::string toAppend, bool& firstStatus)
+void DataPanel::AppendStatusStr(std::stringstream& statusStr, std::string toAppend, bool& firstStatus)
 {
     if(!firstStatus)
-        statusStr += " or ";
+        statusStr << " or ";
     else{
-        statusStr += " and ( ";
+        statusStr << " and ( ";
         firstStatus = false;
     }
-    statusStr += "WatchedStatus.idWatchedStatus" + toAppend;
+    statusStr << toAppend;
 }
 
 void DataPanel::ApplyFullGrid()

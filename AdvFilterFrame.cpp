@@ -3,6 +3,8 @@
 #include <wx/textctrl.h>
 #include <wx/button.h>
 #include "AdvFilterFrame.hpp"
+#include "DataPanel.hpp"
+#include "FilterStructs.hpp"
 #include "AppIDs.hpp"
 
 BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
@@ -15,6 +17,8 @@ BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
     EVT_CHECKBOX(ID_ADV_FILTER_SEASON_ALL, AdvFilterFrame::OnSeasonAllCheckBox)
     EVT_BUTTON(ID_ADV_FILTER_RESET, AdvFilterFrame::OnReset)
     EVT_BUTTON(ID_ADV_FILTER_CANCEL, AdvFilterFrame::OnCancel)
+    EVT_BUTTON(ID_ADV_FILTER_OK, AdvFilterFrame::OnOK)
+    EVT_BUTTON(ID_ADV_FILTER_APPLY, AdvFilterFrame::OnApply)
 END_EVENT_TABLE()
 
 AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -26,6 +30,7 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     ///
     ///
 
+    m_parent = static_cast<DataPanel*>(parent);
     m_mainPanel = new wxPanel(this, wxID_ANY);
 
     //
@@ -451,6 +456,17 @@ void AdvFilterFrame::OnCancel(wxCommandEvent& WXUNUSED(event))
     Close();
 }
 
+void AdvFilterFrame::OnOK(wxCommandEvent& WXUNUSED(event))
+{
+    ApplyFilter();
+    Close();
+}
+
+void AdvFilterFrame::OnApply(wxCommandEvent& WXUNUSED(event))
+{
+    ApplyFilter();
+}
+
 wxStaticText* AdvFilterFrame::getLabel(const wxString& text)
 {
     return new wxStaticText(m_mainPanel, wxID_ANY, text);
@@ -485,4 +501,59 @@ void AdvFilterFrame::EnableAllSeason()
     m_fallCheck->SetValue(true);
     m_seasonBlankCheck->SetValue(true);
     m_seasonAllCheck->Disable();
+}
+
+void AdvFilterFrame::ApplyFilter()
+{
+    auto basic = BasicFilterInfo::MakeShared();
+    auto adv = AdvFilterInfo::MakeShared();
+
+    basic->title = m_titleTextField->GetValue();
+    basic->watched = m_watchedCheck->GetValue();
+    basic->watching = m_watchingCheck->GetValue();
+    basic->stalled = m_stalledCheck->GetValue();
+    basic->dropped = m_droppedCheck->GetValue();
+    basic->watchedBlank = m_watchedStatusBlankCheck->GetValue();
+
+    adv->tv = m_tvCheck->GetValue();
+    adv->ova = m_ovaCheck->GetValue();
+    adv->ona = m_onaCheck->GetValue();
+    adv->movie = m_movieCheck->GetValue();
+    adv->tvSpecial = m_tvSpecialCheck->GetValue();
+    adv->releaseBlank = m_releaseTypeBlankCheck->GetValue();
+
+    adv->winter = m_winterCheck->GetValue();
+    adv->spring = m_springCheck->GetValue();
+    adv->summer = m_summerCheck->GetValue();
+    adv->fall = m_fallCheck->GetValue();
+    adv->seasonBlank = m_seasonBlankCheck->GetValue();
+
+    adv->ratingLow = m_ratingsSpinLow->GetValue();
+    adv->yearLow = m_yearSpinLow->GetValue();
+    adv->epsWatchedLow = m_epsWatchedSpinLow->GetValue();
+    adv->epsRewatchedLow = m_rewatchedSpinLow->GetValue();
+    adv->totalEpsLow = m_totalEpsSpinLow->GetValue();
+    adv->lengthLow = m_lengthSpinLow->GetValue();
+    adv->ratingHigh = m_ratingsSpinHigh->GetValue();
+    adv->yearHigh = m_yearSpinHigh->GetValue();
+    adv->epsWatchedHigh = m_epsWatchedSpinHigh->GetValue();
+    adv->epsRewatchedHigh = m_rewatchedSpinHigh->GetValue();
+    adv->totalEpsHigh = m_totalEpsSpinHigh->GetValue();
+    adv->lengthHigh = m_lengthSpinHigh->GetValue();
+
+    adv->yearStartedLow = m_startYearLow->GetValue();
+    adv->monthStartedLow = m_startMonthLow->GetValue();
+    adv->dayStartedLow = m_startDayLow->GetValue();
+    adv->yearStartedHigh = m_startYearHigh->GetValue();
+    adv->monthStartedHigh = m_startMonthHigh->GetValue();
+    adv->dayStartedHigh = m_startDayHigh->GetValue();
+
+    adv->yearFinishedLow = m_finishYearLow->GetValue();
+    adv->monthFinishedLow = m_finishMonthLow->GetValue();
+    adv->dayFinishedLow = m_finishDayLow->GetValue();
+    adv->yearFinishedHigh = m_finishYearHigh->GetValue();
+    adv->monthFinishedHigh = m_finishMonthHigh->GetValue();
+    adv->dayFinishedHigh = m_finishDayHigh->GetValue();
+
+    m_parent->NewFilter(basic, adv);
 }

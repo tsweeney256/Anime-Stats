@@ -6,6 +6,8 @@
 #include <wx/spinctrl.h>
 #include <wx/stattext.h>
 
+class DataPanel;
+
 class AdvFilterFrame : public wxFrame
 {
 public:
@@ -21,11 +23,14 @@ private:
     void OnSeasonAllCheckBox(wxCommandEvent& event);
     void OnReset(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
+    void OnOK(wxCommandEvent& event);
+    void OnApply(wxCommandEvent& event);
 
     wxStaticText* getLabel(const wxString& text);
     void EnableAllWatchedStatus();
     void EnableAllReleaseType();
     void EnableAllSeason();
+    void ApplyFilter();
 
     const int m_minNum    = 0;
     const int m_maxNum    = 999999;
@@ -36,6 +41,7 @@ private:
     const int m_minDay    = 1;
     const int m_maxDay    = 31;
 
+    DataPanel* m_parent;
     wxPanel* m_mainPanel;
 
     wxCheckBox* m_watchedCheck;

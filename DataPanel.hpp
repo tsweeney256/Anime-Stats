@@ -46,7 +46,7 @@ private:
     void OnAdvFilterFrameDestruction(wxWindowDestroyEvent& event);
 
     void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
-    void AppendStatusStr(std::string& statusStr, std::string toAppend, bool& firstStatus);
+    void AppendStatusStr(std::stringstream& statusStr, std::string toAppend, bool& firstStatus);
     void ApplyFullGrid();
     void AppendLastGridRow(bool whiteOutPrevious);
     void NewBasicFilter();
