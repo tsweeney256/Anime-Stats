@@ -22,6 +22,14 @@ private:
     void OnReleaseTypeAllCheckBox(wxCommandEvent& event);
     void OnSeasonCheckBox(wxCommandEvent& event);
     void OnSeasonAllCheckBox(wxCommandEvent& event);
+    void OnRatingEnableCheckBox(wxCommandEvent& event);
+    void OnYearEnableCheckBox(wxCommandEvent& event);
+    void OnEpsWatchedEnableCheckBox(wxCommandEvent& event);
+    void OnEpsRewatchedEnableCheckBox(wxCommandEvent& event);
+    void OnTotalEpsEnableCheckBox(wxCommandEvent& event);
+    void OnLengthEnableCheckBox(wxCommandEvent& event);
+    void OnDateStartedEnableCheckBox(wxCommandEvent& event);
+    void OnDateFinishedEnableCheckBox(wxCommandEvent& event);
     void OnReset(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnOK(wxCommandEvent& event);

@@ -15,6 +15,14 @@ BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
     EVT_CHECKBOX(ID_ADV_FILTER_RELEASE_TYPE_ALL, AdvFilterFrame::OnReleaseTypeAllCheckBox)
     EVT_CHECKBOX(ID_ADV_FILTER_SEASON, AdvFilterFrame::OnSeasonCheckBox)
     EVT_CHECKBOX(ID_ADV_FILTER_SEASON_ALL, AdvFilterFrame::OnSeasonAllCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_RATING_ENABLE, AdvFilterFrame::OnRatingEnableCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_YEAR_ENABLE, AdvFilterFrame::OnYearEnableCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_EPS_WATCHED_ENABLE, AdvFilterFrame::OnEpsWatchedEnableCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_EPS_REWATCHED_ENABLE, AdvFilterFrame::OnEpsRewatchedEnableCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_TOTAL_EPS_ENABLE, AdvFilterFrame::OnTotalEpsEnableCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_LENGTH_ENABLE, AdvFilterFrame::OnLengthEnableCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_DATE_STARTED_ENABLE, AdvFilterFrame::OnDateStartedEnableCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_DATE_FINISHED_ENABLE, AdvFilterFrame::OnDateFinishedEnableCheckBox)
     EVT_BUTTON(ID_ADV_FILTER_RESET, AdvFilterFrame::OnReset)
     EVT_BUTTON(ID_ADV_FILTER_CANCEL, AdvFilterFrame::OnCancel)
     EVT_BUTTON(ID_ADV_FILTER_OK, AdvFilterFrame::OnOK)
@@ -473,6 +481,62 @@ void AdvFilterFrame::OnSeasonCheckBox(wxCommandEvent& event)
 void AdvFilterFrame::OnSeasonAllCheckBox(wxCommandEvent& WXUNUSED(event))
 {
     EnableAllSeason();
+}
+
+void AdvFilterFrame::OnRatingEnableCheckBox(wxCommandEvent& event)
+{
+    m_ratingsSpinLow->Enable(event.GetInt());
+    m_ratingsSpinHigh->Enable(event.GetInt());
+}
+
+void AdvFilterFrame::OnYearEnableCheckBox(wxCommandEvent& event)
+{
+    m_yearSpinLow->Enable(event.GetInt());
+    m_yearSpinHigh->Enable(event.GetInt());
+}
+
+void AdvFilterFrame::OnEpsWatchedEnableCheckBox(wxCommandEvent& event)
+{
+    m_epsWatchedSpinLow->Enable(event.GetInt());
+    m_epsWatchedSpinHigh->Enable(event.GetInt());
+}
+
+void AdvFilterFrame::OnEpsRewatchedEnableCheckBox(wxCommandEvent& event)
+{
+    m_rewatchedSpinLow->Enable(event.GetInt());
+    m_rewatchedSpinHigh->Enable(event.GetInt());
+}
+
+void AdvFilterFrame::OnTotalEpsEnableCheckBox(wxCommandEvent& event)
+{
+    m_totalEpsSpinLow->Enable(event.GetInt());
+    m_totalEpsSpinHigh->Enable(event.GetInt());
+}
+
+void AdvFilterFrame::OnLengthEnableCheckBox(wxCommandEvent& event)
+{
+    m_lengthSpinLow->Enable(event.GetInt());
+    m_lengthSpinHigh->Enable(event.GetInt());
+}
+
+void AdvFilterFrame::OnDateStartedEnableCheckBox(wxCommandEvent& event)
+{
+    m_startYearLow->Enable(event.GetInt());
+    m_startMonthLow->Enable(event.GetInt());
+    m_startDayLow->Enable(event.GetInt());
+    m_startYearHigh->Enable(event.GetInt());
+    m_startMonthHigh->Enable(event.GetInt());
+    m_startDayHigh->Enable(event.GetInt());
+}
+
+void AdvFilterFrame::OnDateFinishedEnableCheckBox(wxCommandEvent& event)
+{
+    m_finishYearLow->Enable(event.GetInt());
+    m_finishMonthLow->Enable(event.GetInt());
+    m_finishDayLow->Enable(event.GetInt());
+    m_finishYearHigh->Enable(event.GetInt());
+    m_finishMonthHigh->Enable(event.GetInt());
+    m_finishDayHigh->Enable(event.GetInt());
 }
 
 void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
