@@ -655,6 +655,15 @@ void AdvFilterFrame::ApplyFilter()
     adv->fall = m_fallCheck->GetValue();
     adv->seasonBlank = m_seasonBlankCheck->GetValue();
 
+    adv->ratingEnabled = m_ratingsEnabled->GetValue();
+    adv->yearEnabled = m_yearEnabled->GetValue();
+    adv->epsWatchedEnabled = m_epsWatchedEnabled->GetValue();
+    adv->epsRewatchedEnabled = m_epsRewatchedEnabled->GetValue();
+    adv->totalEpsEnabled = m_totalEpsEnabled->GetValue();
+    adv->lengthEnabled = m_lengthEnabled->GetValue();
+    adv->dateStartedEnabled = m_dateStartedEnabled->GetValue();
+    adv->dateFinishedEnabled = m_dateFinishedEnabled->GetValue();
+
     adv->ratingLow = m_ratingsSpinLow->GetValue();
     adv->yearLow = m_yearSpinLow->GetValue();
     adv->epsWatchedLow = m_epsWatchedSpinLow->GetValue();

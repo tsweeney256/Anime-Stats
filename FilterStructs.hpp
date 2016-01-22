@@ -41,6 +41,15 @@ struct AdvFilterInfo
     bool fall = true;
     bool seasonBlank = true;
 
+    bool ratingEnabled = false;
+    bool yearEnabled = false;
+    bool epsWatchedEnabled = false;
+    bool epsRewatchedEnabled = false;
+    bool totalEpsEnabled = false;
+    bool lengthEnabled = false;
+    bool dateStartedEnabled = false;
+    bool dateFinishedEnabled = false;
+
     int ratingLow = 0;
     int ratingHigh = 0;
     int yearLow = 0;

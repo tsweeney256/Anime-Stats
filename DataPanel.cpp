@@ -1,4 +1,5 @@
 #include <sstream>
+#include <iomanip>
 #include <wx/checkbox.h>
 #include <wx/button.h>
 #include <wx/textctrl.h>
@@ -433,7 +434,6 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         std::shared_ptr<AdvFilterInfo> newAdvFilterInfo, std::vector<wxString>* changedRows)
 //don't ever free changedRows
 {
-    std::string debug;
     try{
         UpdateOldFilterData();
         m_basicFilterInfo = newBasicFilterInfo;
@@ -499,23 +499,58 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
             else
                 showNothing = true;
 
-            statusStr << "and (series.rating between " << newAdvFilterInfo->ratingLow << " and " << newAdvFilterInfo->ratingHigh <<
-                    ") and (series.year between " << newAdvFilterInfo->yearLow << " and " << newAdvFilterInfo->yearHigh <<
-                    ") and (series.episodesWatched between " << newAdvFilterInfo->epsWatchedLow << " and " << newAdvFilterInfo->epsWatchedHigh <<
-                    ") and (series.totalEpisodes between " << newAdvFilterInfo->totalEpsLow << " and " << newAdvFilterInfo->totalEpsHigh <<
-                    ") and (series.rewatchedEpisodes between " << newAdvFilterInfo->epsRewatchedLow << " and " << newAdvFilterInfo->epsRewatchedHigh <<
-                    ") and (series.episodeLength between " << newAdvFilterInfo->lengthLow << " and " << newAdvFilterInfo->lengthHigh <<
-                    ") and (series.dateStarted between '" << newAdvFilterInfo->yearStartedLow << "-" << newAdvFilterInfo->monthStartedLow <<
-                        "-" << newAdvFilterInfo->dayStartedLow << "' and '" << newAdvFilterInfo->yearStartedHigh << "-" <<
-                        newAdvFilterInfo->monthStartedHigh << "-" << newAdvFilterInfo->dayStartedHigh <<
-                    "') and (series.dateFinished between '" << newAdvFilterInfo->yearFinishedLow << "-" << newAdvFilterInfo->monthFinishedLow <<
-                        "-" << newAdvFilterInfo->dayFinishedLow << "' and '" << newAdvFilterInfo->yearFinishedHigh << "-" <<
-                        newAdvFilterInfo->monthFinishedHigh << "-" << newAdvFilterInfo->dayFinishedHigh << "') ";
+            if(newAdvFilterInfo->ratingEnabled)
+                statusStr << " and (series.rating between " << newAdvFilterInfo->ratingLow << " and " <<
+                    newAdvFilterInfo->ratingHigh << ") ";
+            if(newAdvFilterInfo->yearEnabled)
+                statusStr << " and (series.year between " << newAdvFilterInfo->yearLow << " and "
+                    << newAdvFilterInfo->yearHigh << ") ";
+            if(newAdvFilterInfo->epsWatchedEnabled)
+                statusStr << " and (series.episodesWatched between " << newAdvFilterInfo->epsWatchedLow <<
+                    " and " << newAdvFilterInfo->epsWatchedHigh <<") ";
+            if(newAdvFilterInfo->totalEpsEnabled)
+                statusStr << " and (series.totalEpisodes between " << newAdvFilterInfo->totalEpsLow <<
+                    " and " << newAdvFilterInfo->totalEpsHigh << ") ";
+            if(newAdvFilterInfo->epsRewatchedEnabled)
+                statusStr << " and (series.rewatchedEpisodes between " << newAdvFilterInfo->epsRewatchedLow <<
+                    " and " << newAdvFilterInfo->epsRewatchedHigh << ") ";
+            if(newAdvFilterInfo->lengthEnabled)
+                statusStr << " and (series.episodeLength between " << newAdvFilterInfo->lengthLow << " and " <<
+                    newAdvFilterInfo->lengthHigh << ") ";
+            if(newAdvFilterInfo->dateStartedEnabled){
+                statusStr << " and (series.dateStarted between date('";
+                statusStr << std::setfill('0') << std::setw(4) << newAdvFilterInfo->yearStartedLow;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->monthStartedLow;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->dayStartedLow;
+                statusStr << "') and date('";
+                statusStr << std::setfill('0') << std::setw(4) << newAdvFilterInfo->yearStartedHigh;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->monthStartedHigh;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->dayStartedHigh;
+                statusStr << "')) ";
+            }
+            if(newAdvFilterInfo->dateFinishedEnabled){
+                statusStr << " and (series.dateFinished between date('";
+                statusStr << std::setfill('0') << std::setw(4) << newAdvFilterInfo->yearFinishedLow;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->monthFinishedLow;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->dayFinishedLow;
+                statusStr << "') and date('";
+                statusStr << std::setfill('0') << std::setw(4) << newAdvFilterInfo->yearFinishedHigh;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->monthFinishedHigh;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->dayFinishedHigh;
+                statusStr << "')) ";
+            }
         }
-        debug = std::string(m_basicSelectString.utf8_str()) + " where Title like ? " +
+        auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) + " where Title like ? " +
                 (showNothing ? " and 1 <> 1 " : statusStr.str()) + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") +
-                " order by " + m_curOrderCol + " "+ m_curOrderDir;
-        auto statement = m_connection->PrepareStatement(debug);
+                " order by " + m_curOrderCol + " "+ m_curOrderDir);
         statement->Bind(1, "%" + newBasicFilterInfo->title + "%");
         auto results = statement->GetResults();
         ResetTable(results);
@@ -538,7 +573,6 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error applying filter.\n" + e.GetErrorMessage());
-        wxMessageBox(debug);
         m_top->Close(true);
     }
 }
