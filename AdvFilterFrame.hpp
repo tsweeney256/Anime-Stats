@@ -90,8 +90,8 @@ private:
     wxSpinCtrl* m_yearSpinHigh;
     wxSpinCtrl* m_epsWatchedSpinLow;
     wxSpinCtrl* m_epsWatchedSpinHigh;
-    wxSpinCtrl* m_rewatchedSpinLow;
-    wxSpinCtrl* m_rewatchedSpinHigh;
+    wxSpinCtrl* m_epsRewatchedSpinLow;
+    wxSpinCtrl* m_epsRewatchedSpinHigh;
     wxSpinCtrl* m_totalEpsSpinLow;
     wxSpinCtrl* m_totalEpsSpinHigh;
     wxSpinCtrl* m_lengthSpinLow;

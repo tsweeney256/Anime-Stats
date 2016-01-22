@@ -135,9 +135,9 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
             wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
     m_epsWatchedSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
             wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
-    m_rewatchedSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+    m_epsRewatchedSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
             wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
-    m_rewatchedSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+    m_epsRewatchedSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
             wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
     m_totalEpsSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
             wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
@@ -186,8 +186,8 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_yearSpinHigh->Disable();
     m_epsWatchedSpinLow->Disable();
     m_epsWatchedSpinHigh->Disable();
-    m_rewatchedSpinLow->Disable();
-    m_rewatchedSpinHigh->Disable();
+    m_epsRewatchedSpinLow->Disable();
+    m_epsRewatchedSpinHigh->Disable();
     m_totalEpsSpinLow->Disable();
     m_totalEpsSpinHigh->Disable();
     m_lengthSpinLow->Disable();
@@ -309,9 +309,9 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     epsWatchedBottomSizer->Add(m_epsWatchedSpinHigh, paddingFlag);
 
     rewatchedTopSizer->Add(m_epsRewatchedEnabled, paddingFlag);
-    rewatchedBottomSizer->Add(m_rewatchedSpinLow, paddingFlag);
+    rewatchedBottomSizer->Add(m_epsRewatchedSpinLow, paddingFlag);
     rewatchedBottomSizer->Add(getLabel(throughStr), paddingFlag);
-    rewatchedBottomSizer->Add(m_rewatchedSpinHigh, paddingFlag);
+    rewatchedBottomSizer->Add(m_epsRewatchedSpinHigh, paddingFlag);
 
     totalEpsTopSizer->Add(m_totalEpsEnabled, paddingFlag);
     totalEpsBottomSizer->Add(m_totalEpsSpinLow, paddingFlag);
@@ -503,8 +503,8 @@ void AdvFilterFrame::OnEpsWatchedEnableCheckBox(wxCommandEvent& event)
 
 void AdvFilterFrame::OnEpsRewatchedEnableCheckBox(wxCommandEvent& event)
 {
-    m_rewatchedSpinLow->Enable(event.GetInt());
-    m_rewatchedSpinHigh->Enable(event.GetInt());
+    m_epsRewatchedSpinLow->Enable(event.GetInt());
+    m_epsRewatchedSpinHigh->Enable(event.GetInt());
 }
 
 void AdvFilterFrame::OnTotalEpsEnableCheckBox(wxCommandEvent& event)
@@ -557,8 +557,8 @@ void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
     m_yearSpinHigh->SetValue(m_maxNum);
     m_epsWatchedSpinLow->SetValue(m_minNum);
     m_epsWatchedSpinHigh->SetValue(m_maxNum);
-    m_rewatchedSpinLow->SetValue(m_minNum);
-    m_rewatchedSpinHigh->SetValue(m_maxNum);
+    m_epsRewatchedSpinLow->SetValue(m_minNum);
+    m_epsRewatchedSpinHigh->SetValue(m_maxNum);
     m_totalEpsSpinLow->SetValue(m_minNum);
     m_totalEpsSpinHigh->SetValue(m_maxNum);
     m_lengthSpinLow->SetValue(m_minNum);
@@ -667,13 +667,13 @@ void AdvFilterFrame::ApplyFilter()
     adv->ratingLow = m_ratingsSpinLow->GetValue();
     adv->yearLow = m_yearSpinLow->GetValue();
     adv->epsWatchedLow = m_epsWatchedSpinLow->GetValue();
-    adv->epsRewatchedLow = m_rewatchedSpinLow->GetValue();
+    adv->epsRewatchedLow = m_epsRewatchedSpinLow->GetValue();
     adv->totalEpsLow = m_totalEpsSpinLow->GetValue();
     adv->lengthLow = m_lengthSpinLow->GetValue();
     adv->ratingHigh = m_ratingsSpinHigh->GetValue();
     adv->yearHigh = m_yearSpinHigh->GetValue();
     adv->epsWatchedHigh = m_epsWatchedSpinHigh->GetValue();
-    adv->epsRewatchedHigh = m_rewatchedSpinHigh->GetValue();
+    adv->epsRewatchedHigh = m_epsRewatchedSpinHigh->GetValue();
     adv->totalEpsHigh = m_totalEpsSpinHigh->GetValue();
     adv->lengthHigh = m_lengthSpinHigh->GetValue();
 
