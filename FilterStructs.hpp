@@ -33,7 +33,7 @@ struct AdvFilterInfo
     bool ova = true;
     bool ona = true;
     bool tvSpecial = true;
-    bool releaseblank = true;
+    bool releaseBlank = true;
 
     bool winter = true;
     bool spring = true;
