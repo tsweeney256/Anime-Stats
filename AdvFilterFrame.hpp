@@ -66,6 +66,15 @@ private:
 
     wxTextCtrl* m_titleTextField;
 
+    wxCheckBox* m_ratingsEnabled;
+    wxCheckBox* m_yearEnabled;
+    wxCheckBox* m_epsWatchedEnabled;
+    wxCheckBox* m_epsRewatchedEnabled;
+    wxCheckBox* m_totalEpsEnabled;
+    wxCheckBox* m_lengthEnabled;
+    wxCheckBox* m_dateStartedEnabled;
+    wxCheckBox* m_dateFinishedEnabled;
+
     wxSpinCtrl* m_ratingsSpinLow;
     wxSpinCtrl* m_ratingsSpinHigh;
     wxSpinCtrl* m_yearSpinLow;

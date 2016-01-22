@@ -57,6 +57,15 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_seasonBlankCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_SEASON, _("Blank"));
     m_seasonAllCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_SEASON_ALL, _("Enable All"));
 
+    m_ratingsEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RATING_ENABLE, _("Enable"));
+    m_yearEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_YEAR_ENABLE, _("Enable"));;
+    m_epsWatchedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_EPS_WATCHED_ENABLE, _("Enable"));;
+    m_epsRewatchedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_EPS_REWATCHED_ENABLE, _("Enable"));;
+    m_totalEpsEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_TOTAL_EPS_ENABLE, _("Enable"));;
+    m_lengthEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_LENGTH_ENABLE, _("Enable"));;
+    m_dateStartedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_DATE_STARTED_ENABLE, _("Enable"));;
+    m_dateFinishedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_DATE_FINISHED_ENABLE, _("Enable"));;
+
     m_watchedCheck->SetValue(true);
     m_watchingCheck->SetValue(true);
     m_stalledCheck->SetValue(true);
@@ -161,6 +170,32 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_finishDayHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
             wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_maxDay);
 
+    //all spin controls are disable until explicitly enabled by the user
+    m_ratingsSpinLow->Disable();
+    m_ratingsSpinHigh->Disable();
+    m_yearSpinLow->Disable();
+    m_yearSpinHigh->Disable();
+    m_epsWatchedSpinLow->Disable();
+    m_epsWatchedSpinHigh->Disable();
+    m_rewatchedSpinLow->Disable();
+    m_rewatchedSpinHigh->Disable();
+    m_totalEpsSpinLow->Disable();
+    m_totalEpsSpinHigh->Disable();
+    m_lengthSpinLow->Disable();
+    m_lengthSpinHigh->Disable();
+    m_startYearLow->Disable();
+    m_startMonthLow->Disable();
+    m_startDayLow->Disable();
+    m_startYearHigh->Disable();
+    m_startMonthHigh->Disable();
+    m_startDayHigh->Disable();
+    m_finishYearLow->Disable();
+    m_finishMonthLow->Disable();
+    m_finishDayLow->Disable();
+    m_finishYearHigh->Disable();
+    m_finishMonthHigh->Disable();
+    m_finishDayHigh->Disable();
+
     //
     //buttons
     //
@@ -194,30 +229,38 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     auto releaseTypeSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Release Type"));
     auto seasonSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Season"));
     auto textFieldSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Title"));
-    auto ratingsSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Rating"));
-    auto yearSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Year Released"));
-    auto epsWatchedSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Episodes Watched"));
-    auto rewatchedSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Episodes Rewatched"));
-    auto totalEpsSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Total Episodes"));
-    auto lengthSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Episode Length"));
+    auto ratingsSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Rating"));
+    auto yearSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Year Released"));
+    auto epsWatchedSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Episodes Watched"));
+    auto rewatchedSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Episodes Rewatched"));
+    auto totalEpsSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Total Episodes"));
+    auto lengthSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Episode Length"));
     auto dateStartedSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Date Started (YYYY-MM-DD)"));
     auto dateFinishedSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Date Finished (YYYY-MM-DD)"));
 
     auto watchedStatusSizer = new wxGridSizer(3, 5, 5);
     auto releaseTypeSizer = new wxGridSizer(3, 5, 5);
     auto seasonSizer = new wxGridSizer(3, 5, 5);
-    auto ratingsSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto yearSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto epsWatchedSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto rewatchedSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto totalEpsSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto lengthSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto ratingsBottomSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto yearBottomSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto epsWatchedBottomSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto rewatchedBottomSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto totalEpsBottomSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto lengthBottomSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto ratingsTopSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto yearTopSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto epsWatchedTopSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto rewatchedTopSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto totalEpsTopSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto lengthTopSizer = new wxBoxSizer(wxHORIZONTAL);
     auto dateStartedLowSizer = new wxBoxSizer(wxHORIZONTAL);
     auto dateStartedMidSizer = new wxBoxSizer(wxHORIZONTAL);
     auto dateStartedHighSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto dateStartedTopSizer = new wxBoxSizer(wxHORIZONTAL);
     auto dateFinishedLowSizer = new wxBoxSizer(wxHORIZONTAL);
     auto dateFinishedMidSizer = new wxBoxSizer(wxHORIZONTAL);
     auto dateFinishedHighSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto dateFinishedTopSizer = new wxBoxSizer(wxHORIZONTAL);
 
     watchedStatusSizer->Add(m_watchedCheck, paddingFlag);
     watchedStatusSizer->Add(m_stalledCheck, paddingFlag);
@@ -241,29 +284,35 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     seasonSizer->Add(m_fallCheck, paddingFlag);
     seasonSizer->Add(m_seasonAllCheck, paddingFlag);
 
-    ratingsSizer->Add(m_ratingsSpinLow, paddingFlag);
-    ratingsSizer->Add(getLabel(throughStr), paddingFlag);
-    ratingsSizer->Add(m_ratingsSpinHigh, paddingFlag);
+    ratingsTopSizer->Add(m_ratingsEnabled, paddingFlag);
+    ratingsBottomSizer->Add(m_ratingsSpinLow, paddingFlag);
+    ratingsBottomSizer->Add(getLabel(throughStr), paddingFlag);
+    ratingsBottomSizer->Add(m_ratingsSpinHigh, paddingFlag);
 
-    yearSizer->Add(m_yearSpinLow, paddingFlag);
-    yearSizer->Add(getLabel(throughStr), paddingFlag);
-    yearSizer->Add(m_yearSpinHigh, paddingFlag);
+    yearTopSizer->Add(m_yearEnabled, paddingFlag);
+    yearBottomSizer->Add(m_yearSpinLow, paddingFlag);
+    yearBottomSizer->Add(getLabel(throughStr), paddingFlag);
+    yearBottomSizer->Add(m_yearSpinHigh, paddingFlag);
 
-    epsWatchedSizer->Add(m_epsWatchedSpinLow, paddingFlag);
-    epsWatchedSizer->Add(getLabel(throughStr), paddingFlag);
-    epsWatchedSizer->Add(m_epsWatchedSpinHigh, paddingFlag);
+    epsWatchedTopSizer->Add(m_epsWatchedEnabled, paddingFlag);
+    epsWatchedBottomSizer->Add(m_epsWatchedSpinLow, paddingFlag);
+    epsWatchedBottomSizer->Add(getLabel(throughStr), paddingFlag);
+    epsWatchedBottomSizer->Add(m_epsWatchedSpinHigh, paddingFlag);
 
-    rewatchedSizer->Add(m_rewatchedSpinLow, paddingFlag);
-    rewatchedSizer->Add(getLabel(throughStr), paddingFlag);
-    rewatchedSizer->Add(m_rewatchedSpinHigh, paddingFlag);
+    rewatchedTopSizer->Add(m_epsRewatchedEnabled, paddingFlag);
+    rewatchedBottomSizer->Add(m_rewatchedSpinLow, paddingFlag);
+    rewatchedBottomSizer->Add(getLabel(throughStr), paddingFlag);
+    rewatchedBottomSizer->Add(m_rewatchedSpinHigh, paddingFlag);
 
-    totalEpsSizer->Add(m_totalEpsSpinLow, paddingFlag);
-    totalEpsSizer->Add(getLabel(throughStr), paddingFlag);
-    totalEpsSizer->Add(m_totalEpsSpinHigh, paddingFlag);
+    totalEpsTopSizer->Add(m_totalEpsEnabled, paddingFlag);
+    totalEpsBottomSizer->Add(m_totalEpsSpinLow, paddingFlag);
+    totalEpsBottomSizer->Add(getLabel(throughStr), paddingFlag);
+    totalEpsBottomSizer->Add(m_totalEpsSpinHigh, paddingFlag);
 
-    lengthSizer->Add(m_lengthSpinLow, paddingFlag);
-    lengthSizer->Add(getLabel(throughStr), paddingFlag);
-    lengthSizer->Add(m_lengthSpinHigh, paddingFlag);
+    lengthTopSizer->Add(m_lengthEnabled, paddingFlag);
+    lengthBottomSizer->Add(m_lengthSpinLow, paddingFlag);
+    lengthBottomSizer->Add(getLabel(throughStr), paddingFlag);
+    lengthBottomSizer->Add(m_lengthSpinHigh, paddingFlag);
 
     dateStartedLowSizer->Add(m_startYearLow, paddingFlag);
     dateStartedLowSizer->Add(getLabel(hyphenStr), paddingFlag);
@@ -276,6 +325,7 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     dateStartedHighSizer->Add(m_startMonthHigh, paddingFlag);
     dateStartedHighSizer->Add(getLabel(hyphenStr), paddingFlag);
     dateStartedHighSizer->Add(m_startDayHigh, paddingFlag);
+    dateStartedTopSizer->Add(m_dateStartedEnabled, paddingFlag);
 
     dateFinishedLowSizer->Add(m_finishYearLow, paddingFlag);
     dateFinishedLowSizer->Add(getLabel(hyphenStr), paddingFlag);
@@ -288,36 +338,47 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     dateFinishedHighSizer->Add(m_finishMonthHigh, paddingFlag);
     dateFinishedHighSizer->Add(getLabel(hyphenStr), paddingFlag);
     dateFinishedHighSizer->Add(m_finishDayHigh, paddingFlag);
+    dateFinishedTopSizer->Add(m_dateFinishedEnabled, paddingFlag);
 
     watchedStatusSizerOutline->Add(watchedStatusSizer, paddingFlag);
     releaseTypeSizerOutline->Add(releaseTypeSizer, paddingFlag);
     seasonSizerOutline->Add(seasonSizer, paddingFlag);
     textFieldSizerOutline->Add(m_titleTextField, wxSizerFlags(1).Border(wxALL).Expand());
-    ratingsSizerOutline->Add(ratingsSizer, paddingFlag);
-    yearSizerOutline->Add(yearSizer, paddingFlag);
-    epsWatchedSizerOutline->Add(epsWatchedSizer, paddingFlag);
-    rewatchedSizerOutline->Add(rewatchedSizer, paddingFlag);
-    totalEpsSizerOutline->Add(totalEpsSizer, paddingFlag);
-    lengthSizerOutline->Add(lengthSizer, paddingFlag);
+
+    ratingsSizerOutline->Add(ratingsTopSizer, paddingFlag);
+    yearSizerOutline->Add(yearTopSizer, paddingFlag);
+    epsWatchedSizerOutline->Add(epsWatchedTopSizer, paddingFlag);
+    rewatchedSizerOutline->Add(rewatchedTopSizer, paddingFlag);
+    totalEpsSizerOutline->Add(totalEpsTopSizer, paddingFlag);
+    lengthSizerOutline->Add(lengthTopSizer, paddingFlag);
+    ratingsSizerOutline->Add(ratingsBottomSizer, paddingFlag);
+    yearSizerOutline->Add(yearBottomSizer, paddingFlag);
+    epsWatchedSizerOutline->Add(epsWatchedBottomSizer, paddingFlag);
+    rewatchedSizerOutline->Add(rewatchedBottomSizer, paddingFlag);
+    totalEpsSizerOutline->Add(totalEpsBottomSizer, paddingFlag);
+    lengthSizerOutline->Add(lengthBottomSizer, paddingFlag);
+
+    dateStartedSizerOutline->Add(dateStartedTopSizer, paddingFlag);
     dateStartedSizerOutline->Add(dateStartedLowSizer, paddingFlag);
     dateStartedSizerOutline->Add(dateStartedMidSizer, paddingCenterFlag);
     dateStartedSizerOutline->Add(dateStartedHighSizer, paddingFlag);
+    dateFinishedSizerOutline->Add(dateFinishedTopSizer, paddingFlag);
     dateFinishedSizerOutline->Add(dateFinishedLowSizer, paddingFlag);
     dateFinishedSizerOutline->Add(dateFinishedMidSizer, paddingCenterFlag);
     dateFinishedSizerOutline->Add(dateFinishedHighSizer, paddingFlag);
 
+    leftSizer->Add(textFieldSizerOutline, expandFlag);
     leftSizer->Add(watchedStatusSizerOutline, expandFlag);
     leftSizer->Add(releaseTypeSizerOutline, expandFlag);
     leftSizer->Add(seasonSizerOutline, expandFlag);
-    leftSizer->Add(textFieldSizerOutline, expandFlag);
+    leftSizer->Add(ratingsSizerOutline, expandFlag);
 
-    midSizer->Add(ratingsSizerOutline, expandFlag);
     midSizer->Add(yearSizerOutline, expandFlag);
     midSizer->Add(epsWatchedSizerOutline, expandFlag);
     midSizer->Add(rewatchedSizerOutline, expandFlag);
     midSizer->Add(totalEpsSizerOutline, expandFlag);
-    midSizer->Add(lengthSizerOutline, expandFlag);
 
+    rightSizer->Add(lengthSizerOutline, expandFlag);
     rightSizer->Add(dateStartedSizerOutline, expandFlag);
     rightSizer->Add(dateFinishedSizerOutline, expandFlag);
 
