@@ -433,6 +433,10 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
 //don't ever free changedRows
 {
     try{
+        UpdateOldFilterData();
+        m_basicFilterInfo = newBasicFilterInfo;
+        m_advFilterInfo = newAdvFilterInfo;
+
         //setting up the where part of the sql statement to filter by watched statuses
         bool firstStatus = true;
         std::string statusStr;
@@ -468,7 +472,6 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
             m_allCheck->Enable();
         }
         m_titleFilterTextField->SetValue(newBasicFilterInfo->title);
-        UpdateOldFilterData();
         m_panelSizer->Layout();
     }
     catch(cppw::Sqlite3Exception& e){
