@@ -134,6 +134,11 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	m_panelSizer->Add(topControlBarSizer, wxSizerFlags(0).Border(wxALL, 2));
 	m_panelSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
 	SetSizerAndFit(m_panelSizer);
+
+	//
+	//Misc initializations
+	//
+	m_oldBasicFilterInfo = BasicFilterInfo::MakeShared(); //already initialized how we want it
 }
 
 bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
@@ -198,12 +203,12 @@ void DataPanel::OnEnableAllCheckbox(wxCommandEvent& WXUNUSED(event))
 
 void DataPanel::OnTextEnter(wxCommandEvent& WXUNUSED(event))
 {
-    NewFilter();
+    NewBasicFilter();
 }
 
 void DataPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
 {
-    NewFilter();
+    NewBasicFilter();
 }
 
 void DataPanel::OnResetFilter(wxCommandEvent& WXUNUSED(event))
@@ -215,10 +220,10 @@ void DataPanel::OnResetFilter(wxCommandEvent& WXUNUSED(event))
     m_blankCheck->SetValue(true);
     m_allCheck->Disable();
     m_titleFilterTextField->SetValue("");
-    NewFilter();
+    NewBasicFilter();
 }
 
-void DataPanel::OnAdvFilter(wxCommandEvent& event)
+void DataPanel::OnAdvFilter(wxCommandEvent& WXUNUSED(event))
 {
     //non-modal
     auto frame = new AdvFilterFrame(this, "Advanced Filtering", wxDefaultPosition, wxDefaultSize);
@@ -264,7 +269,7 @@ void DataPanel::OnGridColSort(wxGridEvent& event)
         m_curSortAsc = true;
     }
     m_curColSort = event.GetCol();
-    ApplyFilterEasy();
+    ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
 }
 
 void DataPanel::OnGridCellChanging(wxGridEvent& event)
@@ -423,37 +428,38 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
     m_grid->AutoSize();
 }
 
-void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool watching, bool stalled,
-        bool dropped, bool blank, std::vector<wxString>* changedRows)
+void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
+        std::shared_ptr<AdvFilterInfo> newAdvFilterInfo, std::vector<wxString>* changedRows)
 //don't ever free changedRows
 {
     try{
         //setting up the where part of the sql statement to filter by watched statuses
         bool firstStatus = true;
         std::string statusStr;
-        if(watched)
+        if(newBasicFilterInfo->watched)
             AppendStatusStr(statusStr, "= 1 ", firstStatus);
-        if(watching)
+        if(newBasicFilterInfo->watching)
             AppendStatusStr(statusStr, "= 2 ", firstStatus);
-        if(stalled)
+        if(newBasicFilterInfo->stalled)
             AppendStatusStr(statusStr, "= 3 ", firstStatus);
-        if(dropped)
+        if(newBasicFilterInfo->dropped)
             AppendStatusStr(statusStr, "= 4 ", firstStatus);
-        if(blank)
+        if(newBasicFilterInfo->watchedBlank)
             AppendStatusStr(statusStr, "= 0 ", firstStatus);
         if(!firstStatus)
             statusStr += " ) ";
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) + " where Title like ? " +
                 statusStr + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") + " order by " + m_curOrderCol + " "+ m_curOrderDir);
-        statement->Bind(1, "%" + filterStr + "%");
+        statement->Bind(1, "%" + newBasicFilterInfo->title + "%");
         auto results = statement->GetResults();
         ResetTable(results);
-        m_watchedCheck->SetValue(watched);
-        m_watchingCheck->SetValue(watching);
-        m_stalledCheck->SetValue(stalled);
-        m_droppedCheck->SetValue(dropped);
-        m_blankCheck->SetValue(blank);
-        if(watched && watching && stalled && dropped && blank){
+        m_watchedCheck->SetValue(newBasicFilterInfo->watched);
+        m_watchingCheck->SetValue(newBasicFilterInfo->watching);
+        m_stalledCheck->SetValue(newBasicFilterInfo->stalled);
+        m_droppedCheck->SetValue(newBasicFilterInfo->dropped);
+        m_blankCheck->SetValue(newBasicFilterInfo->watchedBlank);
+        if(newBasicFilterInfo->watched && newBasicFilterInfo->watching && newBasicFilterInfo->stalled &&
+                newBasicFilterInfo->dropped && newBasicFilterInfo->watchedBlank){
             m_allCheck->SetValue(true);
             m_allCheck->Disable();
         }
@@ -461,7 +467,7 @@ void DataPanel::ApplyFilter(const std::string& filterStr, bool watched, bool wat
             m_allCheck->SetValue(false);
             m_allCheck->Enable();
         }
-        m_titleFilterTextField->SetValue(filterStr);
+        m_titleFilterTextField->SetValue(newBasicFilterInfo->title);
         UpdateOldFilterData();
         m_panelSizer->Layout();
     }
@@ -516,26 +522,28 @@ void DataPanel::AppendLastGridRow(bool whiteOutPrevious)
     }
 }
 
-void DataPanel::ApplyFilterEasy()
+void DataPanel::NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
+        std::shared_ptr<AdvFilterInfo> newAdvFilterInfo)
 {
-    ApplyFilter(std::string(m_titleFilterTextField->GetValue().utf8_str()),
-            m_watchedCheck->GetValue(),
-            m_watchingCheck->GetValue(),
-            m_stalledCheck->GetValue(),
-            m_droppedCheck->GetValue(),
-            m_blankCheck->GetValue(),
-            m_changedRows.get());
-}
-
-void DataPanel::NewFilter()
-{
-    std::string newFilterStr = std::string(m_titleFilterTextField->GetValue().utf8_str());
-    m_commands.push_back(std::make_unique<FilterCommand>(this, newFilterStr, m_oldFilterStr, m_watchedCheck->GetValue(),
-            m_watchingCheck->GetValue(), m_stalledCheck->GetValue(), m_droppedCheck->GetValue(), m_blankCheck->GetValue(),
-            m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, m_changedRows));
+    m_basicFilterInfo = newBasicFilterInfo;
+    m_advFilterInfo = newAdvFilterInfo;
+    m_commands.push_back(std::make_unique<FilterCommand>(this, m_basicFilterInfo, m_oldBasicFilterInfo,
+            m_advFilterInfo, m_oldAdvFilterInfo, m_changedRows));
     UpdateOldFilterData();
     ++m_commandLevel;
     HandleCommandChecking();
+}
+
+void DataPanel::NewBasicFilter()
+{
+    m_basicFilterInfo = BasicFilterInfo::MakeShared();
+    m_basicFilterInfo->title = std::string(m_titleFilterTextField->GetValue().utf8_str());
+    m_basicFilterInfo->watched = m_watchedCheck->GetValue();
+    m_basicFilterInfo->watching = m_watchingCheck->GetValue();
+    m_basicFilterInfo->stalled = m_stalledCheck->GetValue();
+    m_basicFilterInfo->dropped = m_droppedCheck->GetValue();
+    m_basicFilterInfo->watchedBlank = m_blankCheck->GetValue();
+    NewFilter(m_basicFilterInfo, nullptr);
 }
 
 void DataPanel::HandleCommandChecking()
@@ -624,13 +632,8 @@ void DataPanel::HandleUndoRedoColorChange()
 
 void DataPanel::UpdateOldFilterData()
 {
-    m_oldFilterStr = std::string(m_titleFilterTextField->GetValue().utf8_str());
-    m_oldWatched = m_watchedCheck->GetValue();
-    m_oldWatching = m_watchingCheck->GetValue();
-    m_oldStalled = m_stalledCheck->GetValue();
-    m_oldDropped = m_droppedCheck->GetValue();
-    m_oldBlank = m_blankCheck->GetValue();
-
+    m_oldBasicFilterInfo = m_basicFilterInfo;
+    m_oldAdvFilterInfo = m_advFilterInfo;
 }
 
 std::string DataPanel::GetAddedRowsSqlStr(std::vector<wxString>* changedRows)

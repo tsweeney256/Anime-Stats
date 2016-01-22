@@ -375,26 +375,24 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
     }
 }
 
-//truly, truly obnoxious
-FilterCommand::FilterCommand(DataPanel* dataPanel, std::string newFilterStr, std::string oldFilterStr, bool newWatched, bool newWatching,
-        bool newStalled, bool newDropped, bool newBlank, bool oldWatched, bool oldWatching, bool oldStalled, bool oldDropped, bool oldBlank,
-        std::shared_ptr<std::vector<wxString>> addedRowIDs)
-    : SqlGridCommand(nullptr, nullptr), m_dataPanel(dataPanel), m_newFilterStr(newFilterStr), m_oldFilterStr(oldFilterStr),
-      m_newWatched(newWatched), m_newWatching(newWatching), m_newStalled(newStalled), m_newDropped(newDropped), m_newBlank(newBlank),
-      m_oldWatched(oldWatched), m_oldWatching(oldWatching), m_oldStalled(oldStalled), m_oldDropped(oldDropped), m_oldBlank(oldBlank),
-      m_addedRowIDs(addedRowIDs)
+FilterCommand::FilterCommand(DataPanel* dataPanel, std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
+        std::shared_ptr<BasicFilterInfo> oldBasicFilterInfo, std::shared_ptr<AdvFilterInfo> newAdvFilterInfo,
+        std::shared_ptr<AdvFilterInfo> oldAdvFilterInfo, std::shared_ptr<std::vector<wxString>> addedRowIDs)
+    : SqlGridCommand(nullptr, nullptr), m_dataPanel(dataPanel), m_newBasicFilterInfo(newBasicFilterInfo),
+      m_oldBasicFilterInfo(oldBasicFilterInfo), m_newAdvFilterInfo(newAdvFilterInfo),
+      m_oldAdvFilterInfo(oldAdvFilterInfo), m_addedRowIDs(addedRowIDs)
 {
     Execute();
 }
 
 void FilterCommand::Execute()
 {
-    m_dataPanel->ApplyFilter(m_newFilterStr, m_newWatched, m_newWatching, m_newStalled, m_newDropped, m_newBlank);
+    m_dataPanel->ApplyFilter(m_newBasicFilterInfo, m_newAdvFilterInfo);
     m_dataPanel->SetAddedFilterRows(std::make_shared<std::vector<wxString>>());
 }
 
 void FilterCommand::UnExecute()
 {
-    m_dataPanel->ApplyFilter(m_oldFilterStr, m_oldWatched, m_oldWatching, m_oldStalled, m_oldDropped, m_oldBlank, m_addedRowIDs.get());
+    m_dataPanel->ApplyFilter(m_oldBasicFilterInfo, m_oldAdvFilterInfo, m_addedRowIDs.get());
     m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
 }

@@ -10,6 +10,7 @@
 #include "cppw/Sqlite3.hpp"
 #include "AppIDs.hpp"
 #include "SqlGridCommand.hpp"
+#include "FilterStructs.hpp"
 
 namespace cppw { class Sqlite3Connection; }
 
@@ -24,9 +25,11 @@ public:
     void SetUnsavedChanges(bool);
     void Undo();
     void Redo();
-    void ApplyFilter(const std::string& filterStr, bool Watched, bool Watching, bool Stalled,
-            bool Dropped, bool Blank, std::vector<wxString>* changedRows = nullptr);
+    void ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
+            std::shared_ptr<AdvFilterInfo> newAdvFilterInfo, std::vector<wxString>* changedRows = nullptr);
     void SetAddedFilterRows(std::shared_ptr<std::vector<wxString>> changedRows);
+    void NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
+                std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);
@@ -46,8 +49,7 @@ private:
     void AppendStatusStr(std::string& statusStr, std::string toAppend, bool& firstStatus);
     void ApplyFullGrid();
     void AppendLastGridRow(bool whiteOutPrevious);
-    void ApplyFilterEasy();
-    void NewFilter();
+    void NewBasicFilter();
     void HandleCommandChecking();
     void BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr);
     void SetRatingColor(int row, const char* valStr);
@@ -86,8 +88,10 @@ private:
     int m_curColSort = col::TITLE;
     bool m_curSortAsc = true;
     bool m_unsavedChanges = false;
-    std::string m_oldFilterStr;
-    bool m_oldWatched = true, m_oldWatching = true, m_oldStalled = true, m_oldDropped = true, m_oldBlank = true;
+    std::shared_ptr<BasicFilterInfo> m_basicFilterInfo;
+    std::shared_ptr<AdvFilterInfo> m_advFilterInfo;
+    std::shared_ptr<BasicFilterInfo> m_oldBasicFilterInfo;
+    std::shared_ptr<AdvFilterInfo> m_oldAdvFilterInfo;
     bool m_ratingColorEnabled = true, m_watchedStatusColorEnabled = true;
     int m_ratingColor[3][3] {{248, 105, 107}, {255, 235, 132}, {99, 190, 123}};
     //the hex is bgr instead of rgb because wxwidgets implemented it backwards
