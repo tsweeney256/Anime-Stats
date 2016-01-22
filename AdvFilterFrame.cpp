@@ -22,7 +22,7 @@ BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
 END_EVENT_TABLE()
 
 AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size)
-    : wxFrame(parent, ID_ADV_FILTER_FRAME, title, pos, size, wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
+    : wxFrame(parent, ID_ADV_FILTER_FRAME, title, pos, size, wxDEFAULT_FRAME_STYLE & ~(/*wxRESIZE_BORDER |*/ wxMAXIMIZE_BOX))
 {
     ///
     ///
@@ -31,7 +31,8 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     ///
 
     m_parent = static_cast<DataPanel*>(parent);
-    m_mainPanel = new wxPanel(this, wxID_ANY);
+    m_mainPanel = new wxScrolledWindow(this, wxID_ANY);
+    m_mainPanel->SetScrollRate(10, 10);
 
     //
     //checkboxes
@@ -396,6 +397,7 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
 
     m_mainPanel->SetSizerAndFit(mainSizer);
     this->Fit();
+    this->SetMaxSize(this->GetSize());
 }
 
 void AdvFilterFrame::OnClose(wxCloseEvent& WXUNUSED(event))

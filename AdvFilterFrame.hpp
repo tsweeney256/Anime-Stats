@@ -2,6 +2,7 @@
 #define ADVFILTERFRAME_HPP
 
 #include <wx/frame.h>
+#include <wx/scrolwin.h>
 #include <wx/checkbox.h>
 #include <wx/spinctrl.h>
 #include <wx/stattext.h>
@@ -42,7 +43,7 @@ private:
     const int m_maxDay    = 31;
 
     DataPanel* m_parent;
-    wxPanel* m_mainPanel;
+    wxScrolledWindow* m_mainPanel;
 
     wxCheckBox* m_watchedCheck;
     wxCheckBox* m_watchingCheck;
