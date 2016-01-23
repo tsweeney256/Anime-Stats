@@ -386,46 +386,46 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
     wxGridUpdateLocker lock(m_grid);
     if(m_grid->GetNumberRows() > 0)
         m_grid->DeleteRows(0, m_grid->GetNumberRows());
-    if(results->NextRow()){
-        int rowPos = 0;
-        wxASSERT_MSG(results->GetColumnCount() == numViewCols, "Basic Select Results have wrong number of columns.");
+    wxASSERT_MSG(results->GetColumnCount() == numViewCols, "Basic Select Results have wrong number of columns.");
+    if(!m_colsCreated){
+        m_colsCreated = true;
+        m_grid->AppendCols(numViewCols);
+        auto watchedAttr = new wxGridCellAttr();
+        auto releasedAttr = new wxGridCellAttr();
+        auto seasonAttr = new wxGridCellAttr();
+        auto intAttr = new wxGridCellAttr();
+        auto dateAttr = new wxGridCellAttr();
+        watchedAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedWatchedVals.size(), &m_allowedWatchedVals[0]));
+        releasedAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedReleaseVals.size(), &m_allowedReleaseVals[0]));
+        seasonAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedSeasonVals.size(), &m_allowedSeasonVals[0]));
+        //don't want to use wxGridCellNumericEditor because it doesn't allow nulls
+        auto intEditor = new wxGridCellTextEditor(6); //only allow 6 length as an easy way to prevent integer overflows
+        wxTextValidator intValidator(wxFILTER_INCLUDE_CHAR_LIST);
+        intValidator.SetCharIncludes("0123456789");
+        intEditor->SetValidator(intValidator);
+        intAttr->SetEditor(intEditor);
+        dateAttr->SetEditor(new GridCellDateEditor());
+        m_grid->SetColAttr(col::RATING, intAttr);
+        m_grid->SetColAttr(col::WATCHED_STATUS, watchedAttr);
+        m_grid->SetColAttr(col::RELEASE_TYPE, releasedAttr);
+        m_grid->SetColAttr(col::YEAR, intAttr);
+        m_grid->SetColAttr(col::SEASON, seasonAttr);
+        m_grid->SetColAttr(col::EPISODES_WATCHED, intAttr);
+        m_grid->SetColAttr(col::TOTAL_EPISODES, intAttr);
+        m_grid->SetColAttr(col::REWATCHED_EPISODES, intAttr);
+        m_grid->SetColAttr(col::EPISODE_LENGTH, intAttr);
+        m_grid->SetColAttr(col::DATE_STARTED, dateAttr);
+        m_grid->SetColAttr(col::DATE_FINISHED, dateAttr);
+        //increment the intAttr reference counter by how many columns use it minus 1
+        for(int i = 0; i < 5; ++i)
+            intAttr->IncRef();
+        dateAttr->IncRef(); //an extra time for the date finished column
+        for(int i = 0; i < numViewCols; ++i)
+            m_grid->SetColLabelValue(i, wxString::FromUTF8(results->GetColumnName(i).c_str()));
+    }
+    int rowPos = 0;
+    while(results->NextRow()){
         m_grid->AppendRows();
-        if(!m_colsCreated){
-            m_colsCreated = true;
-            m_grid->AppendCols(numViewCols);
-            auto watchedAttr = new wxGridCellAttr();
-            auto releasedAttr = new wxGridCellAttr();
-            auto seasonAttr = new wxGridCellAttr();
-            auto intAttr = new wxGridCellAttr();
-            auto dateAttr = new wxGridCellAttr();
-            watchedAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedWatchedVals.size(), &m_allowedWatchedVals[0]));
-            releasedAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedReleaseVals.size(), &m_allowedReleaseVals[0]));
-            seasonAttr->SetEditor(new wxGridCellChoiceEditor(m_allowedSeasonVals.size(), &m_allowedSeasonVals[0]));
-            //don't want to use wxGridCellNumericEditor because it doesn't allow nulls
-            auto intEditor = new wxGridCellTextEditor(6); //only allow 6 length as an easy way to prevent integer overflows
-            wxTextValidator intValidator(wxFILTER_INCLUDE_CHAR_LIST);
-            intValidator.SetCharIncludes("0123456789");
-            intEditor->SetValidator(intValidator);
-            intAttr->SetEditor(intEditor);
-            dateAttr->SetEditor(new GridCellDateEditor());
-            m_grid->SetColAttr(col::RATING, intAttr);
-            m_grid->SetColAttr(col::WATCHED_STATUS, watchedAttr);
-            m_grid->SetColAttr(col::RELEASE_TYPE, releasedAttr);
-            m_grid->SetColAttr(col::YEAR, intAttr);
-            m_grid->SetColAttr(col::SEASON, seasonAttr);
-            m_grid->SetColAttr(col::EPISODES_WATCHED, intAttr);
-            m_grid->SetColAttr(col::TOTAL_EPISODES, intAttr);
-            m_grid->SetColAttr(col::REWATCHED_EPISODES, intAttr);
-            m_grid->SetColAttr(col::EPISODE_LENGTH, intAttr);
-            m_grid->SetColAttr(col::DATE_STARTED, dateAttr);
-            m_grid->SetColAttr(col::DATE_FINISHED, dateAttr);
-            //increment the intAttr reference counter by how many columns use it minus 1
-            for(int i = 0; i < 5; ++i)
-                intAttr->IncRef();
-            dateAttr->IncRef(); //an extra time for the date finished column
-            for(int i = 0; i < numViewCols; ++i)
-                m_grid->SetColLabelValue(i, wxString::FromUTF8(results->GetColumnName(i).c_str()));
-        }
         for(int i = 0; i < numViewCols; ++i){
             if(i == col::RATING)
                 SetRatingColor(rowPos, results->GetString(i).c_str());
@@ -434,22 +434,11 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
             m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
         }
         ++rowPos;
-        while(results->NextRow()){
-            m_grid->AppendRows();
-            for(int i = 0; i < numViewCols; ++i){
-                if(i == col::RATING)
-                    SetRatingColor(rowPos, results->GetString(i).c_str());
-                else if(i == col::WATCHED_STATUS)
-                    SetWatchedStatusColor(rowPos, results->GetString(i));
-                m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
-            }
-            ++rowPos;
-        }
     }
-    AppendLastGridRow(false);
     //user shouldn't see idSeries key
     m_grid->HideCol(0);
     m_grid->AutoSize();
+    AppendLastGridRow(false);
 }
 
 void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,

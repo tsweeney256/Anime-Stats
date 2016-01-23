@@ -80,6 +80,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
                 try{
                     auto sql = std::string(createStr.utf8_str());
                     m_connection->ExecuteQuery(sql);
+                    m_connection->Commit();
+                    m_connection->Begin();
                 }
                 catch(cppw::Sqlite3Exception& e){
                     error = true;
@@ -97,6 +99,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
             errorMsg = "Error: " + createFileName + " could not be found.";
         }
         if(error){
+            m_connection->Rollback();
             wxRemoveFile("AnimeStats.db");
             wxMessageBox(errorMsg);
             Close();
@@ -111,7 +114,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     auto notebook = new wxNotebook(mainPanel, wxID_ANY);
     m_dataPanel = new DataPanel(m_connection.get(), notebook, this);
     notebook->AddPage(m_dataPanel, _("Data"));
-    mainPanelSizer->Add(notebook, wxSizerFlags(0).Expand());
+    mainPanelSizer->Add(notebook, wxSizerFlags(1).Expand());
     mainPanel->SetSizerAndFit(mainPanelSizer);
 }
 

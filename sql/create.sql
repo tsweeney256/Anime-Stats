@@ -12,7 +12,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-BEGIN TRANSACTION;
 CREATE TABLE "WatchedStatus" (
   "idWatchedStatus" INTEGER PRIMARY KEY,
   "status" TEXT NOT NULL
@@ -43,7 +42,6 @@ CREATE TABLE "Series" (
   "episodeLength" INTEGER DEFAULT NULL,
   "dateStarted" TEXT DEFAULT NULL,
   "dateFinished" TEXT DEFAULT NULL,
-  CONSTRAINT "fk_Show_LengthType1" FOREIGN KEY ("idLengthType") REFERENCES "LengthType" ("idLengthType") ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT "fk_Show_ReleaseType1" FOREIGN KEY ("idReleaseType") REFERENCES "ReleaseType" ("idReleaseType") ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT "fk_Show_Season1" FOREIGN KEY ("idSeason") REFERENCES "Season" ("idSeason") ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT "fk_Show_WatchedStatus1" FOREIGN KEY ("idWatchedStatus") REFERENCES "WatchedStatus" ("idWatchedStatus") ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -75,4 +73,3 @@ CREATE TABLE "Label" (
 );
 INSERT INTO `Label` VALUES (0,'No Label',0);
 INSERT INTO `Label` VALUES (1,'Default',1);
-COMMIT;
