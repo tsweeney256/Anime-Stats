@@ -26,9 +26,9 @@ set(CPPW_SQLITE3 cppw/Sqlite3/Sqlite3Connection.cpp
         cppw/Sqlite3/Sqlite3Result.cpp
         cppw/Sqlite3/Sqlite3Statement.cpp)
 add_executable(AnimeStats ${CPPW_SQLITE3} ${SOURCE_FILES})
-if(WIN STREQUAL "true")
+if(WIN STREQUAL "true" OR WIN32)
     target_sources(AnimeStats PUBLIC resource.rc)
-endif(WIN STREQUAL "true")
+endif(WIN STREQUAL "true" OR WIN32)
 
 find_package(SQLite3 REQUIRED)
 if(SQLITE3_FOUND)
