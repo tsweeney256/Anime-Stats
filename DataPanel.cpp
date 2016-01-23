@@ -385,8 +385,12 @@ void DataPanel::OnAdvFilterFrameDestruction(wxWindowDestroyEvent& event)
 void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 {
     wxGridUpdateLocker lock(m_grid);
-    if(m_grid->GetNumberRows() > 0)
+    int rowSize = 1; //don't initialize to 0, because a rowSize of 0 hides the row
+
+    if(m_grid->GetNumberRows() > 0){
+        rowSize = m_grid->GetRowSize(0);
         m_grid->DeleteRows(0, m_grid->GetNumberRows());
+    }
     wxASSERT_MSG(results->GetColumnCount() == numViewCols, "Basic Select Results have wrong number of columns.");
     if(!m_colsCreated){
         m_colsCreated = true;
@@ -427,6 +431,8 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
     int rowPos = 0;
     while(results->NextRow()){
         m_grid->AppendRows();
+        m_grid->SetRowSize(rowPos, rowSize);
+        m_grid->DisableRowResize(rowPos);
         for(int i = 0; i < numViewCols; ++i){
             if(i == col::RATING)
                 SetRatingColor(rowPos, results->GetString(i).c_str());
