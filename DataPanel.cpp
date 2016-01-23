@@ -437,8 +437,12 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
     }
     //user shouldn't see idSeries key
     m_grid->HideCol(0);
-    m_grid->AutoSize();
     AppendLastGridRow(false);
+    if(m_firstDraw){
+        m_firstDraw = false;
+        //only do this on startup because it's wicked slow
+        m_grid->AutoSize();
+    }
 }
 
 void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,

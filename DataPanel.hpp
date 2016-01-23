@@ -104,6 +104,7 @@ private:
     int m_curColSort = col::TITLE;
     bool m_curSortAsc = true;
     bool m_unsavedChanges = false;
+    bool m_firstDraw = true;
     std::shared_ptr<BasicFilterInfo> m_basicFilterInfo;
     std::shared_ptr<AdvFilterInfo> m_advFilterInfo;
     std::shared_ptr<BasicFilterInfo> m_oldBasicFilterInfo;
