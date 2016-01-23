@@ -585,7 +585,6 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
             m_allCheck->Enable();
         }
         m_titleFilterTextField->SetValue(newBasicFilterInfo->title);
-        m_panelSizer->Layout();
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error applying filter.\n" + e.GetErrorMessage());
@@ -611,7 +610,6 @@ void DataPanel::ApplyFullGrid()
                 "order by " + m_curOrderCol + " " + m_curOrderDir);
         auto results = statement->GetResults();
         ResetTable(results);
-        m_panelSizer->Layout();
     }
     catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error preparing basic select statement.\n" + e.GetErrorMessage());
