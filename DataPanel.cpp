@@ -258,6 +258,7 @@ void DataPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
 void DataPanel::OnAddRow(wxCommandEvent& WXUNUSED(event))
 {
     m_grid->GoToCell(m_grid->GetNumberRows()-1, col::TITLE);
+    m_grid->EnableCellEditControl(true);
 }
 
 void DataPanel::OnDeleteRow(wxCommandEvent& WXUNUSED(event))
