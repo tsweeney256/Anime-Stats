@@ -88,7 +88,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	auto applyFilterButton = new wxButton(topBar, ID_APPLY_FILTER_BTN, "Apply Filter");
 	auto resetFilterButton = new wxButton(topBar, ID_RESET_FILTER_BTN, "Reset Filter");
 	m_advFilterButton = new wxButton(topBar, ID_ADV_FILTER_BTN, "Adv. Filter");
-	m_advSortButton = new wxButton(topBar, ID_ADV_SORT_BTN, "Adv. Filter");
+	m_advSortButton = new wxButton(topBar, ID_ADV_SORT_BTN, "Adv. Sort");
 	auto addRowButton = new wxButton(topBar, ID_ADD_ROW_BTN, "Add Row");
 	auto deleteRowButton = new wxButton(topBar, ID_DELETE_ROW_BTN, "Delete Rows");
 	auto refreshButton = new wxButton(topBar, ID_REFRESH_BTN, "Refresh");
