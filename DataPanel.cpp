@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "cppw/Sqlite3.hpp"
 #include "GridCellDateEditor.hpp"
 #include "AdvFilterFrame.hpp"
+#include "AdvSortFrame.hpp"
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_CHECKBOX(ID_WATCHED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
@@ -42,13 +43,14 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_BUTTON(ID_APPLY_FILTER_BTN, DataPanel::OnApplyFilter)
     EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
     EVT_BUTTON(ID_ADV_FILTER_BTN, DataPanel::OnAdvFilter)
+    EVT_BUTTON(ID_ADV_SORT_BTN, DataPanel::OnAdvSort)
     EVT_BUTTON(ID_REFRESH_BTN, DataPanel::OnRefresh)
     EVT_BUTTON(ID_ADD_ROW_BTN, DataPanel::OnAddRow)
     EVT_BUTTON(ID_DELETE_ROW_BTN, DataPanel::OnDeleteRow)
     EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
     EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
     EVT_COMBOBOX_DROPDOWN(wxID_ANY, DataPanel::OnComboDropDown)
-    EVT_WINDOW_DESTROY(DataPanel::OnAdvFilterFrameDestruction)
+    EVT_WINDOW_DESTROY(DataPanel::OnAdvrFrameDestruction)
 END_EVENT_TABLE()
 
 DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWindow* top, wxWindowID id, const wxPoint& pos,
@@ -263,6 +265,14 @@ void DataPanel::OnAdvFilter(wxCommandEvent& WXUNUSED(event))
     m_advFilterButton->Disable();
 }
 
+void DataPanel::OnAdvSort(wxCommandEvent& WXUNUSED(event))
+{
+    //non-modal
+    auto frame = new AdvSortFrame(this);
+    frame->Show(true);
+    m_advSortButton->Disable();
+}
+
 void DataPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
 {
     ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
@@ -389,10 +399,12 @@ void DataPanel::OnComboDropDown(wxCommandEvent& event)
     m_oldCellComboIndex = std::to_string(control->GetCurrentSelection());
 }
 
-void DataPanel::OnAdvFilterFrameDestruction(wxWindowDestroyEvent& event)
+void DataPanel::OnAdvrFrameDestruction(wxWindowDestroyEvent& event)
 {
     if(event.GetId() == ID_ADV_FILTER_FRAME)
         m_advFilterButton->Enable();
+    else if(event.GetId() == ID_ADV_SORT_FRAME)
+        m_advSortButton->Enable();
 }
 
 void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)

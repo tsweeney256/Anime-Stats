@@ -54,13 +54,14 @@ private:
     void OnApplyFilter(wxCommandEvent& event);
     void OnResetFilter(wxCommandEvent& event);
     void OnAdvFilter(wxCommandEvent& event);
+    void OnAdvSort(wxCommandEvent& event);
     void OnRefresh(wxCommandEvent& event);
     void OnAddRow(wxCommandEvent& event);
     void OnDeleteRow(wxCommandEvent& event);
     void OnGridColSort(wxGridEvent& event);
     void OnGridCellChanging(wxGridEvent& event);
     void OnComboDropDown(wxCommandEvent& event);
-    void OnAdvFilterFrameDestruction(wxWindowDestroyEvent& event);
+    void OnAdvrFrameDestruction(wxWindowDestroyEvent& event);
 
     void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
     void AppendStatusStr(std::stringstream& statusStr, std::string toAppend, bool& firstStatus);
