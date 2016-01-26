@@ -10,6 +10,7 @@ BEGIN_EVENT_TABLE(AdvSortFrame, wxFrame)
     EVT_BUTTON(ID_RIGHT_BUTTON, AdvSortFrame::OnRight)
     EVT_BUTTON(ID_UP_BUTTON, AdvSortFrame::OnUp)
     EVT_BUTTON(ID_DOWN_BUTTON, AdvSortFrame::OnDown)
+    EVT_BUTTON(wxID_CANCEL, AdvSortFrame::OnCancel)
 END_EVENT_TABLE()
 
 AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
@@ -96,6 +97,11 @@ void AdvSortFrame::OnUp(wxCommandEvent& WXUNUSED(event))
 void AdvSortFrame::OnDown(wxCommandEvent& WXUNUSED(event))
 {
     UpDownCommon(-1);
+}
+
+void AdvSortFrame::OnCancel(wxCommandEvent& WXUNUSED(event))
+{
+    Close();
 }
 
 void AdvSortFrame::LeftRightCommon(wxListBox* target, wxListBox* dest, int idx)
