@@ -90,6 +90,7 @@ private:
     wxCheckBox* m_blankCheck;
     wxCheckBox* m_allCheck;
     wxButton* m_advFilterButton;
+    wxButton* m_advSortButton;
     wxTextCtrl* m_titleFilterTextField;
     wxString m_basicSelectString;
     cppw::Sqlite3Connection* m_connection;
