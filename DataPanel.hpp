@@ -45,6 +45,7 @@ public:
     void SetAddedFilterRows(std::shared_ptr<std::vector<wxString>> changedRows);
     void NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                 std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
+    void SetSort(std::string  sqlSortStr, bool asc);
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);

@@ -598,6 +598,14 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
     }
 }
 
+void DataPanel::SetSort(std::string sqlSortStr, bool asc)
+{
+    m_curColSort = -1; //reset the current sorting column for the main view
+    m_curOrderCol = (asc ? "asc" : "desc");
+    m_curOrderCol = sqlSortStr;
+    ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
+}
+
 void DataPanel::AppendStatusStr(std::stringstream& statusStr, std::string toAppend, bool& firstStatus)
 {
     if(!firstStatus)
