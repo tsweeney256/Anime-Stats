@@ -119,7 +119,9 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	btnSizer->Add(applyFilterButton, btnFlags);
 	btnSizer->Add(m_advFilterButton, btnFlags);
 	btnSizer->Add(addRowButton, btnFlags);
-	btnSizer->Add(new wxWindow(this, wxID_ANY), btnFlags);
+	auto btnPlaceHolder = new wxWindow(this, wxID_ANY);
+	btnPlaceHolder->Hide();
+	btnSizer->Add(btnPlaceHolder, btnFlags);
 	//row 2
 	btnSizer->Add(resetFilterButton, btnFlags);
 	btnSizer->Add(m_advSortButton, btnFlags);
