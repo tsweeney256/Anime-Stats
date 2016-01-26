@@ -59,15 +59,18 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
     ////Top Bar
     ////
 
+    auto topBar = new wxScrolledWindow(this, wxID_ANY);
+    topBar->SetScrollRate(10, 10);
+
     //
     //checkboxes
     //
-	m_watchedCheck = new wxCheckBox(this, ID_WATCHED_CB, _("Watched"));
-	m_watchingCheck = new wxCheckBox(this, ID_WATCHING_CB, _("Watching"));
-	m_stalledCheck = new wxCheckBox(this, ID_STALLED_CB, _("Stalled"));
-	m_droppedCheck = new wxCheckBox(this, ID_DROPPED_CB, _("Dropped"));
-	m_blankCheck = new wxCheckBox(this, ID_BLANK_CB,  _("Blank"));
-	m_allCheck = new wxCheckBox(this, ID_ALL_CB, _("Enable All"));
+	m_watchedCheck = new wxCheckBox(topBar, ID_WATCHED_CB, _("Watched"));
+	m_watchingCheck = new wxCheckBox(topBar, ID_WATCHING_CB, _("Watching"));
+	m_stalledCheck = new wxCheckBox(topBar, ID_STALLED_CB, _("Stalled"));
+	m_droppedCheck = new wxCheckBox(topBar, ID_DROPPED_CB, _("Dropped"));
+	m_blankCheck = new wxCheckBox(topBar, ID_BLANK_CB,  _("Blank"));
+	m_allCheck = new wxCheckBox(topBar, ID_ALL_CB, _("Enable All"));
 
 	m_watchedCheck->SetValue(true);
 	m_watchingCheck->SetValue(true);
@@ -80,49 +83,54 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	//
 	//buttons and textfield
 	//
-	auto applyFilterButton = new wxButton(this, ID_APPLY_FILTER_BTN, "Apply Filter");
-	auto resetFilterButton = new wxButton(this, ID_RESET_FILTER_BTN, "Reset Filter");
-	m_titleFilterTextField = new wxTextCtrl(this, ID_TITLE_FILTER_FIELD, wxEmptyString,
-			wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
-	m_advFilterButton = new wxButton(this, ID_ADV_FILTER_BTN, "Adv. Filter");
-	m_advSortButton = new wxButton(this, ID_ADV_SORT_BTN, "Adv. Filter");
-	auto refreshButton = new wxButton(this, ID_REFRESH_BTN, "Refresh");
-	auto addRowButton = new wxButton(this, ID_ADD_ROW_BTN, "Add Row");
-	auto deleteRowButton = new wxButton(this, ID_DELETE_ROW_BTN, "Delete Rows");
+    m_titleFilterTextField = new wxTextCtrl(topBar, ID_TITLE_FILTER_FIELD, wxEmptyString,
+            wxDefaultPosition, wxSize(250, -1), wxTE_PROCESS_ENTER);
+	auto applyFilterButton = new wxButton(topBar, ID_APPLY_FILTER_BTN, "Apply Filter");
+	auto resetFilterButton = new wxButton(topBar, ID_RESET_FILTER_BTN, "Reset Filter");
+	m_advFilterButton = new wxButton(topBar, ID_ADV_FILTER_BTN, "Adv. Filter");
+	m_advSortButton = new wxButton(topBar, ID_ADV_SORT_BTN, "Adv. Filter");
+	auto addRowButton = new wxButton(topBar, ID_ADD_ROW_BTN, "Add Row");
+	auto deleteRowButton = new wxButton(topBar, ID_DELETE_ROW_BTN, "Delete Rows");
+	auto refreshButton = new wxButton(topBar, ID_REFRESH_BTN, "Refresh");
 
 	//
 	//top bar sizers
 	//
 	auto checkBoxSizer = new wxGridSizer(3, 5, 5);
-	auto checkBoxSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, this, _("Filter Watched Status"));
-	auto titleFilterSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _("Filter Title"));
+	auto checkBoxSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Watched Status"));
+	auto titleFilterSizer = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Title"));
 	auto topControlBarSizer = new wxBoxSizer(wxHORIZONTAL);
 	m_panelSizer = new wxBoxSizer(wxVERTICAL);
 	auto btnSizer = new wxGridSizer(2, 4, 0, 0);
 
-	checkBoxSizerOutline->Add(checkBoxSizer, wxSizerFlags(0).Border(wxALL, 5));
-	checkBoxSizer->Add(m_watchedCheck, wxSizerFlags(0));
-	checkBoxSizer->Add(m_stalledCheck, wxSizerFlags(0));
-	checkBoxSizer->Add(m_blankCheck, wxSizerFlags(0));
-	checkBoxSizer->Add(m_watchingCheck, wxSizerFlags(0));
-	checkBoxSizer->Add(m_droppedCheck, wxSizerFlags(0));
-	checkBoxSizer->Add(m_allCheck, wxSizerFlags(0));
+	auto checkBoxFlags = wxSizerFlags(1).Expand();
+	checkBoxSizerOutline->Add(checkBoxSizer, wxSizerFlags(1).Border(wxALL).Expand());
+	checkBoxSizer->Add(m_watchedCheck, checkBoxFlags);
+	checkBoxSizer->Add(m_stalledCheck, checkBoxFlags);
+	checkBoxSizer->Add(m_blankCheck, checkBoxFlags);
+	checkBoxSizer->Add(m_watchingCheck, checkBoxFlags);
+	checkBoxSizer->Add(m_droppedCheck, checkBoxFlags);
+	checkBoxSizer->Add(m_allCheck, checkBoxFlags);
 
-	titleFilterSizer->Add(m_titleFilterTextField, wxSizerFlags(0).Border(wxALL, 5).Center());
+	titleFilterSizer->Add(m_titleFilterTextField, wxSizerFlags(1).Border(wxALL).Center());
+
+	auto btnFlags = wxSizerFlags(1).Bottom().Expand();
 	//row 1
-	btnSizer->Add(applyFilterButton, wxSizerFlags(0).Bottom().Expand());
-	btnSizer->Add(m_advFilterButton, wxSizerFlags(0).Bottom().Expand());
-	btnSizer->Add(addRowButton, wxSizerFlags(0).Bottom().Expand());
-	btnSizer->Add(new wxWindow(this, wxID_ANY), wxSizerFlags(0).Bottom().Expand());
+	btnSizer->Add(applyFilterButton, btnFlags);
+	btnSizer->Add(m_advFilterButton, btnFlags);
+	btnSizer->Add(addRowButton, btnFlags);
+	btnSizer->Add(new wxWindow(this, wxID_ANY), btnFlags);
 	//row 2
-	btnSizer->Add(resetFilterButton, wxSizerFlags(0).Bottom().Expand());
-	btnSizer->Add(m_advSortButton, wxSizerFlags(0).Bottom().Expand());
-	btnSizer->Add(deleteRowButton, wxSizerFlags(0).Bottom().Expand());
-	btnSizer->Add(refreshButton, wxSizerFlags(0).Bottom().Expand());
+	btnSizer->Add(resetFilterButton, btnFlags);
+	btnSizer->Add(m_advSortButton, btnFlags);
+	btnSizer->Add(deleteRowButton, btnFlags);
+	btnSizer->Add(refreshButton, btnFlags);
 
-	topControlBarSizer->Add(checkBoxSizerOutline, wxSizerFlags(0).Bottom().Border(wxRIGHT|wxLEFT, 2));
-	topControlBarSizer->Add(titleFilterSizer, wxSizerFlags(0).Bottom().Expand().Border(wxRIGHT|wxLEFT, 2));
-	topControlBarSizer->Add(btnSizer, wxSizerFlags(0).Bottom().Border(wxRIGHT|wxLEFT, 2).Expand());
+	auto topControlBarFlags = wxSizerFlags(0).Bottom().Expand().Border(wxRIGHT|wxLEFT);
+	topControlBarSizer->Add(checkBoxSizerOutline, topControlBarFlags);
+	topControlBarSizer->Add(titleFilterSizer, topControlBarFlags);
+	topControlBarSizer->Add(btnSizer, topControlBarFlags);
+	topBar->SetSizerAndFit(topControlBarSizer);
 
 	////
 	////grid
@@ -152,7 +160,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	//
 	//panel sizer
 	//
-	m_panelSizer->Add(topControlBarSizer, wxSizerFlags(0).Border(wxALL, 2));
+	m_panelSizer->Add(topBar, wxSizerFlags(0).Border(wxALL, 2));
 	m_panelSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
 	SetSizerAndFit(m_panelSizer);
 
