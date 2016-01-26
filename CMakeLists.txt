@@ -16,6 +16,7 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "S
 
 set(SOURCE_FILES 
         AdvFilterFrame.cpp
+        AdvSortFrame.cpp
         App.cpp
         DataPanel.cpp
         GridCellDateEditor.cpp
