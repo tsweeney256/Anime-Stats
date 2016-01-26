@@ -123,7 +123,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	btnSizer->Add(refreshButton, btnFlags);
 	btnSizer->Add(deleteRowButton, btnFlags);
 
-	auto topControlBarFlags = wxSizerFlags(0).Bottom().Expand().Border(wxRIGHT|wxLEFT);
+	auto topControlBarFlags = wxSizerFlags(0).Bottom().Expand().Border(wxALL);
 	topControlBarSizer->Add(checkBoxSizerOutline, topControlBarFlags);
 	topControlBarSizer->Add(titleFilterSizer, topControlBarFlags);
 	topControlBarSizer->Add(btnSizer, topControlBarFlags);
