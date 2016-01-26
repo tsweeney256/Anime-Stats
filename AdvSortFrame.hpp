@@ -15,8 +15,11 @@ private:
     void OnClose(wxCloseEvent& event);
     void OnLeft(wxCommandEvent& event);
     void OnRight(wxCommandEvent& event);
+    void OnUp(wxCommandEvent& event);
+    void OnDown(wxCommandEvent& event);
 
     void LeftRightCommon(wxListBox* target, wxListBox* dest, int idx);
+    void UpDownCommon(int direction); //direction being positive or negative 1
 
     wxListBox* m_sortList;
     wxListBox* m_dontList;

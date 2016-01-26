@@ -8,6 +8,8 @@ BEGIN_EVENT_TABLE(AdvSortFrame, wxFrame)
     EVT_CLOSE(AdvSortFrame::OnClose)
     EVT_BUTTON(ID_LEFT_BUTTON, AdvSortFrame::OnLeft)
     EVT_BUTTON(ID_RIGHT_BUTTON, AdvSortFrame::OnRight)
+    EVT_BUTTON(ID_UP_BUTTON, AdvSortFrame::OnUp)
+    EVT_BUTTON(ID_DOWN_BUTTON, AdvSortFrame::OnDown)
 END_EVENT_TABLE()
 
 AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
@@ -86,6 +88,16 @@ void AdvSortFrame::OnRight(wxCommandEvent& WXUNUSED(event))
     LeftRightCommon(m_sortList, m_dontList, m_sortList->GetSelection());
 }
 
+void AdvSortFrame::OnUp(wxCommandEvent& WXUNUSED(event))
+{
+    UpDownCommon(1);
+}
+
+void AdvSortFrame::OnDown(wxCommandEvent& WXUNUSED(event))
+{
+    UpDownCommon(-1);
+}
+
 void AdvSortFrame::LeftRightCommon(wxListBox* target, wxListBox* dest, int idx)
 {
     if(target->GetSelection() != wxNOT_FOUND){
@@ -93,4 +105,22 @@ void AdvSortFrame::LeftRightCommon(wxListBox* target, wxListBox* dest, int idx)
         dest->InsertItems(1, &tempStr, dest->GetCount());
         target->Delete(idx);
     }
+}
+
+void AdvSortFrame::UpDownCommon(int direction)
+{
+    auto idx = m_sortList->GetSelection();
+
+    if(idx == wxNOT_FOUND)
+        return;
+    else if(idx - direction < 0)
+        return;
+    else if(idx - direction + 1 > static_cast<int>(m_sortList->GetCount()))
+        return;
+
+    auto tempStr = m_sortList->GetString(idx);
+
+    m_sortList->Delete(idx);
+    m_sortList->InsertItems(1, &tempStr, idx - direction);
+    m_sortList->SetSelection(idx - direction);
 }
