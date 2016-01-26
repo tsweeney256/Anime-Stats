@@ -307,15 +307,16 @@ void DataPanel::OnDeleteRow(wxCommandEvent& WXUNUSED(event))
 
 void DataPanel::OnGridColSort(wxGridEvent& event)
 {
-    m_curOrderCol = std::to_string(event.GetCol() + 1) + " collate nocase";
+    m_curOrderCol = std::to_string(event.GetCol() + 1) + " collate nocase ";
     if(m_curColSort == event.GetCol()){
-        m_curOrderDir = (m_curSortAsc ? "desc" : "asc");
+        m_curOrderDir = (m_curSortAsc ? " desc " : " asc ");
         m_curSortAsc = !m_curSortAsc;
     }
     else{
-        m_curOrderDir = "asc";
+        m_curOrderDir = " asc ";
         m_curSortAsc = true;
     }
+    m_curOrderCombined = m_curOrderCol + m_curOrderDir;
     m_curColSort = event.GetCol();
     ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
 }
@@ -600,7 +601,7 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         }
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) + " where Title like ? " +
                 (showNothing ? " and 1 <> 1 " : statusStr.str()) + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") +
-                " order by " + m_curOrderCol + " "+ m_curOrderDir);
+                " order by " + m_curOrderCombined);
         statement->Bind(1, "%" + newBasicFilterInfo->title + "%");
         auto results = statement->GetResults();
         ResetTable(results);
@@ -626,11 +627,11 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
     }
 }
 
-void DataPanel::SetSort(std::string sqlSortStr, bool asc)
+void DataPanel::SetSort(std::string sqlSortStr)
 {
     m_curColSort = -1; //reset the current sorting column for the main view
-    m_curOrderCol = (asc ? "asc" : "desc");
-    m_curOrderCol = sqlSortStr;
+    m_curSortAsc = false; //reset the current sorting direction
+    m_curOrderCombined = sqlSortStr;
     ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
 }
 
@@ -649,7 +650,7 @@ void DataPanel::ApplyFullGrid()
 {
     try{
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.ToUTF8()) +
-                "order by " + m_curOrderCol + " " + m_curOrderDir);
+                "order by " + m_curOrderCombined);
         auto results = statement->GetResults();
         ResetTable(results);
     }

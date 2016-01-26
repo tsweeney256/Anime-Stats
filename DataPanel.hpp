@@ -45,7 +45,7 @@ public:
     void SetAddedFilterRows(std::shared_ptr<std::vector<wxString>> changedRows);
     void NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                 std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
-    void SetSort(std::string  sqlSortStr, bool asc);
+    void SetSort(std::string  sqlSortStr);
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);
@@ -95,8 +95,9 @@ private:
     wxTextCtrl* m_titleFilterTextField;
     wxString m_basicSelectString;
     cppw::Sqlite3Connection* m_connection;
-    std::string m_curOrderCol = "Title collate nocase";
-    std::string m_curOrderDir = "asc";
+    std::string m_curOrderCol = " Title collate nocase ";
+    std::string m_curOrderDir = " asc ";
+    std::string m_curOrderCombined = m_curOrderCol + m_curOrderDir;
     std::string m_oldCellComboIndex;
     std::vector<std::unique_ptr<SqlGridCommand>> m_commands;
     std::vector<wxString> m_allowedWatchedVals;

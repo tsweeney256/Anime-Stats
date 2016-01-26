@@ -18,10 +18,14 @@ private:
     void OnUp(wxCommandEvent& event);
     void OnDown(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
+    void OnApply(wxCommandEvent& event);
+    void OnOk(wxCommandEvent& event);
 
     void LeftRightCommon(wxListBox* target, wxListBox* dest, int idx);
     void UpDownCommon(int direction); //direction being positive or negative 1
+    void ApplyOkCommon();
 
+    DataPanel* m_dataPanel;
     wxListBox* m_sortList;
     wxListBox* m_dontList;
     wxRadioButton* m_ascBtn;

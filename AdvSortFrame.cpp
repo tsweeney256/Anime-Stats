@@ -1,6 +1,7 @@
 #include <wx/panel.h>
 #include <wx/button.h>
 #include <wx/sizer.h>
+#include "DataPanel.hpp"
 #include "AdvSortFrame.hpp"
 #include "AppIDs.hpp"
 
@@ -11,11 +12,13 @@ BEGIN_EVENT_TABLE(AdvSortFrame, wxFrame)
     EVT_BUTTON(ID_UP_BUTTON, AdvSortFrame::OnUp)
     EVT_BUTTON(ID_DOWN_BUTTON, AdvSortFrame::OnDown)
     EVT_BUTTON(wxID_CANCEL, AdvSortFrame::OnCancel)
+    EVT_BUTTON(wxID_APPLY, AdvSortFrame::OnApply)
+    EVT_BUTTON(wxID_OK, AdvSortFrame::OnOk)
 END_EVENT_TABLE()
 
 AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
     : wxFrame(parent, ID_ADV_SORT_FRAME, "Advanced Sorting", wxDefaultPosition, wxDefaultSize,
-            wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER |wxMAXIMIZE_BOX))
+            wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER |wxMAXIMIZE_BOX)), m_dataPanel(static_cast<DataPanel*>(parent))
 {
     auto mainPanel = new wxPanel(this, wxID_ANY);
 
@@ -105,6 +108,17 @@ void AdvSortFrame::OnCancel(wxCommandEvent& WXUNUSED(event))
     Close();
 }
 
+void AdvSortFrame::OnApply(wxCommandEvent& WXUNUSED(event))
+{
+    ApplyOkCommon();
+}
+
+void AdvSortFrame::OnOk(wxCommandEvent& WXUNUSED(event))
+{
+    ApplyOkCommon();
+    Close();
+}
+
 void AdvSortFrame::LeftRightCommon(wxListBox* target, wxListBox* dest, int idx)
 {
     if(target->GetSelection() != wxNOT_FOUND){
@@ -130,4 +144,14 @@ void AdvSortFrame::UpDownCommon(int direction)
     m_sortList->Delete(idx);
     m_sortList->InsertItems(1, &tempStr, idx - direction);
     m_sortList->SetSelection(idx - direction);
+}
+
+void AdvSortFrame::ApplyOkCommon()
+{
+    std::string sortStr;
+
+    for(unsigned int i = 0; i < m_sortList->GetCount(); ++i)
+        sortStr += std::string(std::string("`") + m_sortList->GetString(i).utf8_str()) + "` collate nocase " +
+                (m_ascBtn->GetValue() ? " asc " : " desc ") + (i + 1 == m_sortList->GetCount() ? "" : ", ");
+    m_dataPanel->SetSort(sortStr);
 }
