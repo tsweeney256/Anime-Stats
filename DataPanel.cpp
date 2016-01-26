@@ -80,10 +80,10 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	//
 	//buttons and textfield
 	//
+    m_titleFilterTextField = new wxTextCtrl(this, ID_TITLE_FILTER_FIELD, wxEmptyString,
+            wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
 	auto applyFilterButton = new wxButton(this, ID_APPLY_FILTER_BTN, "Apply Filter");
 	auto resetFilterButton = new wxButton(this, ID_RESET_FILTER_BTN, "Reset Filter");
-	m_titleFilterTextField = new wxTextCtrl(this, ID_TITLE_FILTER_FIELD, wxEmptyString,
-			wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
 	m_advFilterButton = new wxButton(this, ID_ADV_FILTER_BTN, "Adv. Filter");
 	auto refreshButton = new wxButton(this, ID_REFRESH_BTN, "Refresh");
 	auto addRowButton = new wxButton(this, ID_ADD_ROW_BTN, "Add Row");
