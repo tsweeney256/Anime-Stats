@@ -268,7 +268,7 @@ void DataPanel::OnAdvFilter(wxCommandEvent& WXUNUSED(event))
 void DataPanel::OnAdvSort(wxCommandEvent& WXUNUSED(event))
 {
     //non-modal
-    auto frame = new AdvSortFrame(this);
+    auto frame = new AdvSortFrame(this, m_colList);
     frame->Show(true);
     m_advSortButton->Disable();
 }
@@ -450,8 +450,11 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
         for(int i = 0; i < 5; ++i)
             intAttr->IncRef();
         dateAttr->IncRef(); //an extra time for the date finished column
-        for(int i = 0; i < numViewCols; ++i)
+        for(int i = 0; i < numViewCols; ++i){
             m_grid->SetColLabelValue(i, wxString::FromUTF8(results->GetColumnName(i).c_str()));
+            if(i != col::ID_SERIES)
+                m_colList.Add(m_grid->GetColLabelValue(i));
+        }
     }
     int rowPos = 0;
     while(results->NextRow()){

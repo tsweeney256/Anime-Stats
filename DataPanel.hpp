@@ -121,6 +121,7 @@ private:
     int m_maxRating = 9;
     wxBoxSizer* m_panelSizer;
     std::shared_ptr<std::vector<wxString>> m_changedRows; //managed by the command classes
+    wxArrayString m_colList;
 
     DECLARE_EVENT_TABLE()
 };
