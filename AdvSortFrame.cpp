@@ -37,7 +37,7 @@ AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
     auto radioSizer = new wxBoxSizer(wxHORIZONTAL);
     auto midSizer = new wxBoxSizer(wxVERTICAL);
     auto contentSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto bottomBtnSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto bottomBtnSizer = new wxStdDialogButtonSizer();
     auto fullSizer = new wxBoxSizer(wxVERTICAL);
 
     auto upDownRadioFlags = wxSizerFlags(0).Border(wxALL).Center().Bottom();
@@ -62,9 +62,10 @@ AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
     contentSizer->Add(midSizer, midFlags);
     contentSizer->Add(dontOutlineSizer, borderNoExpandFlag);
 
-    bottomBtnSizer->Add(applyBtn, borderNoExpandFlag);
-    bottomBtnSizer->Add(okBtn, borderNoExpandFlag);
-    bottomBtnSizer->Add(cancelBtn, borderNoExpandFlag);
+    bottomBtnSizer->AddButton(applyBtn);
+    bottomBtnSizer->AddButton(okBtn);
+    bottomBtnSizer->AddButton(cancelBtn);
+    bottomBtnSizer->Realize();
 
     fullSizer->Add(contentSizer, borderNoExpandFlag);
     fullSizer->Add(bottomBtnSizer, wxSizerFlags(0).Border(wxALL).Bottom().Right());
