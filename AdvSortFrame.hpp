@@ -13,6 +13,10 @@ public:
 
 private:
     void OnClose(wxCloseEvent& event);
+    void OnLeft(wxCommandEvent& event);
+    void OnRight(wxCommandEvent& event);
+
+    void LeftRightCommon(wxListBox* target, wxListBox* dest, int idx);
 
     wxListBox* m_sortList;
     wxListBox* m_dontList;

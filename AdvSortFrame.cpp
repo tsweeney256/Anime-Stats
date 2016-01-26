@@ -6,6 +6,8 @@
 
 BEGIN_EVENT_TABLE(AdvSortFrame, wxFrame)
     EVT_CLOSE(AdvSortFrame::OnClose)
+    EVT_BUTTON(ID_LEFT_BUTTON, AdvSortFrame::OnLeft)
+    EVT_BUTTON(ID_RIGHT_BUTTON, AdvSortFrame::OnRight)
 END_EVENT_TABLE()
 
 AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
@@ -72,4 +74,23 @@ AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
 void AdvSortFrame::OnClose(wxCloseEvent& WXUNUSED(event))
 {
     Destroy();
+}
+
+void AdvSortFrame::OnLeft(wxCommandEvent& WXUNUSED(event))
+{
+    LeftRightCommon(m_dontList, m_sortList, m_dontList->GetSelection());
+}
+
+void AdvSortFrame::OnRight(wxCommandEvent& WXUNUSED(event))
+{
+    LeftRightCommon(m_sortList, m_dontList, m_sortList->GetSelection());
+}
+
+void AdvSortFrame::LeftRightCommon(wxListBox* target, wxListBox* dest, int idx)
+{
+    if(target->GetSelection() != wxNOT_FOUND){
+        auto tempStr = target->GetString(idx);
+        dest->InsertItems(1, &tempStr, dest->GetCount());
+        target->Delete(idx);
+    }
 }
