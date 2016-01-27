@@ -127,7 +127,7 @@ void AdvSortFrame::OnRadioLeft(wxCommandEvent& WXUNUSED(event))
 {
     if(m_sortList->GetSelection() != wxNOT_FOUND){
         auto nameStr = m_toSort[m_sortList->GetSelection()].name;
-        auto ascStr = wxString((m_ascBtnLeft->GetValue() ? "ASC" : "DESC"));
+        auto ascStr = (m_ascBtnLeft->GetValue() ? _("ASC") : _("DESC"));
         wxString str = nameStr + "   " + ascStr;
         m_toSort[m_sortList->GetSelection()].asc = m_ascBtnLeft->GetValue();
         m_sortList->SetString(m_sortList->GetSelection(), str);
