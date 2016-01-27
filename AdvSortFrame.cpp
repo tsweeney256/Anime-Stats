@@ -155,15 +155,6 @@ void AdvSortFrame::OnOk(wxCommandEvent& WXUNUSED(event))
     Close();
 }
 
-void AdvSortFrame::LeftRightCommon(wxListBox* target, wxListBox* dest, int idx)
-{
-    if(target->GetSelection() != wxNOT_FOUND){
-        auto tempStr = target->GetString(idx);
-        dest->InsertItems(1, &tempStr, dest->GetCount());
-        target->Delete(idx);
-    }
-}
-
 void AdvSortFrame::UpDownCommon(int direction)
 {
     auto idx = m_sortList->GetSelection();
