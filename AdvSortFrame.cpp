@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <wx/panel.h>
 #include <wx/button.h>
 #include <wx/sizer.h>
@@ -14,6 +15,8 @@ BEGIN_EVENT_TABLE(AdvSortFrame, wxFrame)
     EVT_BUTTON(wxID_CANCEL, AdvSortFrame::OnCancel)
     EVT_BUTTON(wxID_APPLY, AdvSortFrame::OnApply)
     EVT_BUTTON(wxID_OK, AdvSortFrame::OnOk)
+    EVT_RADIOBUTTON(ID_RADIO_LEFT, AdvSortFrame::OnRadioLeft)
+    EVT_LISTBOX(ID_LISTBOX_LEFT, AdvSortFrame::OnListBoxLeftSelect)
 END_EVENT_TABLE()
 
 AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
@@ -22,14 +25,16 @@ AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
 {
     auto mainPanel = new wxPanel(this, wxID_ANY);
 
-    m_sortList = new wxListBox(mainPanel, wxID_ANY);
+    m_sortList = new wxListBox(mainPanel, ID_LISTBOX_LEFT);
     auto leftBtn = new wxButton(mainPanel, ID_LEFT_BUTTON, "<--");
     auto rightBtn = new wxButton(mainPanel, ID_RIGHT_BUTTON, "-->");
     m_dontList = new wxListBox(mainPanel, wxID_ANY);
     auto upBtn = new wxButton(mainPanel, ID_UP_BUTTON, _("Up"));
     auto downBtn = new wxButton(mainPanel, ID_DOWN_BUTTON, _("Down"));
-    m_ascBtn = new wxRadioButton(mainPanel, wxID_ANY, _("Ascending"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-    m_descBtn = new wxRadioButton(mainPanel, wxID_ANY, _("Descending"));
+    m_ascBtnLeft = new wxRadioButton(mainPanel, ID_RADIO_LEFT, _("Ascending"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+    m_descBtnLeft = new wxRadioButton(mainPanel, ID_RADIO_LEFT, _("Descending"));
+    m_ascBtnRight = new wxRadioButton(mainPanel, wxID_ANY, _("Ascending"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+    m_descBtnRight = new wxRadioButton(mainPanel, wxID_ANY, _("Descending"));
     auto applyBtn = new wxButton(mainPanel, wxID_APPLY);
     auto okBtn = new wxButton(mainPanel, wxID_OK);
     auto cancelBtn = new wxButton(mainPanel, wxID_CANCEL);
@@ -37,7 +42,8 @@ AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
     auto dontOutlineSizer = new wxStaticBoxSizer(wxVERTICAL, mainPanel, _("Don't Sort By"));
 
     auto upDownSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto radioSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto radioSizerLeft = new wxBoxSizer(wxHORIZONTAL);
+    auto radioSizerRight = new wxBoxSizer(wxHORIZONTAL);
     auto midSizer = new wxBoxSizer(wxVERTICAL);
     auto contentSizer = new wxBoxSizer(wxHORIZONTAL);
     auto bottomBtnSizer = new wxStdDialogButtonSizer();
@@ -50,16 +56,19 @@ AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
 
     upDownSizer->Add(upBtn, upDownRadioFlags);
     upDownSizer->Add(downBtn, upDownRadioFlags);
-    radioSizer->Add(m_ascBtn, upDownRadioFlags);
-    radioSizer->Add(m_descBtn, upDownRadioFlags);
+    radioSizerLeft->Add(m_ascBtnLeft, upDownRadioFlags);
+    radioSizerLeft->Add(m_descBtnLeft, upDownRadioFlags);
     sortOutlineSizer->Add(m_sortList, expandFlag);
     sortOutlineSizer->Add(upDownSizer, upDownRadioFlags);
-    sortOutlineSizer->Add(radioSizer, upDownRadioFlags);
+    sortOutlineSizer->Add(radioSizerLeft, upDownRadioFlags);
 
     midSizer->Add(leftBtn, midFlags);
     midSizer->Add(rightBtn, midFlags);
 
-    dontOutlineSizer->Add(m_dontList, borderNoExpandFlag);
+    radioSizerRight->Add(m_ascBtnRight, upDownRadioFlags);
+    radioSizerRight->Add(m_descBtnRight, upDownRadioFlags);
+    dontOutlineSizer->Add(m_dontList, expandFlag);
+    dontOutlineSizer->Add(radioSizerRight, borderNoExpandFlag);
 
     contentSizer->Add(sortOutlineSizer, expandFlag);
     contentSizer->Add(midSizer, midFlags);
@@ -85,12 +94,23 @@ void AdvSortFrame::OnClose(wxCloseEvent& WXUNUSED(event))
 
 void AdvSortFrame::OnLeft(wxCommandEvent& WXUNUSED(event))
 {
-    LeftRightCommon(m_dontList, m_sortList, m_dontList->GetSelection());
+    if(m_dontList->GetSelection() != wxNOT_FOUND){
+        m_toSort.emplace_back(m_dontList->GetString(m_dontList->GetSelection()), m_ascBtnRight->GetValue());
+        auto nameStr = m_dontList->GetString((m_dontList->GetSelection()));
+        auto ascStr = wxString((m_ascBtnRight->GetValue() ? "ASC" : "DESC"));
+        wxString str = nameStr + "   " + ascStr;
+        m_sortList->InsertItems(1, &str, m_sortList->GetCount());
+        m_dontList->Delete(m_dontList->GetSelection());
+    }
 }
 
 void AdvSortFrame::OnRight(wxCommandEvent& WXUNUSED(event))
 {
-    LeftRightCommon(m_sortList, m_dontList, m_sortList->GetSelection());
+    if(m_sortList->GetSelection() != wxNOT_FOUND){
+        m_dontList->InsertItems(1, &(m_toSort[m_sortList->GetSelection()].name), m_dontList->GetCount());
+        m_toSort.erase(m_toSort.begin() + m_sortList->GetSelection());
+        m_sortList->Delete(m_sortList->GetSelection());
+    }
 }
 
 void AdvSortFrame::OnUp(wxCommandEvent& WXUNUSED(event))
@@ -101,6 +121,22 @@ void AdvSortFrame::OnUp(wxCommandEvent& WXUNUSED(event))
 void AdvSortFrame::OnDown(wxCommandEvent& WXUNUSED(event))
 {
     UpDownCommon(-1);
+}
+
+void AdvSortFrame::OnRadioLeft(wxCommandEvent& WXUNUSED(event))
+{
+    if(m_sortList->GetSelection() != wxNOT_FOUND){
+        auto nameStr = m_toSort[m_sortList->GetSelection()].name;
+        auto ascStr = wxString((m_ascBtnLeft->GetValue() ? "ASC" : "DESC"));
+        wxString str = nameStr + "   " + ascStr;
+        m_toSort[m_sortList->GetSelection()].asc = m_ascBtnLeft->GetValue();
+        m_sortList->SetString(m_sortList->GetSelection(), str);
+    }
+}
+
+void AdvSortFrame::OnListBoxLeftSelect(wxCommandEvent& event)
+{
+    (m_toSort[event.GetInt()].asc ? m_ascBtnLeft : m_descBtnLeft)->SetValue(true);
 }
 
 void AdvSortFrame::OnCancel(wxCommandEvent& WXUNUSED(event))
@@ -144,6 +180,7 @@ void AdvSortFrame::UpDownCommon(int direction)
     m_sortList->Delete(idx);
     m_sortList->InsertItems(1, &tempStr, idx - direction);
     m_sortList->SetSelection(idx - direction);
+    std::iter_swap(m_toSort.begin() + idx, m_toSort.begin() + idx - direction);
 }
 
 void AdvSortFrame::ApplyOkCommon()
@@ -151,7 +188,7 @@ void AdvSortFrame::ApplyOkCommon()
     std::string sortStr;
 
     for(unsigned int i = 0; i < m_sortList->GetCount(); ++i)
-        sortStr += std::string(std::string("`") + m_sortList->GetString(i).utf8_str()) + "` collate nocase " +
-                (m_ascBtn->GetValue() ? " asc " : " desc ") + (i + 1 == m_sortList->GetCount() ? "" : ", ");
+        sortStr += std::string(std::string("`") + m_toSort[i].name.utf8_str()) + "` collate nocase " +
+                (m_toSort[i].asc ? " asc " : " desc ") + (i + 1 == m_sortList->GetCount() ? "" : ", ");
     m_dataPanel->SetSort(sortStr);
 }
