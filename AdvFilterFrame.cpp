@@ -38,10 +38,10 @@ BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
     EVT_CHECKBOX(ID_ADV_FILTER_LENGTH_ENABLE, AdvFilterFrame::OnLengthEnableCheckBox)
     EVT_CHECKBOX(ID_ADV_FILTER_DATE_STARTED_ENABLE, AdvFilterFrame::OnDateStartedEnableCheckBox)
     EVT_CHECKBOX(ID_ADV_FILTER_DATE_FINISHED_ENABLE, AdvFilterFrame::OnDateFinishedEnableCheckBox)
-    EVT_BUTTON(ID_ADV_FILTER_RESET, AdvFilterFrame::OnReset)
-    EVT_BUTTON(ID_ADV_FILTER_CANCEL, AdvFilterFrame::OnCancel)
-    EVT_BUTTON(ID_ADV_FILTER_OK, AdvFilterFrame::OnOK)
-    EVT_BUTTON(ID_ADV_FILTER_APPLY, AdvFilterFrame::OnApply)
+    EVT_BUTTON(wxID_HELP, AdvFilterFrame::OnReset)
+    EVT_BUTTON(wxID_CANCEL, AdvFilterFrame::OnCancel)
+    EVT_BUTTON(wxID_OK, AdvFilterFrame::OnOK)
+    EVT_BUTTON(wxID_APPLY, AdvFilterFrame::OnApply)
 END_EVENT_TABLE()
 
 AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -205,10 +205,10 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_finishMonthHigh->Disable();
     m_finishDayHigh->Disable();
 
-    auto okButton = new wxButton(m_mainPanel, ID_ADV_FILTER_OK, "OK");
-    auto cancelButton = new wxButton(m_mainPanel, ID_ADV_FILTER_CANCEL, "Cancel");
-    auto applyButton = new wxButton(m_mainPanel, ID_ADV_FILTER_APPLY, "Apply");
-    auto resetButton = new wxButton(m_mainPanel, ID_ADV_FILTER_RESET, "Reset");
+    auto okButton = new wxButton(m_mainPanel, wxID_OK, "OK");
+    auto cancelButton = new wxButton(m_mainPanel, wxID_CANCEL, "Cancel");
+    auto applyButton = new wxButton(m_mainPanel, wxID_APPLY, "Apply");
+    auto resetButton = new wxButton(m_mainPanel, wxID_HELP, "Reset"); //wxID_HELP as a heck to get it to work with the sizer
 
     //
     //sizers
@@ -224,6 +224,7 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
 
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     auto contentSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto osButtonSizer = new wxStdDialogButtonSizer();
     auto buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
     auto leftSizer = new wxBoxSizer(wxVERTICAL);
@@ -391,10 +392,13 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     contentSizer->Add(midSizer, paddingFlag);
     contentSizer->Add(rightSizer, paddingFlag);
 
-    buttonSizer->Add(okButton, paddingFlag);
-    buttonSizer->Add(cancelButton, paddingFlag);
-    buttonSizer->Add(applyButton, paddingFlag);
-    buttonSizer->Add(resetButton, paddingFlag);
+    osButtonSizer->AddButton(okButton);
+    osButtonSizer->AddButton(cancelButton);
+    osButtonSizer->AddButton(applyButton);
+    osButtonSizer->AddButton(resetButton);
+    osButtonSizer->Realize();
+    buttonSizer->Add(osButtonSizer, paddingFlag);
+    //buttonSizer->Add(resetButton, paddingFlag);
 
     mainSizer->Add(contentSizer, paddingFlag);
     mainSizer->Add(buttonSizer, paddingRightFlag);
