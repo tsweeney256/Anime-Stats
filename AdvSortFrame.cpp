@@ -176,10 +176,11 @@ void AdvSortFrame::UpDownCommon(int direction)
 
 void AdvSortFrame::ApplyOkCommon()
 {
-    std::string sortStr;
-
-    for(unsigned int i = 0; i < m_sortList->GetCount(); ++i)
-        sortStr += std::string(std::string("`") + m_toSort[i].name.utf8_str()) + "` collate nocase " +
-                (m_toSort[i].asc ? " asc " : " desc ") + (i + 1 == m_sortList->GetCount() ? "" : ", ");
-    m_dataPanel->SetSort(sortStr);
+    if(m_sortList->GetCount()){
+        std::string sortStr;
+        for(unsigned int i = 0; i < m_sortList->GetCount(); ++i)
+            sortStr += std::string(std::string("`") + m_toSort[i].name.utf8_str()) + "` collate nocase " +
+                    (m_toSort[i].asc ? " asc " : " desc ") + (i + 1 == m_sortList->GetCount() ? "" : ", ");
+        m_dataPanel->SetSort(sortStr);
+    }
 }
