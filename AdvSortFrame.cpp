@@ -41,13 +41,13 @@ AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
     auto mainPanel = new wxPanel(this, wxID_ANY);
 
     m_sortList = new wxListBox(mainPanel, ID_LISTBOX_LEFT);
-    auto leftBtn = new wxButton(mainPanel, ID_LEFT_BUTTON, "<--");
-    auto rightBtn = new wxButton(mainPanel, ID_RIGHT_BUTTON, "-->");
-    m_dontList = new wxListBox(mainPanel, wxID_ANY);
     auto upBtn = new wxButton(mainPanel, ID_UP_BUTTON, _("Up"));
     auto downBtn = new wxButton(mainPanel, ID_DOWN_BUTTON, _("Down"));
     m_ascBtnLeft = new wxRadioButton(mainPanel, ID_RADIO_LEFT, _("Ascending"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
     m_descBtnLeft = new wxRadioButton(mainPanel, ID_RADIO_LEFT, _("Descending"));
+    auto leftBtn = new wxButton(mainPanel, ID_LEFT_BUTTON, "<--");
+    auto rightBtn = new wxButton(mainPanel, ID_RIGHT_BUTTON, "-->");
+    m_dontList = new wxListBox(mainPanel, wxID_ANY);
     m_ascBtnRight = new wxRadioButton(mainPanel, wxID_ANY, _("Ascending"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
     m_descBtnRight = new wxRadioButton(mainPanel, wxID_ANY, _("Descending"));
     auto applyBtn = new wxButton(mainPanel, wxID_APPLY);
