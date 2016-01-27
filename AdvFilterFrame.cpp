@@ -47,19 +47,11 @@ END_EVENT_TABLE()
 AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size)
     : wxFrame(parent, ID_ADV_FILTER_FRAME, title, pos, size, wxDEFAULT_FRAME_STYLE & ~(/*wxRESIZE_BORDER |*/ wxMAXIMIZE_BOX))
 {
-    ///
-    ///
-    ///AdvFilterFrame
-    ///
-    ///
-
     m_parent = static_cast<DataPanel*>(parent);
     m_mainPanel = new wxScrolledWindow(this, wxID_ANY);
     m_mainPanel->SetScrollRate(10, 10);
 
-    //
-    //checkboxes
-    //
+    m_titleTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
 
     m_watchedCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_WATCHED_STATUS, _("Watched"));
     m_watchingCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_WATCHED_STATUS, _("Watching"));
@@ -68,9 +60,9 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_watchedStatusBlankCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_WATCHED_STATUS, _("Blank"));
     m_watchedStatusAllCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_WATCHED_STATUS_ALL, _("Enable All"));
     m_tvCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("TV"));
+    m_movieCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("Movie"));
     m_ovaCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("OVA"));
     m_onaCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("ONA"));
-    m_movieCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("Movie"));
     m_tvSpecialCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("TV Special"));
     m_releaseTypeBlankCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE, _("Blank"));
     m_releaseTypeAllCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RELEASE_TYPE_ALL, _("Enable All"));
@@ -81,14 +73,88 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_seasonBlankCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_SEASON, _("Blank"));
     m_seasonAllCheck = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_SEASON_ALL, _("Enable All"));
 
+    //for determining the width of the text controls
+    //times 1000 to give 3 extra characters of padding because
+    //GetSizeFromTextSize() doesn't work right on fedora and probably gtk3 in general
+    const wxString maxNumStr   = wxString::Format(wxT("%i"), m_maxNum * 1000);
+    const wxString maxYearStr  = wxString::Format(wxT("%i"), m_maxYear * 1000);
+    const wxString maxMonthDayStr = wxString::Format(wxT("%i"), m_maxMonth * 1000);
+
+    wxSize maxNumTextSize;
+    wxSize maxYearTextSize;
+    wxSize maxMonthDayTextSize;
+
     m_ratingsEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_RATING_ENABLE, _("Enable"));
-    m_yearEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_YEAR_ENABLE, _("Enable"));;
-    m_epsWatchedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_EPS_WATCHED_ENABLE, _("Enable"));;
-    m_epsRewatchedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_EPS_REWATCHED_ENABLE, _("Enable"));;
-    m_totalEpsEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_TOTAL_EPS_ENABLE, _("Enable"));;
-    m_lengthEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_LENGTH_ENABLE, _("Enable"));;
-    m_dateStartedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_DATE_STARTED_ENABLE, _("Enable"));;
-    m_dateFinishedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_DATE_FINISHED_ENABLE, _("Enable"));;
+    m_ratingsSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
+    //find max size needed for the textbox, then set it to that
+    maxNumTextSize = m_ratingsSpinLow->GetSizeFromTextSize(m_ratingsSpinLow->GetTextExtent(maxNumStr));
+    m_ratingsSpinLow->SetInitialSize(maxNumTextSize);
+
+    m_ratingsSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
+
+    m_yearEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_YEAR_ENABLE, _("Enable"));
+    m_yearSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
+    m_yearSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
+
+    m_epsWatchedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_EPS_WATCHED_ENABLE, _("Enable"));
+    m_epsWatchedSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
+    m_epsWatchedSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
+
+    m_epsRewatchedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_EPS_REWATCHED_ENABLE, _("Enable"));
+    m_epsRewatchedSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
+    m_epsRewatchedSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
+
+    m_totalEpsEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_TOTAL_EPS_ENABLE, _("Enable"));
+    m_totalEpsSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
+    m_totalEpsSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
+
+    m_lengthEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_LENGTH_ENABLE, _("Enable"));
+    m_lengthSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
+    m_lengthSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
+            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
+
+    m_dateStartedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_DATE_STARTED_ENABLE, _("Enable"));
+    m_startYearLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+            wxSP_ARROW_KEYS, m_minYear, m_maxYear, m_minYear);
+    maxYearTextSize = m_startYearLow->GetSizeFromTextSize(m_startYearLow->GetTextExtent(maxYearStr));
+    m_startYearLow->SetInitialSize(maxYearTextSize);
+    m_startMonthLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+            wxSP_ARROW_KEYS, m_minMonth, m_maxMonth, m_minMonth);
+    maxMonthDayTextSize = m_startMonthLow->GetSizeFromTextSize(m_startMonthLow->GetTextExtent(maxMonthDayStr));
+    m_startMonthLow->SetInitialSize(maxMonthDayTextSize);
+    m_startDayLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
+            wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_minDay);
+    m_startYearHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxYearTextSize,
+            wxSP_ARROW_KEYS, m_minYear, m_maxYear, m_maxYear);
+    m_startMonthHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
+            wxSP_ARROW_KEYS, m_minMonth, m_maxMonth, m_maxMonth);
+    m_startDayHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
+            wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_maxDay);
+
+    m_dateFinishedEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_DATE_FINISHED_ENABLE, _("Enable"));
+    m_finishYearLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxYearTextSize,
+            wxSP_ARROW_KEYS, m_minYear, m_maxYear, m_minYear);
+    m_finishMonthLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
+            wxSP_ARROW_KEYS, m_minMonth, m_maxMonth, m_minMonth);
+    m_finishDayLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
+            wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_minDay);
+    m_finishYearHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxYearTextSize,
+            wxSP_ARROW_KEYS, m_minYear, m_maxYear, m_maxYear);
+    m_finishMonthHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
+            wxSP_ARROW_KEYS, m_minMonth, m_maxMonth, m_maxMonth);
+    m_finishDayHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
+            wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_maxDay);
 
     m_watchedCheck->SetValue(true);
     m_watchingCheck->SetValue(true);
@@ -112,87 +178,6 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_seasonBlankCheck->SetValue(true);
     m_seasonAllCheck->SetValue(true);
     m_seasonAllCheck->Disable();
-
-    //
-    //textctrl
-    //
-
-    m_titleTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
-
-    //
-    //spinCtrls
-    //
-
-    //for determining the width of the text controls
-    //times 1000 to give 3 extra characters of padding because
-    //GetSizeFromTextSize() doesn't work right on fedora and probably gtk3 in general
-    const wxString maxNumStr   = wxString::Format(wxT("%i"), m_maxNum * 1000);
-    const wxString maxYearStr  = wxString::Format(wxT("%i"), m_maxYear * 1000);
-    const wxString maxMonthDayStr = wxString::Format(wxT("%i"), m_maxMonth * 1000);
-
-    wxSize maxNumTextSize;
-    wxSize maxYearTextSize;
-    wxSize maxMonthDayTextSize;
-
-    m_ratingsSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
-    //find max size needed for the textbox, then set it to that
-    maxNumTextSize = m_ratingsSpinLow->GetSizeFromTextSize(m_ratingsSpinLow->GetTextExtent(maxNumStr));
-    m_ratingsSpinLow->SetInitialSize(maxNumTextSize);
-
-    m_ratingsSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
-    m_yearSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
-    m_yearSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
-    m_epsWatchedSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
-    m_epsWatchedSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
-    m_epsRewatchedSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
-    m_epsRewatchedSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
-    m_totalEpsSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
-    m_totalEpsSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
-    m_lengthSpinLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_minNum);
-    m_lengthSpinHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxNumTextSize,
-            wxSP_ARROW_KEYS, m_minNum, m_maxNum, m_maxNum);
-
-    m_startYearLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-            wxSP_ARROW_KEYS, m_minYear, m_maxYear, m_minYear);
-    maxYearTextSize = m_startYearLow->GetSizeFromTextSize(m_startYearLow->GetTextExtent(maxYearStr));
-    m_startYearLow->SetInitialSize(maxYearTextSize);
-
-    m_startMonthLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-            wxSP_ARROW_KEYS, m_minMonth, m_maxMonth, m_minMonth);
-    maxMonthDayTextSize = m_startMonthLow->GetSizeFromTextSize(m_startMonthLow->GetTextExtent(maxMonthDayStr));
-    m_startMonthLow->SetInitialSize(maxMonthDayTextSize);
-
-    m_startDayLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
-            wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_minDay);
-    m_startYearHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxYearTextSize,
-            wxSP_ARROW_KEYS, m_minYear, m_maxYear, m_maxYear);
-    m_startMonthHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
-            wxSP_ARROW_KEYS, m_minMonth, m_maxMonth, m_maxMonth);
-    m_startDayHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
-            wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_maxDay);
-    m_finishYearLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxYearTextSize,
-            wxSP_ARROW_KEYS, m_minYear, m_maxYear, m_minYear);
-    m_finishMonthLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
-            wxSP_ARROW_KEYS, m_minMonth, m_maxMonth, m_minMonth);
-    m_finishDayLow = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
-            wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_minDay);
-    m_finishYearHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxYearTextSize,
-            wxSP_ARROW_KEYS, m_minYear, m_maxYear, m_maxYear);
-    m_finishMonthHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
-            wxSP_ARROW_KEYS, m_minMonth, m_maxMonth, m_maxMonth);
-    m_finishDayHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
-            wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_maxDay);
 
     //all spin controls are disable until explicitly enabled by the user
     m_ratingsSpinLow->Disable();
@@ -219,10 +204,6 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_finishYearHigh->Disable();
     m_finishMonthHigh->Disable();
     m_finishDayHigh->Disable();
-
-    //
-    //buttons
-    //
 
     auto okButton = new wxButton(m_mainPanel, ID_ADV_FILTER_OK, "OK");
     auto cancelButton = new wxButton(m_mainPanel, ID_ADV_FILTER_CANCEL, "Cancel");
