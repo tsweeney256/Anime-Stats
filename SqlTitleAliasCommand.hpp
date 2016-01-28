@@ -5,8 +5,10 @@
 #include <cstdint>
 #include <memory>
 
-class cppw::Sqlite3Connection;
-class cppw::Sqlite3Statement;
+namespace cppw{
+    class Sqlite3Connection;
+    class Sqlite3Statement;
+}
 class wxListBox;
 
 namespace SqlTitleAliasCommand

@@ -58,6 +58,7 @@ private:
     void OnRefresh(wxCommandEvent& event);
     void OnAddRow(wxCommandEvent& event);
     void OnDeleteRow(wxCommandEvent& event);
+    void OnAliasTitle(wxCommandEvent& event);
     void OnGridColSort(wxGridEvent& event);
     void OnGridCellChanging(wxGridEvent& event);
     void OnComboDropDown(wxCommandEvent& event);

@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "GridCellDateEditor.hpp"
 #include "AdvFilterFrame.hpp"
 #include "AdvSortFrame.hpp"
+#include "TitleAliasDialog.hpp"
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_CHECKBOX(ID_WATCHED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
@@ -47,6 +48,7 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_BUTTON(ID_REFRESH_BTN, DataPanel::OnRefresh)
     EVT_BUTTON(ID_ADD_ROW_BTN, DataPanel::OnAddRow)
     EVT_BUTTON(ID_DELETE_ROW_BTN, DataPanel::OnDeleteRow)
+    EVT_BUTTON(ID_TITLE_ALIAS_BTN, DataPanel::OnAliasTitle)
     EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
     EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
     EVT_COMBOBOX_DROPDOWN(wxID_ANY, DataPanel::OnComboDropDown)
@@ -93,6 +95,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	m_advSortButton = new wxButton(topBar, ID_ADV_SORT_BTN, "Adv. Sort");
 	auto addRowButton = new wxButton(topBar, ID_ADD_ROW_BTN, "Add Row");
 	auto deleteRowButton = new wxButton(topBar, ID_DELETE_ROW_BTN, "Delete Rows");
+	auto titleAliasButton = new wxButton(topBar, ID_TITLE_ALIAS_BTN, "Alias Title");
 	auto refreshButton = new wxButton(topBar, ID_REFRESH_BTN, "Refresh");
 
 	//
@@ -121,9 +124,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 	btnSizer->Add(applyFilterButton, btnFlags);
 	btnSizer->Add(m_advFilterButton, btnFlags);
 	btnSizer->Add(addRowButton, btnFlags);
-	auto btnPlaceHolder = new wxWindow(this, wxID_ANY);
-	btnPlaceHolder->Hide();
-	btnSizer->Add(btnPlaceHolder, btnFlags);
+	btnSizer->Add(titleAliasButton, btnFlags);
 	//row 2
 	btnSizer->Add(resetFilterButton, btnFlags);
 	btnSizer->Add(m_advSortButton, btnFlags);
@@ -303,6 +304,20 @@ void DataPanel::OnDeleteRow(wxCommandEvent& WXUNUSED(event))
     ++m_commandLevel;
     HandleCommandChecking();
     m_unsavedChanges = true;
+}
+
+void DataPanel::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
+{
+    auto rows = m_grid->GetSelectedRows();
+
+    if(rows.size() > 1)
+        wxMessageBox("Error: You may only set aliases to one title at a time.");
+    else if(rows.size() == 0)
+        wxMessageBox("Error: No row was selected.");
+    else{
+        auto aliasDlg = new TitleAliasDialog(this, wxID_ANY, m_connection, wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)));
+        aliasDlg->ShowModal();
+    }
 }
 
 void DataPanel::OnGridColSort(wxGridEvent& event)
