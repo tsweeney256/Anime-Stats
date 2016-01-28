@@ -135,10 +135,12 @@ void MainFrame::OnClose(wxCloseEvent& event)
             Destroy();
         }
         else if(button == wxID_NO){
+            m_connection->Rollback();
             Destroy();
         }
     }
     else
+        m_connection->Rollback();
         Destroy();
 }
 
