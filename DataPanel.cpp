@@ -116,7 +116,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 
 	titleFilterSizer->Add(m_titleFilterTextField, wxSizerFlags(1).Border(wxALL).Center());
 
-	auto btnFlags = wxSizerFlags(1).Bottom().Expand();
+	auto btnFlags = wxSizerFlags(1).Expand();
 	//row 1
 	btnSizer->Add(applyFilterButton, btnFlags);
 	btnSizer->Add(m_advFilterButton, btnFlags);
