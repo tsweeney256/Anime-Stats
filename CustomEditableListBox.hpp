@@ -36,14 +36,12 @@ private:
     {
         event.Skip();
         auto customEvent = std::unique_ptr<wxListEvent>(static_cast<wxListEvent*>(event.Clone()));
-        //customEvent->SetId(typeEVT_LIST_ITEM_SELECTED_CUSTOM);
         wxPostEvent(m_parent, *customEvent);
     }
     void OnEndLabelEditCustom(wxListEvent& event)
     {
         event.Skip();
         auto customEvent = std::unique_ptr<wxListEvent>(static_cast<wxListEvent*>(event.Clone()));
-        //customEvent->SetId(typeEVT_LIST_END_LABEL_EDIT_CUSTOM);
         wxPostEvent(m_parent, *customEvent);
     }
 
