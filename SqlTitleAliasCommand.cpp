@@ -1,17 +1,16 @@
-#include <wx/listbox.h>
+#include <wx/listctrl.h>
 #include "SqlTitleAliasCommand.hpp"
 #include "cppw/Sqlite3.hpp"
 
-SqlTitleAliasCommand::SqlTitleAliasCommand::SqlTitleAliasCommand(cppw::Sqlite3Connection* connection, wxListBox* list, int64_t idSeries, int listPos)
+SqlTitleAliasCommand::SqlTitleAliasCommand::SqlTitleAliasCommand(cppw::Sqlite3Connection* connection, wxListCtrl* list, int64_t idSeries, int listPos)
     : m_connection(connection), m_list(list), m_idSeries(idSeries), m_listPos(listPos) {}
 
-SqlTitleAliasCommand::UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxListBox* list, int64_t idSeries,
+SqlTitleAliasCommand::UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxListCtrl* list, int64_t idSeries,
         int listPos, std::string newVal, std::string oldVal)
     : SqlTitleAliasCommand(connection, list, idSeries, listPos), m_newVal(newVal), m_oldVal(oldVal)
 {
     if(!m_updateStmt)
         m_updateStmt = m_connection->PrepareStatement("update Title set name=? where name=? and idSeries=?");
-    Execute();
 }
 
 std::unique_ptr<cppw::Sqlite3Statement> SqlTitleAliasCommand::UpdateCommand::m_updateStmt(nullptr);
@@ -28,7 +27,7 @@ void SqlTitleAliasCommand::UpdateCommand::UnExecute()
 
 void SqlTitleAliasCommand::UpdateCommand::ExecuteCommon(std::string targetVal, std::string newVal)
 {
-    m_list->SetString(m_listPos, newVal);
+    m_list->SetItem(m_listPos, 1, newVal);
 }
 
 void SqlTitleAliasCommand::UpdateCommand::ApplyToDb()
@@ -42,25 +41,23 @@ void SqlTitleAliasCommand::UpdateCommand::ApplyToDb()
     results->NextRow();
 }
 
-SqlTitleAliasCommand::InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxListBox* list, int64_t idSeries, std::string val)
-    : SqlTitleAliasCommand(connection, list, idSeries, list->GetCount()), m_val(val)
+SqlTitleAliasCommand::InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxListCtrl* list, int64_t idSeries, std::string val)
+    : SqlTitleAliasCommand(connection, list, idSeries, 0), m_val(val)
 {
     if(!m_insertStmt)
         m_insertStmt = m_connection->PrepareStatement("insert into Title (name, idSeries, idLabel) values(?,?,0)");
-    Execute();
 }
 
 std::unique_ptr<cppw::Sqlite3Statement> SqlTitleAliasCommand::InsertCommand::m_insertStmt(nullptr);
 
 void SqlTitleAliasCommand::InsertCommand::Execute()
 {
-    wxString val(m_val);
-    m_list->InsertItems(1, &val, m_listPos);
+    m_list->InsertItem(m_listPos, m_val);
 }
 
 void SqlTitleAliasCommand::InsertCommand::UnExecute()
 {
-    m_list->Delete(m_listPos);
+    m_list->DeleteItem(m_listPos);
 }
 
 void SqlTitleAliasCommand::InsertCommand::ApplyToDb()
@@ -73,26 +70,25 @@ void SqlTitleAliasCommand::InsertCommand::ApplyToDb()
     results->NextRow();
 }
 
-SqlTitleAliasCommand::DeleteCommand::DeleteCommand(cppw::Sqlite3Connection* connection, wxListBox* list, int64_t idSeries,
+SqlTitleAliasCommand::DeleteCommand::DeleteCommand(cppw::Sqlite3Connection* connection, wxListCtrl* list, int64_t idSeries,
         int listPos, std::string val)
     : SqlTitleAliasCommand(connection, list, idSeries, listPos), m_val(val)
 {
     if(!m_deleteStmt)
         m_deleteStmt = m_connection->PrepareStatement("delete from Title where name=? and idSeries=?");
-    Execute();
 }
 
 std::unique_ptr<cppw::Sqlite3Statement> SqlTitleAliasCommand::DeleteCommand::m_deleteStmt(nullptr);
 
 void SqlTitleAliasCommand::DeleteCommand::Execute()
 {
-    m_list->Delete(m_listPos);
+    m_list->DeleteItem(m_listPos);
 }
 
 void SqlTitleAliasCommand::DeleteCommand::UnExecute()
 {
-    wxString val(m_val);
-    m_list->InsertItems(1, &val, m_listPos);
+
+    m_list->InsertItem(m_listPos, m_val);
 }
 
 void SqlTitleAliasCommand::DeleteCommand::ApplyToDb()

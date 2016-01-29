@@ -9,7 +9,7 @@ namespace cppw{
     class Sqlite3Connection;
     class Sqlite3Statement;
 }
-class wxListBox;
+class wxListCtrl;
 
 namespace SqlTitleAliasCommand
 {
@@ -17,7 +17,7 @@ namespace SqlTitleAliasCommand
     {
     public:
         SqlTitleAliasCommand() = delete;
-        SqlTitleAliasCommand(cppw::Sqlite3Connection* connection, wxListBox* list, int64_t idSeries, int listPos);
+        SqlTitleAliasCommand(cppw::Sqlite3Connection* connection, wxListCtrl* list, int64_t idSeries, int listPos);
         virtual ~SqlTitleAliasCommand() = default;
 
         virtual void Execute() = 0;
@@ -26,7 +26,7 @@ namespace SqlTitleAliasCommand
 
     protected:
         cppw::Sqlite3Connection* m_connection;
-        wxListBox* m_list;
+        wxListCtrl* m_list;
         int64_t m_idSeries;
         int m_listPos;
     };
@@ -35,7 +35,7 @@ namespace SqlTitleAliasCommand
     {
     public:
         UpdateCommand() = delete;
-        UpdateCommand(cppw::Sqlite3Connection* connection, wxListBox* list, int64_t idSeries,
+        UpdateCommand(cppw::Sqlite3Connection* connection, wxListCtrl* list, int64_t idSeries,
                 int listPos, std::string newVal, std::string oldVal);
 
         void Execute() override;
@@ -55,7 +55,7 @@ namespace SqlTitleAliasCommand
     {
     public:
         InsertCommand() = delete;
-        InsertCommand(cppw::Sqlite3Connection* connection, wxListBox* list, int64_t idSeries, std::string val);
+        InsertCommand(cppw::Sqlite3Connection* connection, wxListCtrl* list, int64_t idSeries, std::string val);
 
         void Execute() override;
         void UnExecute() override;
@@ -71,7 +71,7 @@ namespace SqlTitleAliasCommand
     {
     public:
         DeleteCommand() = delete;
-        DeleteCommand(cppw::Sqlite3Connection* connection, wxListBox* list, int64_t idSeries, int listPos, std::string val);
+        DeleteCommand(cppw::Sqlite3Connection* connection, wxListCtrl* list, int64_t idSeries, int listPos, std::string val);
 
         void Execute() override;
         void UnExecute() override;
