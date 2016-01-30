@@ -32,6 +32,7 @@ private:
     std::vector<std::unique_ptr<SqlTitleAliasCommand::SqlTitleAliasCommand>> m_commands;
     wxString m_oldDelVal;
     wxString m_oldEditVal;
+    bool m_ignoreDeleteEvent = false;;
 
     DECLARE_EVENT_TABLE()
 };

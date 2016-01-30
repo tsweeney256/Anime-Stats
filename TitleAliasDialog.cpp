@@ -1,4 +1,6 @@
+#include <cctype>
 #include <wx/sizer.h>
+#include <wx/msgdlg.h>
 #include "CustomEditableListBox.hpp"
 #include "cppw/Sqlite3.hpp"
 #include "TitleAliasDialog.hpp"
@@ -55,9 +57,56 @@ void TitleAliasDialog::OnBeginUpdate(wxListEvent& event)
 
 void TitleAliasDialog::OnEndUpdate(wxListEvent& event)
 {
+    //cancels the edit if the user canceled it or if the new value is the same as the previous value
     if(!event.IsEditCancelled() && m_oldEditVal.compare(event.GetText())){
-        if(!m_oldEditVal.compare("")) //only automatically created new entries are allowed to be blank
+        //cancels edit if the alt title is the same as the main title
+        if(m_title.IsSameAs(event.GetText())){
+            wxMessageBox("Alternate title may not be the same as the main title.");
+            m_list->SetItemText(event.GetIndex(), m_oldEditVal);
+            //new entry will still automatically be created if this happened when trying to insert a new row
+            //so we need to undo that
+            if(m_oldEditVal.IsSameAs("")){
+                m_ignoreDeleteEvent = true;
+                m_list->DeleteItem(m_list->GetItemCount() - 1);
+            }
+        }
+        //cancels the edit if the new alt title is blank
+        else if([&event]()
+                {
+                    bool blank = true;
+                    auto str = std::string(event.GetText().utf8_str());
+                    for(char c : str){
+                        if(!isspace(c))
+                            blank = false;
+                    }
+                    return blank;
+                }()){
+            wxMessageBox("Alternate title may not be blank.");
+            m_list->SetItemText(event.GetIndex(), m_oldEditVal);
+            if(m_oldEditVal.IsSameAs("")){
+                m_ignoreDeleteEvent = true;
+                m_list->DeleteItem(m_list->GetItemCount() - 1);
+            }
+        }
+        //cancels the edit if the new alt title is not unique
+        else if([this, &event]()
+                {
+                    for(int i = 0; i < m_list->GetItemCount(); ++i)
+                        if(i != event.GetIndex() && m_list->GetItemText(i).IsSameAs(event.GetText()))
+                            return true;
+                    return false;
+                }()){
+            wxMessageBox("Alternate title with this name already exists.");
+            m_list->SetItemText(event.GetIndex(), m_oldEditVal);
+            if(m_oldEditVal.IsSameAs("")){
+                m_ignoreDeleteEvent = true;
+                m_list->DeleteItem(m_list->GetItemCount() - 1);
+            }
+        }
+        //is an insert if the old value was completely blank
+        else if(m_oldEditVal.IsSameAs(""))
             m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_list, m_idSeries, std::string(event.GetText().utf8_str())));
+        //else it is an update
         else
             m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_list, m_idSeries,
                     event.GetIndex(), std::string(event.GetText().utf8_str()), std::string(m_oldEditVal.utf8_str())));
@@ -66,7 +115,11 @@ void TitleAliasDialog::OnEndUpdate(wxListEvent& event)
 
 void TitleAliasDialog::OnDelete(wxListEvent& event)
 {
-    m_commands.push_back(std::make_unique<DeleteCommand>(m_connection, m_list, m_idSeries, event.GetIndex(), std::string(m_oldDelVal.utf8_str())));
+    if(!m_ignoreDeleteEvent)
+        m_commands.push_back(std::make_unique<DeleteCommand>(m_connection, m_list, m_idSeries, event.GetIndex(),
+                std::string(m_oldDelVal.utf8_str())));
+    else
+        m_ignoreDeleteEvent = false;
 }
 
 void TitleAliasDialog::OnOk(wxCommandEvent& event)
