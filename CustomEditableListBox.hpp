@@ -4,6 +4,9 @@
 
 //because wxEditableListBoxes is dumb and neither skips the list control events nor
 //gives its own interface for handling events
+
+//Do note that this class makes a clone of the wxListControl events and sends that to its parent. So you can not
+//use those events to veto the changes. It will have already applied the changes by the time the parents get the event.
 class CustomEditableListBox : public wxEditableListBox
 {
 public:
