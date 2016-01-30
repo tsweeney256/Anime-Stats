@@ -507,9 +507,9 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         m_advFilterInfo = newAdvFilterInfo;
 
         //setting up the where part of the sql statement to filter by watched statuses
-        std::string watchedStatus = "WatchedStatus.idWatchedStatus";
-        std::string releaseType = "ReleaseType.idReleaseType";
-        std::string season = "Season.idSeason";
+        std::string watchedStatus = "idWatchedStatus";
+        std::string releaseType = "idReleaseType";
+        std::string season = "idSeason";
         bool firstStatus = true;
         bool showNothing = false; //if none of the boxes are ticked then nothing should be displayed
         std::stringstream statusStr;
@@ -567,25 +567,25 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                 showNothing = true;
 
             if(newAdvFilterInfo->ratingEnabled)
-                statusStr << " and (series.rating between " << newAdvFilterInfo->ratingLow << " and " <<
+                statusStr << " and (rating between " << newAdvFilterInfo->ratingLow << " and " <<
                     newAdvFilterInfo->ratingHigh << ") ";
             if(newAdvFilterInfo->yearEnabled)
-                statusStr << " and (series.year between " << newAdvFilterInfo->yearLow << " and "
+                statusStr << " and (year between " << newAdvFilterInfo->yearLow << " and "
                     << newAdvFilterInfo->yearHigh << ") ";
             if(newAdvFilterInfo->epsWatchedEnabled)
-                statusStr << " and (series.episodesWatched between " << newAdvFilterInfo->epsWatchedLow <<
+                statusStr << " and (episodesWatched between " << newAdvFilterInfo->epsWatchedLow <<
                     " and " << newAdvFilterInfo->epsWatchedHigh <<") ";
             if(newAdvFilterInfo->totalEpsEnabled)
-                statusStr << " and (series.totalEpisodes between " << newAdvFilterInfo->totalEpsLow <<
+                statusStr << " and (totalEpisodes between " << newAdvFilterInfo->totalEpsLow <<
                     " and " << newAdvFilterInfo->totalEpsHigh << ") ";
             if(newAdvFilterInfo->epsRewatchedEnabled)
-                statusStr << " and (series.rewatchedEpisodes between " << newAdvFilterInfo->epsRewatchedLow <<
+                statusStr << " and (rewatchedEpisodes between " << newAdvFilterInfo->epsRewatchedLow <<
                     " and " << newAdvFilterInfo->epsRewatchedHigh << ") ";
             if(newAdvFilterInfo->lengthEnabled)
-                statusStr << " and (series.episodeLength between " << newAdvFilterInfo->lengthLow << " and " <<
+                statusStr << " and (episodeLength between " << newAdvFilterInfo->lengthLow << " and " <<
                     newAdvFilterInfo->lengthHigh << ") ";
             if(newAdvFilterInfo->dateStartedEnabled){
-                statusStr << " and (series.dateStarted between date('";
+                statusStr << " and (dateStarted between date('";
                 statusStr << std::setfill('0') << std::setw(4) << newAdvFilterInfo->yearStartedLow;
                 statusStr << "-";
                 statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->monthStartedLow;
@@ -600,7 +600,7 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                 statusStr << "')) ";
             }
             if(newAdvFilterInfo->dateFinishedEnabled){
-                statusStr << " and (series.dateFinished between date('";
+                statusStr << " and (dateFinished between date('";
                 statusStr << std::setfill('0') << std::setw(4) << newAdvFilterInfo->yearFinishedLow;
                 statusStr << "-";
                 statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->monthFinishedLow;
@@ -615,10 +615,14 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                 statusStr << "')) ";
             }
         }
-        auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.utf8_str()) + " where Title like ? " +
+        auto debug = std::string(m_basicSelectString.utf8_str()) +
+                " where 1=1 " + //just a dumb hack so I don't have to worry about when to start using 'and's and 'or's
                 (showNothing ? " and 1 <> 1 " : statusStr.str()) + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") +
-                " order by " + m_curOrderCombined);
+                " order by " + m_curOrderCombined;
+        //wxMessageBox(debug);
+        auto statement = m_connection->PrepareStatement(debug);
         statement->Bind(1, "%" + newBasicFilterInfo->title + "%");
+        statement->Bind(2, "%" + newBasicFilterInfo->title + "%");
         auto results = statement->GetResults();
         ResetTable(results);
         m_watchedCheck->SetValue(newBasicFilterInfo->watched);
@@ -667,6 +671,8 @@ void DataPanel::ApplyFullGrid()
     try{
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.ToUTF8()) +
                 "order by " + m_curOrderCombined);
+        statement->Bind(1, "%%");
+        statement->Bind(2, "%%");
         auto results = statement->GetResults();
         ResetTable(results);
     }
