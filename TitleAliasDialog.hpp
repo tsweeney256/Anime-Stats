@@ -11,6 +11,11 @@ class wxListCtrl;
 class wxListEvent;
 namespace SqlTitleAliasCommand { class SqlTitleAliasCommand; }
 
+//Originally I wanted to put a wxMenu on here to allow undoing and redoing actions. The code supporting undoing
+//and redoing is even already there in SqlTitleAliasCommand. However, wxDialog does not support
+//having menus. This makes it so wxDialogs can not support undoing and redoing without having to tinker with how
+//wxWidgets handles keyboard events. The choice became having a wxFrame that supports menus but does not support
+//being modal, or having a wxDialog that does not support menus but does support being modal. I chose making the window modal.
 
 class TitleAliasDialog : public wxDialog
 {
