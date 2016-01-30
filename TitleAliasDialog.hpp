@@ -16,7 +16,7 @@ class TitleAliasDialog : public wxDialog
 {
 public:
     TitleAliasDialog() = delete;
-    TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite3Connection* connection, int64_t idSeries);
+    TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite3Connection* connection, int64_t idSeries, wxString title);
 
 private:
     void OnSelect(wxListEvent& event);
@@ -27,6 +27,7 @@ private:
 
     cppw::Sqlite3Connection* m_connection;
     int64_t m_idSeries;
+    wxString m_title;
     wxListCtrl* m_list = nullptr;
     std::vector<std::unique_ptr<SqlTitleAliasCommand::SqlTitleAliasCommand>> m_commands;
     wxString m_oldDelVal;

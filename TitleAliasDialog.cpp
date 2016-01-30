@@ -14,11 +14,12 @@ BEGIN_EVENT_TABLE(TitleAliasDialog, wxDialog)
     EVT_BUTTON(wxID_OK, TitleAliasDialog::OnOk)
 END_EVENT_TABLE()
 
-TitleAliasDialog::TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite3Connection* connection, int64_t idSeries)
-    : wxDialog(parent, id, "Title Alias"), m_connection(connection), m_idSeries(idSeries)
+TitleAliasDialog::TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite3Connection* connection,
+        int64_t idSeries, wxString title)
+    : wxDialog(parent, id, "Title Alias"), m_connection(connection), m_idSeries(idSeries), m_title(title)
 {
     //create the dialog controls
-    auto list = new CustomEditableListBox(this, wxID_ANY, "Aliases", wxDefaultPosition,
+    auto list = new CustomEditableListBox(this, wxID_ANY, m_title, wxDefaultPosition,
             wxDefaultSize, wxEL_DEFAULT_STYLE | wxEL_NO_REORDER);
     m_list = list->GetListCtrl();
 
