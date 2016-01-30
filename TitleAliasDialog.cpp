@@ -10,6 +10,7 @@ using namespace SqlTitleAliasCommand;
 
 BEGIN_EVENT_TABLE(TitleAliasDialog, wxDialog)
     EVT_LIST_ITEM_SELECTED(wxID_ANY, TitleAliasDialog::OnSelect)
+    EVT_LIST_ITEM_ACTIVATED(wxID_ANY, TitleAliasDialog::OnActivated)
     EVT_LIST_BEGIN_LABEL_EDIT(wxID_ANY, TitleAliasDialog::OnBeginUpdate)
     EVT_LIST_END_LABEL_EDIT(wxID_ANY, TitleAliasDialog::OnEndUpdate)
     EVT_LIST_DELETE_ITEM(wxID_ANY, TitleAliasDialog::OnDelete)
@@ -48,6 +49,11 @@ TitleAliasDialog::TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite
 void TitleAliasDialog::OnSelect(wxListEvent& event)
 {
     m_oldDelVal = event.GetText();
+}
+
+void TitleAliasDialog::OnActivated(wxListEvent& event)
+{
+    m_list->EditLabel(event.GetIndex());
 }
 
 void TitleAliasDialog::OnBeginUpdate(wxListEvent& event)

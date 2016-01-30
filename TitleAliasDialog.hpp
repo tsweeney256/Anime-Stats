@@ -20,6 +20,7 @@ public:
 
 private:
     void OnSelect(wxListEvent& event);
+    void OnActivated(wxListEvent& event);
     void OnBeginUpdate(wxListEvent& event);
     void OnEndUpdate(wxListEvent& event);
     void OnDelete(wxListEvent& event);
