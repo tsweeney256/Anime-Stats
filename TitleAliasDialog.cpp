@@ -27,6 +27,7 @@ TitleAliasDialog::TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite
     mainSizer->Add(list, wxSizerFlags(1).Border(wxALL).Expand());
     mainSizer->Add(btnSizer, wxSizerFlags(0).Border(wxALL).Bottom().Right());
     SetSizerAndFit(mainSizer);
+    SetMinSize(GetSize());
 
     auto stmt = connection->PrepareStatement("select name from Title where idSeries=? and idLabel=0");
     stmt->Bind(1, idSeries);
