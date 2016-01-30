@@ -17,6 +17,7 @@ END_EVENT_TABLE()
 TitleAliasDialog::TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite3Connection* connection, int64_t idSeries)
     : wxDialog(parent, id, "Title Alias"), m_connection(connection), m_idSeries(idSeries)
 {
+    //create the dialog controls
     auto list = new CustomEditableListBox(this, wxID_ANY, "Aliases", wxDefaultPosition,
             wxDefaultSize, wxEL_DEFAULT_STYLE | wxEL_NO_REORDER);
     m_list = list->GetListCtrl();
@@ -29,6 +30,7 @@ TitleAliasDialog::TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite
     SetSizerAndFit(mainSizer);
     SetMinSize(GetSize());
 
+    //populate the list
     auto stmt = connection->PrepareStatement("select name from Title where idSeries=? and idLabel=0");
     stmt->Bind(1, idSeries);
     auto results = stmt->GetResults();
