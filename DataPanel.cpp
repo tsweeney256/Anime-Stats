@@ -616,12 +616,11 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                 statusStr << "')) ";
             }
         }
-        auto debug = std::string(m_basicSelectString.utf8_str()) +
+        auto sqlStr = std::string(m_basicSelectString.utf8_str()) +
                 " where 1=1 " + //just a dumb hack so I don't have to worry about when to start using 'and's and 'or's
                 (showNothing ? " and 1 <> 1 " : statusStr.str()) + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") +
                 " order by " + m_curOrderCombined;
-        //wxMessageBox(debug);
-        auto statement = m_connection->PrepareStatement(debug);
+        auto statement = m_connection->PrepareStatement(sqlStr);
         statement->Bind(1, "%" + newBasicFilterInfo->title + "%");
         statement->Bind(2, "%" + newBasicFilterInfo->title + "%");
         auto results = statement->GetResults();
@@ -823,9 +822,9 @@ std::string DataPanel::GetAddedRowsSqlStr(std::vector<wxString>* changedRows)
     if(changedRows && changedRows->size()){
         output = " or (";
         for(unsigned int i = 0; i < changedRows->size() - 1; ++i){
-            output += " Series.idSeries=" + std::string((*changedRows)[i].utf8_str()) + " or ";
+            output += " rightSide.idSeries=" + std::string((*changedRows)[i].utf8_str()) + " or ";
         }
-        output += " Series.idSeries=" + std::string(changedRows->back().utf8_str()) + ")";
+        output += " rightSide.idSeries=" + std::string(changedRows->back().utf8_str()) + ")";
     }
     return output;
 }
