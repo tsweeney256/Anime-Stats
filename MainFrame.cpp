@@ -121,7 +121,6 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 void MainFrame::OnClose(wxCloseEvent& event)
 {
     if(m_dataPanel->UnsavedChangesExist() && event.CanVeto()){
-        event.Veto();
         auto test = new wxMessageDialog(this, _("Save changes to database before closing?"),
                 wxMessageBoxCaptionStr, wxCANCEL|wxYES_NO|wxCANCEL_DEFAULT|wxCENTER);
         auto button = test->ShowModal();
@@ -138,10 +137,13 @@ void MainFrame::OnClose(wxCloseEvent& event)
             m_connection->Rollback();
             Destroy();
         }
+        else //cancel
+            event.Veto();
     }
-    else
+    else{
         m_connection->Rollback();
         Destroy();
+    }
 }
 
 void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
