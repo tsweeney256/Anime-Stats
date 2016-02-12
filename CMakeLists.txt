@@ -6,6 +6,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake/Modules/")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} -s")
+set(CMAKE_CXX_FLAGS_STATIC_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${STATIC_ARGS}")
+set(CMAKE_CXX_FLAGS_STATIC_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${STATIC_ARGS}")
 set(STATIC_ARGS "-static-libstdc++ -static-libgcc -static")
 set(CMAKE_EXE_LINKER_FLAGS_STATIC_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${STATIC_ARGS}")
 set(CMAKE_EXE_LINKER_FLAGS_STATIC_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${STATIC_ARGS}")
@@ -21,7 +23,9 @@ set(SOURCE_FILES
         DataPanel.cpp
         GridCellDateEditor.cpp
         MainFrame.cpp
-        SqlGridCommand.cpp)
+        SqlGridCommand.cpp
+        SqlTitleAliasCommand.cpp
+        TitleAliasDialog.cpp)
 set(CPPW_SQLITE3 cppw/Sqlite3/Sqlite3Connection.cpp
         cppw/Sqlite3/Sqlite3Exception.cpp
         cppw/Sqlite3/Sqlite3Result.cpp
