@@ -58,7 +58,7 @@ namespace SqlTitleAliasCommand
         void ApplyToDb() override;
 
     private:
-        void ExecuteCommon(std::string targetVal, std::string newVal);
+        void ExecuteCommon(std::string newVal);
 
         std::string m_newVal;
         std::string m_oldVal;

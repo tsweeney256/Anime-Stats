@@ -32,15 +32,15 @@ std::unique_ptr<cppw::Sqlite3Statement> SqlTitleAliasCommand::UpdateCommand::m_u
 
 void SqlTitleAliasCommand::UpdateCommand::Execute()
 {
-    ExecuteCommon(m_oldVal, m_newVal);
+    ExecuteCommon(m_newVal);
 }
 
 void SqlTitleAliasCommand::UpdateCommand::UnExecute()
 {
-    ExecuteCommon(m_newVal, m_oldVal);
+    ExecuteCommon(m_oldVal);
 }
 
-void SqlTitleAliasCommand::UpdateCommand::ExecuteCommon(std::string targetVal, std::string newVal)
+void SqlTitleAliasCommand::UpdateCommand::ExecuteCommon(std::string newVal)
 {
     m_list->SetItem(m_listPos, 1, newVal);
 }
