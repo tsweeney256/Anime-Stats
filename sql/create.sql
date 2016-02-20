@@ -22,13 +22,15 @@ INSERT INTO `WatchedStatus` VALUES (2,'Watching');
 INSERT INTO `WatchedStatus` VALUES (3,'Stalled');
 INSERT INTO `WatchedStatus` VALUES (4,'Dropped');
 CREATE TABLE "Title" (
-  "idName" INTEGER PRIMARY KEY,
-  "name" TEXT NOT NULL,
-  "idSeries" INTEGER NOT NULL,
-  "idLabel" INTEGER NOT NULL DEFAULT 0,
-  CONSTRAINT "fk_Title_Show1" FOREIGN KEY ("idSeries") REFERENCES "Series" ("idSeries") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "fk_Title_Label1" FOREIGN KEY ("idLabel") REFERENCES "Label" ("idLabel") ON DELETE SET DEFAULT ON UPDATE CASCADE
-);
+	`idName`	INTEGER,
+	`name`	TEXT NOT NULL,
+	`idSeries`	INTEGER NOT NULL,
+	`idLabel`	INTEGER NOT NULL DEFAULT 0,
+	`Pronunciation`	TEXT,
+	PRIMARY KEY(idName),
+	FOREIGN KEY(`idSeries`) REFERENCES `Series`(`idSeries`) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY(`idLabel`) REFERENCES `Label`(`idLabel`) ON DELETE SET DEFAULT ON UPDATE CASCADE
+)
 CREATE TABLE "Series" (
   "idSeries" INTEGER PRIMARY KEY,
   "rating" INTEGER DEFAULT NULL,
