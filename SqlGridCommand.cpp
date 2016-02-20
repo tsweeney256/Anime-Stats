@@ -52,7 +52,7 @@ std::vector<std::array<std::string, InsertDeleteCommand::selectedTitleCols>> Ins
 {
     std::vector<std::array<std::string, selectedTitleCols>> titles;
     if(!m_titleSelectStmt)
-        m_titleSelectStmt = m_connection->PrepareStatement("select name, idLabel from Title where idSeries= ?");
+        m_titleSelectStmt = m_connection->PrepareStatement("select name, idLabel, pronunciation from Title where idSeries= ?");
     m_titleSelectStmt->Reset();
     m_titleSelectStmt->ClearBindings();
     m_titleSelectStmt->Bind(1, idSeries);
@@ -71,13 +71,17 @@ void InsertDeleteCommand::InsertIntoTitle(const std::vector<std::array<std::stri
         const std::string& idSeries)
 {
     if(!m_titleInsertStmt)
-        m_titleInsertStmt = m_connection->PrepareStatement("insert into Title (name, idSeries, idLabel) values (?, ?, ?)");
+        m_titleInsertStmt = m_connection->PrepareStatement("insert into Title (name, idSeries, idLabel, pronunciation) values (?, ?, ?, ?)");
     for(const auto& row : titles){
         m_titleInsertStmt->Reset();
         m_titleInsertStmt->ClearBindings();
         m_titleInsertStmt->Bind(1, row[0]);
         m_titleInsertStmt->Bind(2, idSeries);
         m_titleInsertStmt->Bind(3, row[1]);
+        if(!row[2].empty())
+            m_titleInsertStmt->Bind(4, row[2]);
+        else
+            m_titleInsertStmt->BindNull(4);
         auto results = m_titleInsertStmt->GetResults();
         results->NextRow();
     }
@@ -146,7 +150,7 @@ InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, 
 {
     CheckIfLegalTitle(title); //throws and cancels the construction if not legal
     //ExecuteCommon uses the m_titles vector, not the singular m_title
-    std::array<std::string, selectedTitleCols> temp {m_title, std::to_string(m_idLabel)};
+    std::array<std::string, selectedTitleCols> temp {m_title, std::to_string(m_idLabel), ""};
     m_titles.push_back(temp);
     ExecuteCommon();
     m_grid->SetCellValue(m_grid->GetNumberRows()-1, col::ID_SERIES, std::to_string(m_idSeries));
@@ -327,21 +331,27 @@ UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, 
     : SqlGridCommand(connection, grid), InsertableOrUpdatable(connection, dataPanel, addedRowIDs, label, idSeries),
       m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol), m_map(map)
 {
+    int row = -1;
     if(m_col == col::TITLE)
         CheckIfLegalTitle(m_newVal); //throws and cancels the construction if not a legal title
-    ExecutionCommon(m_newVal, m_oldVal);
+    if(m_col == col::PRONUNCIATION){
+        CheckIfLegalPronunciation(m_newVal);
+        row = GetRowWithIdSeries(m_idSeries);
+    }
+    ExecutionCommon(m_newVal, m_oldVal, row);
     AddRowIDToFilterList();
 }
 
 std::unique_ptr<cppw::Sqlite3Statement> UpdateCommand::m_selectIdTitleStmt(nullptr);
 std::unique_ptr<cppw::Sqlite3Statement> UpdateCommand::m_updateTitleStmt(nullptr);
+std::unique_ptr<cppw::Sqlite3Statement> UpdateCommand::m_updatePronunciationStmt(nullptr);
 
 void UpdateCommand::Execute()
 {
-    ExecutionCommon(m_newVal, m_oldVal);
+    int row = GetRowWithIdSeries(m_idSeries);
+    ExecutionCommon(m_newVal, m_oldVal, row);
     AddRowIDToFilterList();
     m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
-    int row = GetRowWithIdSeries(m_idSeries);
     m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_newVal)] : m_newVal));
     m_grid->GoToCell(row, m_col);
     m_grid->SelectBlock(row, m_col, row, m_col);
@@ -349,28 +359,18 @@ void UpdateCommand::Execute()
 
 void UpdateCommand::UnExecute()
 {
-    ExecutionCommon(m_oldVal, m_newVal);
-    RemoveRowIDFromFilterList();
     int row = GetRowWithIdSeries(m_idSeries);
+    ExecutionCommon(m_oldVal, m_newVal, row);
+    RemoveRowIDFromFilterList();
     m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_oldVal)] : m_oldVal));
     m_grid->GoToCell(row, m_col);
     m_grid->SelectBlock(row, m_col, row, m_col);
 }
 
-void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string& oldVal)
+void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string& oldVal, int row)
 {
     if(m_col == col::TITLE){
-        if(!m_selectIdTitleStmt)
-            //so that we only grab the main title's id
-            m_selectIdTitleStmt = m_connection->PrepareStatement("select idName from Title inner join Label "
-                    "on Title.idLabel = Label.idLabel where name = ? and Main=1");
-        m_selectIdTitleStmt->Reset();
-        m_selectIdTitleStmt->ClearBindings();
-        m_selectIdTitleStmt->Bind(1, oldVal);
-        auto result = m_selectIdTitleStmt->GetResults();
-        result->NextRow();
-        auto idName = result->GetString(0);
-        //now actually update the title
+        auto idName = GetIdName(oldVal);
         if(!m_updateTitleStmt)
             m_updateTitleStmt = m_connection->PrepareStatement("update Title set name=? where idName=?");
         m_updateTitleStmt->Reset();
@@ -378,6 +378,21 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
         m_updateTitleStmt->Bind(1, newVal);
         m_updateTitleStmt->Bind(2, idName);
         auto updateResult = m_updateTitleStmt->GetResults();
+        updateResult->NextRow();
+    }
+    else if(m_col == col::PRONUNCIATION){
+        auto title = m_grid->GetCellValue(row, col::TITLE);
+        auto idName = GetIdName(std::string(title.utf8_str()));
+        if(!m_updatePronunciationStmt)
+            m_updatePronunciationStmt = m_connection->PrepareStatement("update Title set pronunciation=? where idName=?");
+        m_updatePronunciationStmt->Reset();
+        m_updatePronunciationStmt->ClearBindings();
+        if(!newVal.empty())
+            m_updatePronunciationStmt->Bind(1, newVal);
+        else
+            m_updatePronunciationStmt->BindNull(1);
+        m_updatePronunciationStmt->Bind(2, idName);
+        auto updateResult = m_updatePronunciationStmt->GetResults();
         updateResult->NextRow();
     }
     else{
@@ -390,6 +405,30 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
         auto result = updateColStmt->GetResults();
         result->NextRow();
     }
+}
+
+void UpdateCommand::CheckIfLegalPronunciation(const std::string& str)
+{
+    bool isBlank = true; //empty pronunciations are fine though
+    for(char c : str)
+        if(!isspace(c))
+            isBlank = false;
+    if(isBlank)
+        throw BlankPronunciationException();
+}
+
+std::string UpdateCommand::GetIdName(const std::string& name)
+{
+    if(!m_selectIdTitleStmt)
+        //so that we only grab the main title's id
+        m_selectIdTitleStmt = m_connection->PrepareStatement("select idName from Title inner join Label "
+                "on Title.idLabel = Label.idLabel where name = ? and Main=1");
+    m_selectIdTitleStmt->Reset();
+    m_selectIdTitleStmt->ClearBindings();
+    m_selectIdTitleStmt->Bind(1, name);
+    auto result = m_selectIdTitleStmt->GetResults();
+    result->NextRow();
+    return result->GetString(0);
 }
 
 FilterCommand::FilterCommand(DataPanel* dataPanel, std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,

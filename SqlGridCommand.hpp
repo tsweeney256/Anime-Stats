@@ -142,7 +142,9 @@ public:
 
 private:
     void AbstractDummy() override {}
-    void ExecutionCommon(const std::string& newVal, const std::string& oldVal);
+    void ExecutionCommon(const std::string& newVal, const std::string& oldVal, int row);
+    void CheckIfLegalPronunciation(const std::string& str);
+    std::string GetIdName(const std::string& name);
 
     std::string m_newVal;
     std::string m_oldVal;
@@ -151,6 +153,7 @@ private:
 
     static std::unique_ptr<cppw::Sqlite3Statement> m_selectIdTitleStmt;
     static std::unique_ptr<cppw::Sqlite3Statement> m_updateTitleStmt;
+    static std::unique_ptr<cppw::Sqlite3Statement> m_updatePronunciationStmt;
 };
 
 class FilterCommand : public SqlGridCommand
@@ -188,6 +191,14 @@ class DupeTitleException : public SqlGridCommandException
 public:
     virtual const char* what() const noexcept override {return "Entry with this title already exists.";}
 
+protected:
+    void AbstractDummy() {}
+};
+
+class BlankPronunciationException : public SqlGridCommandException
+{
+public:
+    virtual const char* what() const noexcept override {return "Pronunciation may not consist of only blank spaces.";}
 protected:
     void AbstractDummy() {}
 };
