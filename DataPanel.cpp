@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "AdvFilterFrame.hpp"
 #include "AdvSortFrame.hpp"
 #include "TitleAliasDialog.hpp"
+#include "MainFrame.hpp"
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_CHECKBOX(ID_WATCHED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
@@ -55,7 +56,7 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_WINDOW_DESTROY(DataPanel::OnAdvrFrameDestruction)
 END_EVENT_TABLE()
 
-DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWindow* top, wxWindowID id, const wxPoint& pos,
+DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, wxWindowID id, const wxPoint& pos,
         const wxSize& size, long style, const wxString& name)
 		: wxPanel(parent, id, pos, size, style, name), m_top(top), m_connection(connection)
 {
@@ -178,7 +179,14 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWi
 
 bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
 
-void DataPanel::SetUnsavedChanges(bool unsavedChanges) { m_unsavedChanges = unsavedChanges; }
+void DataPanel::SetUnsavedChanges(bool unsavedChanges)
+{
+    if(unsavedChanges)
+        m_top->SetTitle("*" + m_top->GetTitle());
+    else if(m_unsavedChanges && !unsavedChanges)
+        m_top->SetTitle(m_top->GetTitle().Mid(1));
+    m_unsavedChanges = unsavedChanges;
+}
 
 void DataPanel::Undo()
 {
@@ -303,7 +311,7 @@ void DataPanel::OnDeleteRow(wxCommandEvent& WXUNUSED(event))
     }
     ++m_commandLevel;
     HandleCommandChecking();
-    m_unsavedChanges = true;
+    SetUnsavedChanges(true);
 }
 
 void DataPanel::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
@@ -318,7 +326,7 @@ void DataPanel::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
         auto aliasDlg = new TitleAliasDialog(this, wxID_ANY, m_connection,
                 wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)), m_grid->GetCellValue(rows[0], col::TITLE));
         if(aliasDlg->ShowModal() == wxID_OK)
-            m_unsavedChanges = true;
+            SetUnsavedChanges(true);
     }
 }
 
@@ -407,7 +415,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
     if(successfulEdit){
         ++m_commandLevel;
         HandleCommandChecking();
-        m_unsavedChanges = true;
+        SetUnsavedChanges(true);
     }
 }
 

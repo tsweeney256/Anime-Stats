@@ -28,12 +28,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "FilterStructs.hpp"
 
 namespace cppw { class Sqlite3Connection; }
+class MainFrame;
 
 //the panel that holds all the components that will make up the Data page
 class DataPanel : public wxPanel
 {
 public:
-    DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, wxWindow* top, wxWindowID id = ID_NOTEBOOK,
+    DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, wxWindowID id = ID_NOTEBOOK,
               const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
               long style = wxTAB_TRAVERSAL, const wxString& name = wxPanelNameStr);
     bool UnsavedChangesExist();
@@ -83,7 +84,7 @@ private:
         enum{R, G, B};
     };
 
-    wxWindow* m_top;
+    MainFrame* m_top;
     wxGrid* m_grid;
     wxCheckBox* m_watchedCheck;
     wxCheckBox* m_watchingCheck;
