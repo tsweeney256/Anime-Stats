@@ -12,9 +12,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-select rightSide.idSeries, name as Title, rating as Rating, status as "Watched Status", type as "Release Type", year as Year, 
-	season as Season, episodesWatched as "Episodes Watched", totalEpisodes as "Total Episodes", 
-	rewatchedEpisodes as "Rewatched Episodes" , episodeLength as "Episode Length", dateStarted as "Date Started", dateFinished as "Date Finished"
+select rightSide.idSeries, name as Title, pronunciation as Pronunciation, rating as Rating, status as "Watched Status", 
+	type as "Release Type", year as Year, season as Season, episodesWatched as "Episodes Watched", totalEpisodes as "Total Episodes", 
+	rewatchedEpisodes as "Rewatched Episodes" , episodeLength as "Episode Length", dateStarted as "Date Started", 
+	dateFinished as "Date Finished"
 from (select distinct LeftTitle.idSeries
 from (select * from Title inner join Label on Title.idLabel = Label.idLabel) as LeftTitle
 left join (select name, idSeries from Title inner join Label on Title.idLabel = Label.idLabel) as RightTitle

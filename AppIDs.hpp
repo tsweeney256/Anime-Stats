@@ -69,6 +69,7 @@ namespace col
     {
         ID_SERIES = 0,
         TITLE,
+        PRONUNCIATION,
         RATING,
         WATCHED_STATUS,
         RELEASE_TYPE,
@@ -83,10 +84,10 @@ namespace col
     };
 }
 
-const int numTitleCols = 4;
+const int numTitleCols = 5;
 const int numSeriesCols = 12;
-const int numViewCols = 13; //including the hidden 1
-const std::vector<std::string> colViewName {"idSeries", "name", "rating", "idWatchedStatus", "idReleaseType", "year", "idSeason",
+const int numViewCols = 14; //including the hidden 1
+const std::vector<std::string> colViewName {"idSeries", "name", "pronunciation", "rating", "idWatchedStatus", "idReleaseType", "year", "idSeason",
     "episodesWatched", "totalEpisodes", "rewatchedEpisodes", "episodeLength", "dateStarted", "dateFinished"};
 
 #endif // APPIDS_HPP
