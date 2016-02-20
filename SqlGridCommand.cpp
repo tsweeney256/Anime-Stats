@@ -48,7 +48,7 @@ InsertDeleteCommand::InsertDeleteCommand(cppw::Sqlite3Connection* connection, wx
 std::unique_ptr<cppw::Sqlite3Statement> InsertDeleteCommand::m_titleSelectStmt(nullptr);
 std::unique_ptr<cppw::Sqlite3Statement> InsertDeleteCommand::m_titleInsertStmt(nullptr);
 
-std::vector<std::array<std::string, numTitleCols-2>> InsertDeleteCommand::getTitlesOfSeries(int64_t idSeries)
+std::vector<std::array<std::string, InsertDeleteCommand::selectedTitleCols>> InsertDeleteCommand::getTitlesOfSeries(int64_t idSeries)
 {
     std::vector<std::array<std::string, selectedTitleCols>> titles;
     if(!m_titleSelectStmt)
