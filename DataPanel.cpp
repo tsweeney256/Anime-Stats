@@ -181,7 +181,7 @@ bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
 
 void DataPanel::SetUnsavedChanges(bool unsavedChanges)
 {
-    if(unsavedChanges)
+    if(unsavedChanges && !m_unsavedChanges)
         m_top->SetTitle("*" + m_top->GetTitle());
     else if(m_unsavedChanges && !unsavedChanges)
         m_top->SetTitle(m_top->GetTitle().Mid(1));
