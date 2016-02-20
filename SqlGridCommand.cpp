@@ -276,7 +276,7 @@ void DeleteCommand::ExecuteCommon()
             throw std::string("just something stupid to crash the program");
 
         m_seriesViewSelectStmt = m_connection->PrepareStatement(std::string(statementStr.utf8_str()) +
-                " where series.idSeries= ?");
+                " where rightSide.idSeries= ?");
     }
     wxGridUpdateLocker lock(m_grid);
     //for(auto idSeries : m_idSeries){
