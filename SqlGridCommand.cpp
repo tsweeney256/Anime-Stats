@@ -276,7 +276,7 @@ void DeleteCommand::ExecuteCommon()
             throw std::string("just something stupid to crash the program");
 
         m_seriesViewSelectStmt = m_connection->PrepareStatement(std::string(statementStr.utf8_str()) +
-                " where series.idSeries= ?");
+                " where rightSide.idSeries= ?");
     }
     wxGridUpdateLocker lock(m_grid);
     //for(auto idSeries : m_idSeries){
@@ -295,7 +295,9 @@ void DeleteCommand::ExecuteCommon()
         }
         m_seriesViewSelectStmt->Reset();
         m_seriesViewSelectStmt->ClearBindings();
-        m_seriesViewSelectStmt->Bind(1, m_idSeries[i]);
+        m_seriesViewSelectStmt->Bind(1, "%%");
+        m_seriesViewSelectStmt->Bind(2, "%%");
+        m_seriesViewSelectStmt->Bind(3, m_idSeries[i]);
         auto seriesViewResults = m_seriesViewSelectStmt->GetResults();
         while(seriesViewResults->NextRow()){
             std::array<std::string, numViewCols> rowView;
