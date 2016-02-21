@@ -442,7 +442,7 @@ void DataPanel::OnAdvrFrameDestruction(wxWindowDestroyEvent& event)
 
 void DataPanel::OnLabelContextMenu(wxGridEvent& event)
 {
-    if(event.GetCol() > -1)
+    if(event.GetRow() < 0)
         m_grid->PopupMenu(m_labelContextMenu, event.GetPosition());
     else
         event.Skip();
