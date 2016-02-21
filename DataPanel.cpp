@@ -497,7 +497,7 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
         ++rowPos;
     }
     //user shouldn't see idSeries key
-    m_grid->HideCol(0);
+    m_grid->HideCol(col::ID_SERIES);
     AppendLastGridRow(false);
     if(m_firstDraw){
         m_firstDraw = false;
