@@ -32,7 +32,4 @@ left join Season
 on series.idSeason = Season.idSeason
 left join WatchedStatus
 on series.idWatchedStatus = WatchedStatus.idWatchedStatus) as RightSide
-on LeftSide.idSeries = rightSide.idSeries
-
-
-
+on LeftSide.idSeries = rightSide.idSeries 
