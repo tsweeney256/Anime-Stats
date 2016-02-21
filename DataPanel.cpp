@@ -179,12 +179,6 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
 	//
 	m_basicFilterInfo = BasicFilterInfo::MakeShared(); //already initialized how we want it
 	m_oldBasicFilterInfo = BasicFilterInfo::MakeShared();
-    m_labelContextMenu = new wxMenu();
-    for(size_t i = col::TITLE; i < colViewName.size(); ++i){
-        int id = ID_VIEW_COL_BEGIN + i;
-        m_labelContextMenu->Append(id, colViewName[i], "", wxITEM_CHECK);
-        m_labelContextMenu->Check(id, true);
-    }
 }
 
 bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
@@ -506,10 +500,16 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
         for(int i = 0; i < 5; ++i)
             intAttr->IncRef();
         dateAttr->IncRef(); //an extra time for the date finished column
+        m_labelContextMenu = new wxMenu();
         for(int i = 0; i < numViewCols; ++i){
-            m_grid->SetColLabelValue(i, wxString::FromUTF8(results->GetColumnName(i).c_str()));
-            if(i != col::ID_SERIES)
-                m_colList.Add(m_grid->GetColLabelValue(i));
+            auto colName = wxString::FromUTF8(results->GetColumnName(i).c_str());
+            m_grid->SetColLabelValue(i, colName);
+            if(i != col::ID_SERIES){
+                m_colList.Add(colName);
+                int id = ID_VIEW_COL_BEGIN + i;
+                m_labelContextMenu->Append(id, colName, "", wxITEM_CHECK);
+                m_labelContextMenu->Check(id, true);
+            }
         }
     }
     int rowPos = 0;

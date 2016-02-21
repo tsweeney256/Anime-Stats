@@ -99,7 +99,7 @@ private:
     wxButton* m_advFilterButton;
     wxButton* m_advSortButton;
     wxTextCtrl* m_titleFilterTextField;
-    wxMenu* m_labelContextMenu;
+    wxMenu* m_labelContextMenu = nullptr;
     wxString m_basicSelectString;
     cppw::Sqlite3Connection* m_connection;
     std::string m_curOrderCol = " Title collate nocase ";
