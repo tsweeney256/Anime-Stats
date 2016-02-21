@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 #include <memory>
 #include <cstdint>
+#include <ostream>
 #include "../Sqlite3.hpp"
 
 namespace cppw
@@ -40,13 +41,15 @@ namespace cppw
 		void Commit();
 		void Rollback();
 		void EnableForeignKey(const bool enable);
-		int64_t  GetLastInsertRowID();
+		int64_t GetLastInsertRowID();
 		void ExecuteQuery(const std::string& query);
+		void SetLogging(std::ostream* os);
 		std::unique_ptr<Sqlite3Statement> PrepareStatement(const std::string& statement);
 
 
 	private:
 		sqlite3_stmt* PrepareStatementCommon(const std::string& statement);
+		static void callbackFunction(void* data, const char* output);
 		sqlite3* m_connection = nullptr;
 	};
 }
