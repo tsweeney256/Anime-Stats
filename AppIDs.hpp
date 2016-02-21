@@ -19,6 +19,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <wx/defs.h>
 
+namespace col
+{
+    enum
+    {
+        ID_SERIES = 0,
+        TITLE,
+        PRONUNCIATION,
+        RATING,
+        WATCHED_STATUS,
+        RELEASE_TYPE,
+        YEAR,
+        SEASON,
+        EPISODES_WATCHED,
+        TOTAL_EPISODES,
+        REWATCHED_EPISODES,
+        EPISODE_LENGTH,
+        DATE_STARTED,
+        DATE_FINISHED,
+        NUM_COLS
+    };
+}
+
 //the various custom IDs that we use for the application
 enum
 {
@@ -60,29 +82,10 @@ enum
     ID_ADV_FILTER_CANCEL,
     ID_ADV_FILTER_APPLY,
     ID_ADV_FILTER_RESET,
-    ID_ADV_SORT_FRAME
+    ID_ADV_SORT_FRAME,
+    ID_VIEW_COL_BEGIN, //the very first column
+    ID_VIEW_COL_END = ID_VIEW_COL_BEGIN + col::NUM_COLS - 1 //the last column
 };
-
-namespace col
-{
-    enum
-    {
-        ID_SERIES = 0,
-        TITLE,
-        PRONUNCIATION,
-        RATING,
-        WATCHED_STATUS,
-        RELEASE_TYPE,
-        YEAR,
-        SEASON,
-        EPISODES_WATCHED,
-        TOTAL_EPISODES,
-        REWATCHED_EPISODES,
-        EPISODE_LENGTH,
-        DATE_STARTED,
-        DATE_FINISHED
-    };
-}
 
 const int numTitleCols = 5;
 const int numSeriesCols = 12;

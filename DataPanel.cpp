@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <wx/debug.h>
 #include <wx/msgdlg.h>
 #include <wx/combobox.h>
+#include <wx/menu.h>
+#include <wx/utils.h>
 #include "DataPanel.hpp"
 #include "AppIDs.hpp"
 #include "cppw/Sqlite3.hpp"
@@ -54,6 +56,8 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
     EVT_COMBOBOX_DROPDOWN(wxID_ANY, DataPanel::OnComboDropDown)
     EVT_WINDOW_DESTROY(DataPanel::OnAdvrFrameDestruction)
+    EVT_GRID_LABEL_RIGHT_CLICK(DataPanel::OnLabelContextMenu)
+    EVT_MENU_RANGE(ID_VIEW_COL_BEGIN, ID_VIEW_COL_END, DataPanel::OnLabelContextMenuItem)
 END_EVENT_TABLE()
 
 DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, wxWindowID id, const wxPoint& pos,
@@ -175,6 +179,12 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
 	//
 	m_basicFilterInfo = BasicFilterInfo::MakeShared(); //already initialized how we want it
 	m_oldBasicFilterInfo = BasicFilterInfo::MakeShared();
+    m_labelContextMenu = new wxMenu();
+    for(size_t i = col::TITLE; i < colViewName.size(); ++i){
+        int id = ID_VIEW_COL_BEGIN + i;
+        m_labelContextMenu->Append(id, colViewName[i], "", wxITEM_CHECK);
+        m_labelContextMenu->Check(id, true);
+    }
 }
 
 bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
@@ -431,6 +441,23 @@ void DataPanel::OnAdvrFrameDestruction(wxWindowDestroyEvent& event)
         m_advFilterButton->Enable();
     else if(event.GetId() == ID_ADV_SORT_FRAME)
         m_advSortButton->Enable();
+}
+
+void DataPanel::OnLabelContextMenu(wxGridEvent& event)
+{
+    if(event.GetCol() > -1)
+        m_grid->PopupMenu(m_labelContextMenu, event.GetPosition());
+    else
+        event.Skip();
+}
+
+void DataPanel::OnLabelContextMenuItem(wxCommandEvent& event)
+{
+    int col = event.GetId() - ID_VIEW_COL_BEGIN;
+    if(event.IsChecked())
+        m_grid->ShowCol(col);
+    else
+        m_grid->HideCol(col);
 }
 
 void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)

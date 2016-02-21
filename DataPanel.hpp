@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 namespace cppw { class Sqlite3Connection; }
 class MainFrame;
+class wxMenu;
 
 //the panel that holds all the components that will make up the Data page
 class DataPanel : public wxPanel
@@ -64,6 +65,8 @@ private:
     void OnGridCellChanging(wxGridEvent& event);
     void OnComboDropDown(wxCommandEvent& event);
     void OnAdvrFrameDestruction(wxWindowDestroyEvent& event);
+    void OnLabelContextMenu(wxGridEvent& event);
+    void OnLabelContextMenuItem(wxCommandEvent& event);
 
     void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
     void AppendStatusStr(std::stringstream& statusStr, std::string toAppend, bool& firstStatus);
@@ -95,6 +98,7 @@ private:
     wxButton* m_advFilterButton;
     wxButton* m_advSortButton;
     wxTextCtrl* m_titleFilterTextField;
+    wxMenu* m_labelContextMenu;
     wxString m_basicSelectString;
     cppw::Sqlite3Connection* m_connection;
     std::string m_curOrderCol = " Title collate nocase ";
