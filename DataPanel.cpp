@@ -342,7 +342,10 @@ void DataPanel::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
 
 void DataPanel::OnGridColSort(wxGridEvent& event)
 {
-    m_curOrderCol = std::to_string(event.GetCol() + 1) + " collate nocase ";
+    int col = event.GetCol() + 1;
+    if(event.GetCol() == col::TITLE && m_sortByPronunciation)
+        col = col::PRONUNCIATION + 1;
+    m_curOrderCol = std::to_string(col) + " collate nocase ";
     if(m_curColSort == event.GetCol()){
         m_curOrderDir = (m_curSortAsc ? " desc " : " asc ");
         m_curSortAsc = !m_curSortAsc;
@@ -863,4 +866,9 @@ std::string DataPanel::GetAddedRowsSqlStr(std::vector<wxString>* changedRows)
         output += " rightSide.idSeries=" + std::string(changedRows->back().utf8_str()) + ")";
     }
     return output;
+}
+
+void DataPanel::SortByPronunciation(bool b)
+{
+    m_sortByPronunciation = b;
 }

@@ -38,7 +38,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
 	EVT_MENU(wxID_UNDO, MainFrame::OnUndo)
 	EVT_MENU(wxID_REDO, MainFrame::OnRedo)
-
+	EVT_MENU(SORT_BY_PRONUNCIATION, MainFrame::OnPreferencesSortByPronunciation)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -57,6 +57,11 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 	auto editMenu = new wxMenu;
 	editMenu->Append(wxID_UNDO);
 	editMenu->Append(wxID_REDO);
+	auto preferencesMenu = new wxMenu;
+	preferencesMenu->Append(SORT_BY_PRONUNCIATION, _("Sort title by pronunciation"),
+	        _("Sorts the title column by the user given pronunciation instead of by its Unicode values."
+	        "Useful for things like chinese characters."), wxITEM_CHECK);
+	editMenu->AppendSubMenu(preferencesMenu, _("Preferences"));
 
 	auto helpMenu = new wxMenu;
 	helpMenu->Append(wxID_ABOUT);
@@ -183,3 +188,8 @@ void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnUndo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Undo(); }
 
 void MainFrame::OnRedo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Redo(); }
+
+void MainFrame::OnPreferencesSortByPronunciation(wxCommandEvent& event)
+{
+    m_dataPanel->SortByPronunciation(event.IsChecked());
+}

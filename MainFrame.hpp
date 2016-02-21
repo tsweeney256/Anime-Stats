@@ -34,6 +34,7 @@ private:
     void OnAbout(wxCommandEvent& event);
     void OnUndo(wxCommandEvent& event);
     void OnRedo(wxCommandEvent& event);
+    void OnPreferencesSortByPronunciation(wxCommandEvent& event);
 
     void CreateDatabase(cppw::Sqlite3Connection* connection);
 
@@ -41,6 +42,11 @@ private:
 
     std::unique_ptr<cppw::Sqlite3Connection> m_connection;
     DataPanel* m_dataPanel = nullptr;
+
+    enum
+    {
+        SORT_BY_PRONUNCIATION = wxID_HIGHEST + 1
+    };
 };
 
 #endif

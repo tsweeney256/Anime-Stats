@@ -48,6 +48,7 @@ public:
     void NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                 std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
     void SetSort(std::string  sqlSortStr);
+    void SortByPronunciation(bool b);
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);
@@ -129,6 +130,7 @@ private:
     wxBoxSizer* m_panelSizer;
     std::shared_ptr<std::vector<wxString>> m_changedRows; //managed by the command classes
     wxArrayString m_colList;
+    bool m_sortByPronunciation = false;
 
     DECLARE_EVENT_TABLE()
 };
