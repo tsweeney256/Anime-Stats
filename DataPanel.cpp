@@ -629,10 +629,14 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                 (showNothing ? " and 1 <> 1 " : statusStr.str()) + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") +
                 " order by " + m_curOrderCombined;
         auto statement = m_connection->PrepareStatement(sqlStr);
-        statement->Bind(1, "%" + newBasicFilterInfo->title + "%");
-        statement->Bind(2, "%" + newBasicFilterInfo->title + "%");
+        std::string bindStr = "%" + newBasicFilterInfo->title + "%";
+        statement->Bind(1, bindStr);
+        statement->Bind(2, bindStr);
         auto results = statement->GetResults();
-        ResetTable(results);
+        if(results->NextRow())
+            ResetTable(results);
+        else
+            wxMessageBox("WHYYYY");
         m_watchedCheck->SetValue(newBasicFilterInfo->watched);
         m_watchingCheck->SetValue(newBasicFilterInfo->watching);
         m_stalledCheck->SetValue(newBasicFilterInfo->stalled);
