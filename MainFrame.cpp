@@ -27,6 +27,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "cppw/Sqlite3.hpp"
+#ifdef NDEBUG
+#include <iostream>
+#endif
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_CLOSE(MainFrame::OnClose)
@@ -67,6 +70,9 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     //
     auto fileExists = wxFileName::FileExists("AnimeData.db");
     m_connection = std::make_unique<cppw::Sqlite3Connection>("AnimeData.db");
+#ifdef NDEBUG
+    m_connection->SetLogging(&std::cout);
+#endif
     m_connection->EnableForeignKey(true);
     m_connection->Begin();
     if(!fileExists){
