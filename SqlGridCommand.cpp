@@ -409,12 +409,14 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
 
 void UpdateCommand::CheckIfLegalPronunciation(const std::string& str)
 {
-    bool isBlank = true; //empty pronunciations are fine though
-    for(char c : str)
-        if(!isspace(c))
-            isBlank = false;
-    if(isBlank)
-        throw BlankPronunciationException();
+    if(!str.empty()){
+        bool isBlank = true; //empty pronunciations are fine though
+        for(char c : str)
+            if(!isspace(c))
+                isBlank = false;
+        if(isBlank)
+            throw BlankPronunciationException();
+    }
 }
 
 std::string UpdateCommand::GetIdName(const std::string& name)
