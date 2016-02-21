@@ -633,10 +633,7 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         statement->Bind(1, bindStr);
         statement->Bind(2, bindStr);
         auto results = statement->GetResults();
-        if(results->NextRow())
-            ResetTable(results);
-        else
-            wxMessageBox("WHYYYY");
+        ResetTable(results);
         m_watchedCheck->SetValue(newBasicFilterInfo->watched);
         m_watchingCheck->SetValue(newBasicFilterInfo->watching);
         m_stalledCheck->SetValue(newBasicFilterInfo->stalled);
