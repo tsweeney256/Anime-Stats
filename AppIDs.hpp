@@ -24,7 +24,8 @@ namespace col
     enum
     {
         ID_SERIES = 0,
-        TITLE,
+        FIRST_VISIBLE_COL,
+        TITLE = FIRST_VISIBLE_COL,
         PRONUNCIATION,
         RATING,
         WATCHED_STATUS,
