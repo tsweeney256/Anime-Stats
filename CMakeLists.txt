@@ -23,6 +23,7 @@ set(SOURCE_FILES
         DataPanel.cpp
         GridCellDateEditor.cpp
         MainFrame.cpp
+        OpenDbDlg.cpp
         Settings.cpp
         SqlGridCommand.cpp
         SqlTitleAliasCommand.cpp
