@@ -24,9 +24,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <wx/file.h>
 #include <wx/filefn.h>
 #include <wx/msgdlg.h>
+#include <wx/stdpaths.h>
+#include <wx/dir.h>
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "cppw/Sqlite3.hpp"
+#include "OpenDbDlg.hpp"
 #ifdef NDEBUG
 #include <iostream>
 #endif
@@ -47,6 +50,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     //
     //settings
     //
+    auto appDir = wxGetCwd();
+    SwitchToDataDir();
     try{
         if(wxFileName::FileExists(settingsFileName))
             m_settings = std::make_unique<Settings>(settingsFileName);
@@ -58,11 +63,33 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     catch(SettingsSaveException& e){
         auto status = wxMessageBox(wxString(e.what()) + "\nContinue Anyway?", "Error", wxYES_NO);
         if(status == wxNO)
-            Close();
+            Destroy();
     }
     catch(SettingsLoadException& e){
         wxMessageBox(wxString(e.what()) + "\nThe program will now close.");
     }
+    wxString dbFile;
+    wxSetWorkingDirectory(appDir);
+    if(!wxFileName::FileExists(m_settings->defaultDb)){
+        wxString msg;
+        if(!m_settings->defaultDb.size())
+            msg = "A default database has not been set.\nPlease open one or create a new one.";
+        else
+            msg = "The default database was not found.\nPlease open one or create a new one.";
+        OpenDbDlg dlg(dbFile, msg, this, wxID_ANY);
+        if(dlg.ShowModal() == wxID_CANCEL){
+            Destroy();
+            return; //I guess Destroy() refuses to run until the constructor has finished
+        }
+        else{
+            auto status = wxMessageBox("Do you want to make this file your default database?", "Make Default?", wxYES_NO, this);
+            if(status == wxYES)
+                m_settings->defaultDb = dbFile;
+        }
+    }
+    else
+        dbFile = m_settings->defaultDb;
+    wxSetWorkingDirectory(appDir);
 	//
 	//menuBar
 	//
@@ -93,8 +120,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     //
     //database
     //
-    auto fileExists = wxFileName::FileExists(m_settings->defaultDb);
-    m_connection = std::make_unique<cppw::Sqlite3Connection>(m_settings->defaultDb);
+    auto fileExists = wxFileName::FileExists(dbFile);
+    m_connection = std::make_unique<cppw::Sqlite3Connection>(std::string(dbFile.utf8_str()));
 #ifdef NDEBUG
     m_connection->SetLogging(&std::cout);
 #endif
@@ -131,9 +158,10 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
         }
         if(error){
             m_connection->Rollback();
-            wxRemoveFile(m_settings->defaultDb);
+            wxRemoveFile(dbFile);
             wxMessageBox(errorMsg);
-            Close();
+            Destroy();
+            return;
         }
     }
 
@@ -152,8 +180,14 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
+    SwitchToDataDir();
     m_dataPanel->WriteSizesToSettings();
-    m_settings->Save(settingsFileName); //save the settings file no matter what
+    try{
+        m_settings->Save(settingsFileName); //save the settings file no matter what
+    }
+    catch(SettingsSaveException& e){
+        wxMessageBox("Unable to save application settings.");
+    }
     if(m_dataPanel->UnsavedChangesExist() && event.CanVeto()){
         auto test = new wxMessageDialog(this, _("Save changes to database before closing?"),
                 wxMessageBoxCaptionStr, wxCANCEL|wxYES_NO|wxCANCEL_DEFAULT|wxCENTER);
@@ -216,4 +250,22 @@ void MainFrame::OnPreferencesSortByPronunciation(wxCommandEvent& event)
 {
     m_dataPanel->SortByPronunciation(event.IsChecked());
     m_settings->sortingByPronunciation = event.IsChecked();
+}
+
+void MainFrame::SwitchToDataDir()
+{
+    auto dataDir = wxStandardPaths::Get().GetUserDataDir();
+    auto status = wxYES;
+    if(!wxDirExists(dataDir)){
+        if(!wxDir::Make(dataDir)){
+            status = wxMessageBox("Unable to create application directory:\n" + dataDir + "\nDo you wish to continue anyway?");
+            if(status == wxNO)
+                Destroy();
+        }
+    }
+    //skip error message if it's redundant
+    if(status == wxYES && !wxSetWorkingDirectory(dataDir)){
+        if(wxMessageBox("Unable to set working directory.\n" + dataDir + "Do you wish to continue anyway?.") == wxNO)
+            Destroy();
+    }
 }

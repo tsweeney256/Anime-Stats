@@ -12,7 +12,7 @@ struct Settings
     Settings();
     Settings(const wxString& fn); //load from xml file
     void Save(const wxString& fn);
-    std::string defaultDb {"AnimeData.db"};
+    std::string defaultDb;
     bool sortingByPronunciation = false;
     std::vector<int> colSizes;
     std::vector<std::vector<int>> cellColors;

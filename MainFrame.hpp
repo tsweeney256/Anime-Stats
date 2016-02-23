@@ -37,12 +37,14 @@ private:
     void OnRedo(wxCommandEvent& event);
     void OnPreferencesSortByPronunciation(wxCommandEvent& event);
 
+    void SwitchToDataDir();
+
     wxDECLARE_EVENT_TABLE();
 
     std::unique_ptr<cppw::Sqlite3Connection> m_connection;
     DataPanel* m_dataPanel = nullptr;
     std::unique_ptr<Settings> m_settings = nullptr;
-    const char* const settingsFileName = "settings";
+    const char* const settingsFileName = "settings.xml";
 
     enum
     {
