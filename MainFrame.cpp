@@ -215,4 +215,5 @@ void MainFrame::OnRedo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Redo(); }
 void MainFrame::OnPreferencesSortByPronunciation(wxCommandEvent& event)
 {
     m_dataPanel->SortByPronunciation(event.IsChecked());
+    m_settings->sortingByPronunciation = event.IsChecked();
 }
