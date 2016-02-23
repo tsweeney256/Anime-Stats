@@ -10,12 +10,6 @@ public:
     OpenDbDlg(wxString& file, wxString msg, wxWindow* parent, wxWindowID id);
     using wxDialog::ShowModal;
 
-    enum{
-        OPEN,
-        SAVE,
-        CANCEL
-    };
-
 private:
     void OnOpen(wxCommandEvent& event);
     void OnSave(wxCommandEvent& event);
