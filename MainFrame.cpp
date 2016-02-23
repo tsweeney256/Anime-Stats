@@ -44,6 +44,25 @@ wxEND_EVENT_TABLE()
 MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 		: wxFrame(NULL, wxID_ANY, title, pos, size)
 {
+    //
+    //settings
+    //
+    try{
+        if(wxFileName::FileExists(settingsFileName))
+            m_settings = std::make_unique<Settings>(settingsFileName);
+        else{
+            m_settings = std::make_unique<Settings>();
+            m_settings->Save(settingsFileName);
+        }
+    }
+    catch(SettingsSaveException& e){
+        auto status = wxMessageBox(wxString(e.what()) + "\nContinue Anyway?", "Error", wxYES_NO);
+        if(status == wxNO)
+            Close();
+    }
+    catch(SettingsLoadException& e){
+        wxMessageBox(wxString(e.what()) + "\nThe program will now close.");
+    }
 	//
 	//menuBar
 	//
@@ -61,6 +80,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 	preferencesMenu->Append(SORT_BY_PRONUNCIATION, _("Sort title by pronunciation"),
 	        _("Sorts the title column by the user given pronunciation instead of by its Unicode values."
 	        "Useful for things like chinese characters."), wxITEM_CHECK);
+	preferencesMenu->Check(SORT_BY_PRONUNCIATION, m_settings->sortingByPronunciation);
 	editMenu->AppendSubMenu(preferencesMenu, _("Preferences"));
 
 	auto helpMenu = new wxMenu;
@@ -73,8 +93,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     //
     //database
     //
-    auto fileExists = wxFileName::FileExists("AnimeData.db");
-    m_connection = std::make_unique<cppw::Sqlite3Connection>("AnimeData.db");
+    auto fileExists = wxFileName::FileExists(m_settings->defaultDb);
+    m_connection = std::make_unique<cppw::Sqlite3Connection>(m_settings->defaultDb);
 #ifdef NDEBUG
     m_connection->SetLogging(&std::cout);
 #endif
@@ -111,7 +131,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
         }
         if(error){
             m_connection->Rollback();
-            wxRemoveFile("AnimeStats.db");
+            wxRemoveFile(m_settings->defaultDb);
             wxMessageBox(errorMsg);
             Close();
         }
@@ -123,7 +143,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     auto mainPanel = new wxPanel(this, wxID_ANY);
     auto mainPanelSizer = new wxBoxSizer(wxVERTICAL);
     auto notebook = new wxNotebook(mainPanel, wxID_ANY);
-    m_dataPanel = new DataPanel(m_connection.get(), notebook, this);
+    m_dataPanel = new DataPanel(m_connection.get(), notebook, this, m_settings.get());
+    m_dataPanel->SortByPronunciation(m_settings->sortingByPronunciation);
     notebook->AddPage(m_dataPanel, _("Data"));
     mainPanelSizer->Add(notebook, wxSizerFlags(1).Expand());
     mainPanel->SetSizerAndFit(mainPanelSizer);
@@ -131,6 +152,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
+    m_dataPanel->WriteSizesToSettings();
+    m_settings->Save(settingsFileName); //save the settings file no matter what
     if(m_dataPanel->UnsavedChangesExist() && event.CanVeto()){
         auto test = new wxMessageDialog(this, _("Save changes to database before closing?"),
                 wxMessageBoxCaptionStr, wxCANCEL|wxYES_NO|wxCANCEL_DEFAULT|wxCENTER);

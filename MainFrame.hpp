@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <wx/frame.h>
 #include <memory>
 #include "cppw/Sqlite3.hpp"
+#include "Settings.hpp"
 
 class DataPanel;
 
@@ -36,12 +37,12 @@ private:
     void OnRedo(wxCommandEvent& event);
     void OnPreferencesSortByPronunciation(wxCommandEvent& event);
 
-    void CreateDatabase(cppw::Sqlite3Connection* connection);
-
     wxDECLARE_EVENT_TABLE();
 
     std::unique_ptr<cppw::Sqlite3Connection> m_connection;
     DataPanel* m_dataPanel = nullptr;
+    std::unique_ptr<Settings> m_settings = nullptr;
+    const char* const settingsFileName = "settings";
 
     enum
     {
