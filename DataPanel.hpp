@@ -30,12 +30,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 namespace cppw { class Sqlite3Connection; }
 class MainFrame;
 class wxMenu;
+class Settings;
 
 //the panel that holds all the components that will make up the Data page
 class DataPanel : public wxPanel
 {
 public:
-    DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, wxWindowID id = ID_NOTEBOOK,
+    DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, Settings* settings, wxWindowID id = ID_NOTEBOOK,
               const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
               long style = wxTAB_TRAVERSAL, const wxString& name = wxPanelNameStr);
     bool UnsavedChangesExist();
@@ -49,6 +50,9 @@ public:
                 std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
     void SetSort(std::string  sqlSortStr);
     void SortByPronunciation(bool b);
+
+    //This can't be done in the destructor for some reason or else it gets screwed up
+    void WriteSizesToSettings();
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);
@@ -90,6 +94,7 @@ private:
 
     MainFrame* m_top;
     wxGrid* m_grid;
+    Settings* m_settings;
     wxCheckBox* m_watchedCheck;
     wxCheckBox* m_watchingCheck;
     wxCheckBox* m_stalledCheck;

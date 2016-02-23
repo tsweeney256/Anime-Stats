@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <wx/combobox.h>
 #include <wx/menu.h>
 #include <wx/utils.h>
+#include <wx/dcclient.h>
 #include "DataPanel.hpp"
 #include "AppIDs.hpp"
 #include "cppw/Sqlite3.hpp"
@@ -35,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "AdvSortFrame.hpp"
 #include "TitleAliasDialog.hpp"
 #include "MainFrame.hpp"
+#include "Settings.hpp"
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_CHECKBOX(ID_WATCHED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
@@ -60,9 +62,9 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_MENU_RANGE(ID_VIEW_COL_BEGIN, ID_VIEW_COL_END, DataPanel::OnLabelContextMenuItem)
 END_EVENT_TABLE()
 
-DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, wxWindowID id, const wxPoint& pos,
-        const wxSize& size, long style, const wxString& name)
-		: wxPanel(parent, id, pos, size, style, name), m_top(top), m_connection(connection)
+DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, Settings* settings,
+        wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+		: wxPanel(parent, id, pos, size, style, name), m_top(top), m_settings(settings), m_connection(connection)
 {
     ////
     ////Top Bar
@@ -451,8 +453,13 @@ void DataPanel::OnLabelContextMenu(wxGridEvent& event)
 void DataPanel::OnLabelContextMenuItem(wxCommandEvent& event)
 {
     int col = event.GetId() - ID_VIEW_COL_BEGIN;
-    if(event.IsChecked())
+    if(event.IsChecked()){
         m_grid->ShowCol(col);
+        //ShowCol() automatically restores the previous column size, but if the previous column size was 0
+        //we're going to have it autosize the column instead of having ShowCol() set it to its smaller default size
+        if(!m_settings->colSizes[col - col::FIRST_VISIBLE_COL])
+            m_grid->AutoSizeColumn(col, false);
+    }
     else
         m_grid->HideCol(col);
 }
@@ -531,8 +538,29 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
     AppendLastGridRow(false);
     if(m_firstDraw){
         m_firstDraw = false;
-        //only do this on startup because it's wicked slow
-        m_grid->AutoSize();
+        if(m_settings->colSizes.size()){
+            for(size_t i = 0; i < m_settings->colSizes.size(); ++i){
+                m_grid->SetColSize(col::FIRST_VISIBLE_COL + i, m_settings->colSizes[i]);
+                if(m_settings->colSizes[i] == 0)
+                    m_labelContextMenu->Check(ID_VIEW_COL_BEGIN + col::FIRST_VISIBLE_COL + i, false);
+            }
+        }
+        else{
+            m_grid->AutoSize();
+            //set the Title column to be sized differently
+            wxClientDC dc(m_grid);
+            dc.SetFont(m_grid->GetLabelFont());
+            auto labelTextSize(dc.GetTextExtent(m_grid->GetColLabelValue(col::TITLE)));
+            m_grid->SetColSize(col::TITLE, labelTextSize.x * 10);
+            //store sizes in the settings structure
+            for(size_t i = 0; i < col::NUM_COLS - col::FIRST_VISIBLE_COL; ++i){
+                m_settings->colSizes.emplace_back(m_grid->GetColSize(col::FIRST_VISIBLE_COL + i));
+            }
+            //pronunciation should be hidden by default. Most people don't need it.
+            m_settings->colSizes[col::PRONUNCIATION - col::FIRST_VISIBLE_COL] = 0;
+            m_grid->SetColSize(col::PRONUNCIATION, 0);
+            m_labelContextMenu->Check(ID_VIEW_COL_BEGIN + col::PRONUNCIATION, false);
+        }
     }
 }
 
@@ -871,4 +899,11 @@ std::string DataPanel::GetAddedRowsSqlStr(std::vector<wxString>* changedRows)
 void DataPanel::SortByPronunciation(bool b)
 {
     m_sortByPronunciation = b;
+}
+
+void DataPanel::WriteSizesToSettings()
+{
+    for(int i = 0; i < col::NUM_COLS - col::FIRST_VISIBLE_COL; ++i){
+        m_settings->colSizes[i] = m_grid->GetColSize(col::FIRST_VISIBLE_COL + i);
+    }
 }
