@@ -23,9 +23,11 @@ set(SOURCE_FILES
         DataPanel.cpp
         GridCellDateEditor.cpp
         MainFrame.cpp
+        Settings.cpp
         SqlGridCommand.cpp
         SqlTitleAliasCommand.cpp
-        TitleAliasDialog.cpp)
+        TitleAliasDialog.cpp
+        )
 set(CPPW_SQLITE3 cppw/Sqlite3/Sqlite3Connection.cpp
         cppw/Sqlite3/Sqlite3Exception.cpp
         cppw/Sqlite3/Sqlite3Result.cpp
