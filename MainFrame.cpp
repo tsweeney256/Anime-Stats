@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <wx/msgdlg.h>
 #include <wx/stdpaths.h>
 #include <wx/dir.h>
+#include <wx/filedlg.h>
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "cppw/Sqlite3.hpp"
@@ -33,6 +34,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #ifdef NDEBUG
 #include <iostream>
 #endif
+
+void MainFrame::CloseDbFile()
+{
+}
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_CLOSE(MainFrame::OnClose)
@@ -43,6 +48,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_REDO, MainFrame::OnRedo)
 	EVT_MENU(SORT_BY_PRONUNCIATION, MainFrame::OnPreferencesSortByPronunciation)
 	EVT_MENU(DEFAULT_DB, MainFrame::OnDefaultDb)
+	EVT_MENU(wxID_NEW, MainFrame::OnNew)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -82,9 +88,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
             return; //I guess Destroy() refuses to run until the constructor has finished
         }
         else{
-            auto status = wxMessageBox("Do you want to make this file your default database?", "Make Default?", wxYES_NO, this);
-            if(status == wxYES)
-                m_settings->defaultDb = m_dbFile;
+            DoDefaultDbPopup();
         }
     }
     else
@@ -97,6 +101,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 	SetMenuBar(menuBar);
 
 	auto fileMenu = new wxMenu;
+	fileMenu->Append(wxID_NEW);
 	fileMenu->Append(wxID_SAVE);
 	fileMenu->Append(DEFAULT_DB, _("Default Database"),
 	        _("Select or unselect this file as your default database."), wxITEM_CHECK);
@@ -123,50 +128,9 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     //
     //database
     //
-    auto fileExists = wxFileName::FileExists(m_dbFile);
-    m_connection = std::make_unique<cppw::Sqlite3Connection>(std::string(m_dbFile.utf8_str()));
-#ifdef NDEBUG
-    m_connection->SetLogging(&std::cout);
-#endif
-    m_connection->EnableForeignKey(true);
-    m_connection->Begin();
-    if(!fileExists){
-        auto error = false;
-        wxString errorMsg;
-        wxString createFileName = "sql/create.sql";
-        wxString createStr;
-        if(wxFileName::FileExists(createFileName)){
-            wxFile createFile(createFileName);
-            if(createFile.ReadAll(&createStr)){
-                try{
-                    auto sql = std::string(createStr.utf8_str());
-                    m_connection->ExecuteQuery(sql);
-                    m_connection->Commit();
-                    m_connection->Begin();
-                }
-                catch(cppw::Sqlite3Exception& e){
-                    error = true;
-                    errorMsg <<_("Error: Could not execute create command.\n sqlite3 error: ") << e.GetExtendedErrorCode() <<
-                           _(" ") << e.GetErrorMessage();
-                }
-            }
-            else{
-                error = true;
-                errorMsg = "Error: Could not read from sql/create.sql.";
-            }
-        }
-        else{
-            error = true;
-            errorMsg = "Error: " + createFileName + " could not be found.";
-        }
-        if(error){
-            m_connection->Rollback();
-            wxRemoveFile(m_dbFile);
-            wxMessageBox(errorMsg);
-            Destroy();
-            return;
-        }
-    }
+    m_connection = GetDbConnection(m_dbFile);
+    if(!m_connection)
+        return; //GetDbConnection calls Destroy, but since this is the constructor, it wont run until the construction is finished
 
     //
     //noteBook
@@ -192,22 +156,9 @@ void MainFrame::OnClose(wxCloseEvent& event)
         wxMessageBox("Unable to save application settings.");
     }
     if(m_dataPanel->UnsavedChangesExist() && event.CanVeto()){
-        auto test = new wxMessageDialog(this, _("Save changes to database before closing?"),
-                wxMessageBoxCaptionStr, wxCANCEL|wxYES_NO|wxCANCEL_DEFAULT|wxCENTER);
-        auto button = test->ShowModal();
-        if(button == wxID_YES){
-            try{
-                m_connection->Commit();
-            }
-            catch(cppw::Sqlite3Exception& e){
-                wxMessageBox("Error saving.\n" + e.GetErrorMessage());
-            }
+        auto status = SaveChangesPopup();
+        if(status != wxID_CANCEL)
             Destroy();
-        }
-        else if(button == wxID_NO){
-            m_connection->Rollback();
-            Destroy();
-        }
         else //cancel
             event.Veto();
     }
@@ -263,6 +214,20 @@ void MainFrame::OnDefaultDb(wxCommandEvent& event)
         m_settings->defaultDb = "";
 }
 
+void MainFrame::OnNew(wxCommandEvent& WXUNUSED(event))
+{
+    if(!(m_dataPanel->UnsavedChangesExist() && SaveChangesPopup() == wxID_CANCEL)){
+        wxString dir = wxStandardPaths::Get().GetDocumentsDir();
+        wxFileDialog dlg(this, wxFileSelectorPromptStr, wxEmptyString, dir, "DB files (*.db)|*.db", wxFD_SAVE);
+        if(dlg.ShowModal() == wxID_OK){
+            m_dbFile = dlg.GetPath();
+            m_connection = GetDbConnection(m_dbFile, true);
+            DoDefaultDbPopup();
+            m_dataPanel->ResetPanel(m_connection.get());
+        }
+    }
+}
+
 void MainFrame::SwitchToDataDir()
 {
     auto dataDir = wxStandardPaths::Get().GetUserDataDir();
@@ -279,4 +244,85 @@ void MainFrame::SwitchToDataDir()
         if(wxMessageBox("Unable to set working directory.\n" + dataDir + "Do you wish to continue anyway?.") == wxNO)
             Destroy();
     }
+}
+
+void MainFrame::DoDefaultDbPopup()
+{
+    auto status = wxMessageBox("Do you want to make this file your default database?", "Make Default?", wxYES_NO, this);
+    if(status == wxYES)
+        m_settings->defaultDb = m_dbFile;
+}
+
+int MainFrame::SaveChangesPopup()
+{
+    auto dlg = new wxMessageDialog(this, _("Save changes to database before closing?"),
+            wxMessageBoxCaptionStr, wxCANCEL|wxYES_NO|wxCANCEL_DEFAULT|wxCENTER);
+    auto status  = dlg->ShowModal();
+    try{
+        if(status == wxID_YES){
+            m_connection->Commit();
+        } else if(status == wxID_NO){
+            m_connection->Rollback();
+        }
+    } catch(cppw::Sqlite3Exception& e){
+        wxMessageBox("Error:\n" + e.GetErrorMessage());
+        if(status == wxID_YES) //if there is an error saving, let the user figure out what they want to do
+            return wxID_CANCEL;
+        //else just shrug and let the program do its thing
+        return status;
+    }
+    return status;
+}
+
+std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxString& file, bool eraseIfAlreadyExists)
+{
+    auto fileExists = wxFileName::FileExists(file);
+    if(fileExists && eraseIfAlreadyExists){
+        wxRemoveFile(file);
+        fileExists = false;
+    }
+    auto connection = std::make_unique<cppw::Sqlite3Connection>(std::string(file.utf8_str()));
+#ifdef NDEBUG
+    connection->SetLogging(&std::cout);
+#endif
+    connection->EnableForeignKey(true);
+    connection->Begin();
+    if(!fileExists){
+        auto error = false;
+        wxString errorMsg;
+        wxString createFileName = "sql/create.sql";
+        wxString createStr;
+        if(wxFileName::FileExists(createFileName)){
+            wxFile createFile(createFileName);
+            if(createFile.ReadAll(&createStr)){
+                try{
+                    auto sql = std::string(createStr.utf8_str());
+                    connection->ExecuteQuery(sql);
+                    connection->Commit();
+                    connection->Begin();
+                }
+                catch(cppw::Sqlite3Exception& e){
+                    error = true;
+                    errorMsg <<_("Error: Could not execute create command.\n sqlite3 error: ") << e.GetExtendedErrorCode() <<
+                           _(" ") << e.GetErrorMessage();
+                }
+            }
+            else{
+                error = true;
+                errorMsg = "Error: Could not read from sql/create.sql.";
+            }
+        }
+        else{
+            error = true;
+            errorMsg = "Error: " + createFileName + " could not be found.";
+        }
+        if(error){
+            connection->Rollback();
+            connection = nullptr;
+            wxRemoveFile(file);
+            wxMessageBox(errorMsg);
+            Destroy();
+        }
+    }
+    return connection;
 }

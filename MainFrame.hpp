@@ -37,8 +37,14 @@ private:
     void OnRedo(wxCommandEvent& event);
     void OnPreferencesSortByPronunciation(wxCommandEvent& event);
     void OnDefaultDb(wxCommandEvent& event);
+    void OnNew(wxCommandEvent& event);
 
     void SwitchToDataDir();
+    void DoDefaultDbPopup();
+    void CloseDbFile();
+    int SaveChangesPopup();
+    //also handles creation of new DB if needed
+    std::unique_ptr<cppw::Sqlite3Connection> GetDbConnection(const wxString& file, bool eraseIfAlreadyExists = false);
 
     wxDECLARE_EVENT_TABLE();
 

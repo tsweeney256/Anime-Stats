@@ -53,6 +53,7 @@ public:
 
     //This can't be done in the destructor for some reason or else it gets screwed up
     void WriteSizesToSettings();
+    void ResetPanel(cppw::Sqlite3Connection* connection);
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);
@@ -85,6 +86,7 @@ private:
     void HandleUndoRedoColorChange();
     void UpdateOldFilterData();
     std::string GetAddedRowsSqlStr(std::vector<wxString>* changedRows);
+    void ResetFilterGui();
 
     class ratingColor{
     public:

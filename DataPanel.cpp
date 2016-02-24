@@ -262,13 +262,7 @@ void DataPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
 
 void DataPanel::OnResetFilter(wxCommandEvent& WXUNUSED(event))
 {
-    m_watchedCheck->SetValue(true);
-    m_watchingCheck->SetValue(true);
-    m_stalledCheck->SetValue(true);
-    m_droppedCheck->SetValue(true);
-    m_blankCheck->SetValue(true);
-    m_allCheck->Disable();
-    m_titleFilterTextField->SetValue("");
+    ResetFilterGui();
     NewBasicFilter();
 }
 
@@ -906,4 +900,39 @@ void DataPanel::WriteSizesToSettings()
     for(int i = 0; i < col::NUM_COLS - col::FIRST_VISIBLE_COL; ++i){
         m_settings->colSizes[i] = m_grid->GetColSize(col::FIRST_VISIBLE_COL + i);
     }
+}
+
+void DataPanel::ResetPanel(cppw::Sqlite3Connection* connection)
+{
+
+    ResetFilterGui();
+    m_commands = std::vector<std::unique_ptr<SqlGridCommand>>();
+    m_commandLevel = 0;
+    m_changedRows = nullptr;
+    m_connection = connection;
+    SetUnsavedChanges(false);
+
+    m_curOrderCol = " Title collate nocase ";
+    m_curOrderDir = " asc ";
+    m_curOrderCombined = m_curOrderCol + m_curOrderDir;
+    m_curColSort = col::TITLE;
+    m_curSortAsc = true;
+
+    m_basicFilterInfo = BasicFilterInfo::MakeShared();
+    m_oldBasicFilterInfo = BasicFilterInfo::MakeShared();
+    m_oldBasicFilterInfo = nullptr;
+    m_oldAdvFilterInfo = nullptr;
+
+    ApplyFullGrid();
+}
+
+void DataPanel::ResetFilterGui()
+{
+    m_watchedCheck->SetValue(true);
+    m_watchingCheck->SetValue(true);
+    m_stalledCheck->SetValue(true);
+    m_droppedCheck->SetValue(true);
+    m_blankCheck->SetValue(true);
+    m_allCheck->Disable();
+    m_titleFilterTextField->SetValue("");
 }
