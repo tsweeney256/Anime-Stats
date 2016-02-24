@@ -219,9 +219,15 @@ void MainFrame::OnNew(wxCommandEvent& WXUNUSED(event))
     if(!(m_dataPanel->UnsavedChangesExist() && SaveChangesPopup() == wxID_CANCEL)){
         wxString dir = wxStandardPaths::Get().GetDocumentsDir();
         wxFileDialog dlg(this, wxFileSelectorPromptStr, wxEmptyString, dir, "DB files (*.db)|*.db", wxFD_SAVE);
-        if(dlg.ShowModal() == wxID_OK){
+        int status;
+        std::unique_ptr<cppw::Sqlite3Connection> newConnection;
+        do{
+            status = dlg.ShowModal();
             m_dbFile = dlg.GetPath();
-            m_connection = GetDbConnection(m_dbFile, true);
+            newConnection = GetDbConnection(m_dbFile, true);
+        }while(status == wxID_OK && !newConnection);
+        if(newConnection && status == wxID_OK){
+            m_connection = std::move(newConnection);
             DoDefaultDbPopup();
             m_dataPanel->ResetPanel(m_connection.get());
         }
@@ -281,12 +287,19 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
         wxRemoveFile(file);
         fileExists = false;
     }
-    auto connection = std::make_unique<cppw::Sqlite3Connection>(std::string(file.utf8_str()));
-#ifdef NDEBUG
-    connection->SetLogging(&std::cout);
-#endif
-    connection->EnableForeignKey(true);
-    connection->Begin();
+    std::unique_ptr<cppw::Sqlite3Connection> connection;
+    try{
+        connection = std::make_unique<cppw::Sqlite3Connection>(std::string(file.utf8_str()));
+    #ifdef NDEBUG
+        connection->SetLogging(&std::cout);
+    #endif
+        connection->EnableForeignKey(true);
+        connection->Begin();
+    } catch(cppw::Sqlite3Exception& e) {
+        wxMessageBox("Error creating database.\nYour hard drive may be full or you may not have "
+                "the proper permissions to write in this folder.");
+        return nullptr;
+    }
     if(!fileExists){
         auto error = false;
         wxString errorMsg;

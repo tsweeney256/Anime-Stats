@@ -44,6 +44,9 @@ private:
     void CloseDbFile();
     int SaveChangesPopup();
     //also handles creation of new DB if needed
+    //will destroy the window the window if there is an unrecoverable error
+    //else it will return nullptr if the error is recoverable
+    //the only recoverable error should be if it fails to create a new db file
     std::unique_ptr<cppw::Sqlite3Connection> GetDbConnection(const wxString& file, bool eraseIfAlreadyExists = false);
 
     wxDECLARE_EVENT_TABLE();
