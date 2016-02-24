@@ -42,6 +42,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_UNDO, MainFrame::OnUndo)
 	EVT_MENU(wxID_REDO, MainFrame::OnRedo)
 	EVT_MENU(SORT_BY_PRONUNCIATION, MainFrame::OnPreferencesSortByPronunciation)
+	EVT_MENU(DEFAULT_DB, MainFrame::OnDefaultDb)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -68,7 +69,6 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     catch(SettingsLoadException& e){
         wxMessageBox(wxString(e.what()) + "\nThe program will now close.");
     }
-    wxString dbFile;
     wxSetWorkingDirectory(appDir);
     if(!wxFileName::FileExists(m_settings->defaultDb)){
         wxString msg;
@@ -76,7 +76,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
             msg = "A default database has not been set.\nPlease open one or create a new one.";
         else
             msg = "The default database was not found.\nPlease open one or create a new one.";
-        OpenDbDlg dlg(dbFile, msg, this, wxID_ANY);
+        OpenDbDlg dlg(m_dbFile, msg, this, wxID_ANY);
         if(dlg.ShowModal() == wxID_CANCEL){
             Destroy();
             return; //I guess Destroy() refuses to run until the constructor has finished
@@ -84,11 +84,11 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
         else{
             auto status = wxMessageBox("Do you want to make this file your default database?", "Make Default?", wxYES_NO, this);
             if(status == wxYES)
-                m_settings->defaultDb = dbFile;
+                m_settings->defaultDb = m_dbFile;
         }
     }
     else
-        dbFile = m_settings->defaultDb;
+        m_dbFile = m_settings->defaultDb;
     wxSetWorkingDirectory(appDir);
 	//
 	//menuBar
@@ -98,6 +98,9 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 
 	auto fileMenu = new wxMenu;
 	fileMenu->Append(wxID_SAVE);
+	fileMenu->Append(DEFAULT_DB, _("Default Database"),
+	        _("Select or unselect this file as your default database."), wxITEM_CHECK);
+	fileMenu->Check(DEFAULT_DB, m_settings->defaultDb.size());
 	fileMenu->Append(wxID_EXIT);
 
 	auto editMenu = new wxMenu;
@@ -120,8 +123,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     //
     //database
     //
-    auto fileExists = wxFileName::FileExists(dbFile);
-    m_connection = std::make_unique<cppw::Sqlite3Connection>(std::string(dbFile.utf8_str()));
+    auto fileExists = wxFileName::FileExists(m_dbFile);
+    m_connection = std::make_unique<cppw::Sqlite3Connection>(std::string(m_dbFile.utf8_str()));
 #ifdef NDEBUG
     m_connection->SetLogging(&std::cout);
 #endif
@@ -158,7 +161,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
         }
         if(error){
             m_connection->Rollback();
-            wxRemoveFile(dbFile);
+            wxRemoveFile(m_dbFile);
             wxMessageBox(errorMsg);
             Destroy();
             return;
@@ -250,6 +253,14 @@ void MainFrame::OnPreferencesSortByPronunciation(wxCommandEvent& event)
 {
     m_dataPanel->SortByPronunciation(event.IsChecked());
     m_settings->sortingByPronunciation = event.IsChecked();
+}
+
+void MainFrame::OnDefaultDb(wxCommandEvent& event)
+{
+    if(event.IsChecked())
+        m_settings->defaultDb = std::string(m_dbFile.utf8_str());
+    else
+        m_settings->defaultDb = "";
 }
 
 void MainFrame::SwitchToDataDir()

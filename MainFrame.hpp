@@ -36,6 +36,7 @@ private:
     void OnUndo(wxCommandEvent& event);
     void OnRedo(wxCommandEvent& event);
     void OnPreferencesSortByPronunciation(wxCommandEvent& event);
+    void OnDefaultDb(wxCommandEvent& event);
 
     void SwitchToDataDir();
 
@@ -44,11 +45,13 @@ private:
     std::unique_ptr<cppw::Sqlite3Connection> m_connection;
     DataPanel* m_dataPanel = nullptr;
     std::unique_ptr<Settings> m_settings = nullptr;
+    wxString m_dbFile;
     const char* const settingsFileName = "settings.xml";
 
     enum
     {
-        SORT_BY_PRONUNCIATION = wxID_HIGHEST + 1
+        SORT_BY_PRONUNCIATION = wxID_HIGHEST + 1,
+        DEFAULT_DB
     };
 };
 
