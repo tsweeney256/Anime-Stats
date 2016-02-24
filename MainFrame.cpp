@@ -345,7 +345,8 @@ void MainFrame::NewOpenCommon(int style)
         }while(!newConnection);
         if(newConnection && status == wxID_OK){
             m_connection = std::move(newConnection);
-            DoDefaultDbPopup();
+            if(m_dbFile.compare(m_settings->defaultDb))
+                DoDefaultDbPopup();
             m_dataPanel->ResetPanel(m_connection.get());
         }
     }
