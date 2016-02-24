@@ -35,10 +35,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
-void MainFrame::CloseDbFile()
-{
-}
-
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_CLOSE(MainFrame::OnClose)
     EVT_MENU(wxID_SAVE, MainFrame::OnSave)

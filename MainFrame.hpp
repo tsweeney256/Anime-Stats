@@ -41,7 +41,6 @@ private:
 
     void SwitchToDataDir();
     void DoDefaultDbPopup();
-    void CloseDbFile();
     int SaveChangesPopup();
     //also handles creation of new DB if needed
     //will destroy the window the window if there is an unrecoverable error
