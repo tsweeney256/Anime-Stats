@@ -38,10 +38,12 @@ private:
     void OnPreferencesSortByPronunciation(wxCommandEvent& event);
     void OnDefaultDb(wxCommandEvent& event);
     void OnNew(wxCommandEvent& event);
+    void OnOpen(wxCommandEvent& event);
 
     void SwitchToDataDir();
     void DoDefaultDbPopup();
     int SaveChangesPopup();
+    void NewOpenCommon(int style);
     //also handles creation of new DB if needed
     //will destroy the window the window if there is an unrecoverable error
     //else it will return nullptr if the error is recoverable

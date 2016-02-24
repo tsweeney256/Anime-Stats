@@ -45,6 +45,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(SORT_BY_PRONUNCIATION, MainFrame::OnPreferencesSortByPronunciation)
 	EVT_MENU(DEFAULT_DB, MainFrame::OnDefaultDb)
 	EVT_MENU(wxID_NEW, MainFrame::OnNew)
+	EVT_MENU(wxID_OPEN, MainFrame::OnOpen)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -98,6 +99,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 
 	auto fileMenu = new wxMenu;
 	fileMenu->Append(wxID_NEW);
+	fileMenu->Append(wxID_OPEN);
 	fileMenu->Append(wxID_SAVE);
 	fileMenu->Append(DEFAULT_DB, _("Default Database"),
 	        _("Select or unselect this file as your default database."), wxITEM_CHECK);
@@ -212,22 +214,12 @@ void MainFrame::OnDefaultDb(wxCommandEvent& event)
 
 void MainFrame::OnNew(wxCommandEvent& WXUNUSED(event))
 {
-    if(!(m_dataPanel->UnsavedChangesExist() && SaveChangesPopup() == wxID_CANCEL)){
-        wxString dir = wxStandardPaths::Get().GetDocumentsDir();
-        wxFileDialog dlg(this, wxFileSelectorPromptStr, wxEmptyString, dir, "DB files (*.db)|*.db", wxFD_SAVE);
-        int status;
-        std::unique_ptr<cppw::Sqlite3Connection> newConnection;
-        do{
-            status = dlg.ShowModal();
-            m_dbFile = dlg.GetPath();
-            newConnection = GetDbConnection(m_dbFile, true);
-        }while(status == wxID_OK && !newConnection);
-        if(newConnection && status == wxID_OK){
-            m_connection = std::move(newConnection);
-            DoDefaultDbPopup();
-            m_dataPanel->ResetPanel(m_connection.get());
-        }
-    }
+    NewOpenCommon(wxFD_SAVE);
+}
+
+void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
+{
+    NewOpenCommon(wxFD_OPEN);
 }
 
 void MainFrame::SwitchToDataDir()
@@ -334,4 +326,27 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
         }
     }
     return connection;
+}
+
+void MainFrame::NewOpenCommon(int style)
+{
+    if(!(m_dataPanel->UnsavedChangesExist() && SaveChangesPopup() == wxID_CANCEL)){
+        wxString dir = wxStandardPaths::Get().GetDocumentsDir();
+        wxFileDialog dlg(this, wxFileSelectorPromptStr, wxEmptyString, dir, "DB files (*.db)|*.db", style);
+        int status;
+        std::unique_ptr<cppw::Sqlite3Connection> newConnection;
+        do{
+            status = dlg.ShowModal();
+            if(status == wxID_OK){
+                m_dbFile = dlg.GetPath();
+                newConnection = GetDbConnection(m_dbFile, wxFD_SAVE == style);
+            }
+            else break;
+        }while(!newConnection);
+        if(newConnection && status == wxID_OK){
+            m_connection = std::move(newConnection);
+            DoDefaultDbPopup();
+            m_dataPanel->ResetPanel(m_connection.get());
+        }
+    }
 }
