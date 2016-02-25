@@ -63,7 +63,7 @@ namespace SqlTitleAliasCommand
         std::string m_newVal;
         std::string m_oldVal;
 
-        static std::unique_ptr<cppw::Sqlite3Statement> m_updateStmt;
+        std::unique_ptr<cppw::Sqlite3Statement> m_updateStmt;
     };
 
     class InsertCommand : public SqlTitleAliasCommand
@@ -79,7 +79,7 @@ namespace SqlTitleAliasCommand
     private:
         std::string m_val;
 
-        static std::unique_ptr<cppw::Sqlite3Statement> m_insertStmt;
+        std::unique_ptr<cppw::Sqlite3Statement> m_insertStmt;
     };
 
     class DeleteCommand : public SqlTitleAliasCommand
@@ -95,7 +95,7 @@ namespace SqlTitleAliasCommand
     private:
         std::string m_val;
 
-        static std::unique_ptr<cppw::Sqlite3Statement> m_deleteStmt;
+        std::unique_ptr<cppw::Sqlite3Statement> m_deleteStmt;
     };
 }
 
