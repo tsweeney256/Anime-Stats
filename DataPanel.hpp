@@ -53,7 +53,8 @@ public:
 
     //This can't be done in the destructor for some reason or else it gets screwed up
     void WriteSizesToSettings();
-    void ResetPanel(cppw::Sqlite3Connection* connection);
+    void SetSqlite3Connection(cppw::Sqlite3Connection* connection); //preserves everything on the panel and the command history
+    void ResetPanel(cppw::Sqlite3Connection* connection); //resets everything
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);

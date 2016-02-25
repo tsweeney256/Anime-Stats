@@ -797,10 +797,15 @@ void DataPanel::BuildAllowedValsMap(std::vector<wxString>& map, const std::strin
 {
     //assumes the primary keys are in order and contiguous from 0 to n and that the value to be mapped
     //is the first column
-    auto stmt = m_connection->PrepareStatement(sqlStmtStr);
-    auto results = stmt->GetResults();
-    while(results->NextRow())
-        map.emplace_back(results->GetString(0).c_str(), wxMBConvUTF8());
+    try{
+        auto stmt = m_connection->PrepareStatement(sqlStmtStr);
+        auto results = stmt->GetResults();
+        while(results->NextRow())
+            map.emplace_back(results->GetString(0).c_str(), wxMBConvUTF8());
+    }catch(cppw::Sqlite3Exception& e){
+        wxMessageBox("Error building allowed values map.\n" + e.GetErrorMessage());
+        m_top->Close(true);
+    }
 }
 
 void DataPanel::SetRatingColor(int row, const char* valStr)
@@ -899,6 +904,14 @@ void DataPanel::WriteSizesToSettings()
 {
     for(int i = 0; i < col::NUM_COLS - col::FIRST_VISIBLE_COL; ++i){
         m_settings->colSizes[i] = m_grid->GetColSize(col::FIRST_VISIBLE_COL + i);
+    }
+}
+
+void DataPanel::SetSqlite3Connection(cppw::Sqlite3Connection* connection)
+{
+    m_connection = connection;
+    for(auto& command : m_commands){
+        command->SetSqlite3Connection(connection);
     }
 }
 

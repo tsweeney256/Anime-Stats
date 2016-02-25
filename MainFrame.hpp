@@ -44,6 +44,8 @@ private:
     void DoDefaultDbPopup();
     int SaveChangesPopup();
     void NewOpenCommon(int style);
+    void SetDbFlags(cppw::Sqlite3Connection* connection);
+    bool WriteMemoryDbToFile();
     //also handles creation of new DB if needed
     //will destroy the window the window if there is an unrecoverable error
     //else it will return nullptr if the error is recoverable
@@ -56,6 +58,7 @@ private:
     DataPanel* m_dataPanel = nullptr;
     std::unique_ptr<Settings> m_settings = nullptr;
     wxString m_dbFile;
+    bool m_dbInMemory = false;
     const char* const settingsFileName = "settings.xml";
 
     enum

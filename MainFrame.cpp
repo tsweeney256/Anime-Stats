@@ -63,34 +63,23 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
             m_settings = std::make_unique<Settings>();
             m_settings->Save(settingsFileName);
         }
-    }
-    catch(SettingsSaveException& e){
+    }catch(SettingsSaveException& e){
         auto status = wxMessageBox(wxString(e.what()) + "\nContinue Anyway?", "Error", wxYES_NO);
         if(status == wxNO)
             Destroy();
-    }
-    catch(SettingsLoadException& e){
+    }catch(SettingsLoadException& e){
         wxMessageBox(wxString(e.what()) + "\nThe program will now close.");
     }
     wxSetWorkingDirectory(appDir);
     if(!wxFileName::FileExists(m_settings->defaultDb)){
-        wxString msg;
-        if(!m_settings->defaultDb.size())
-            msg = "A default database has not been set.\nPlease open one or create a new one.";
-        else
-            msg = "The default database was not found.\nPlease open one or create a new one.";
-        OpenDbDlg dlg(m_dbFile, msg, this, wxID_ANY);
-        if(dlg.ShowModal() == wxID_CANCEL){
-            Destroy();
-            return; //I guess Destroy() refuses to run until the constructor has finished
+        if(m_settings->defaultDb.size()){
+            wxMessageBox("The default database could not be found.");
         }
-        else{
-            DoDefaultDbPopup();
-        }
+        m_dbFile = ":memory:";
+        m_dbInMemory = true;
     }
     else
         m_dbFile = m_settings->defaultDb;
-    wxSetWorkingDirectory(appDir);
 	//
 	//menuBar
 	//
@@ -168,14 +157,21 @@ void MainFrame::OnClose(wxCloseEvent& event)
 
 void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
+    bool savedChanges = false;
     try{
         m_connection->Commit();
         m_connection->Begin();
-    }
-    catch(cppw::Sqlite3Exception& e){
+        savedChanges = true;
+    }catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error saving.\n" + e.GetErrorMessage());
+        return;
     }
-    m_dataPanel->SetUnsavedChanges(false);
+    if(m_dbInMemory){
+        savedChanges = WriteMemoryDbToFile();
+    }
+    if(savedChanges){
+        m_dataPanel->SetUnsavedChanges(false);
+    }
 }
 
 void MainFrame::OnExit(wxCommandEvent& WXUNUSED(event))
@@ -214,12 +210,37 @@ void MainFrame::OnDefaultDb(wxCommandEvent& event)
 
 void MainFrame::OnNew(wxCommandEvent& WXUNUSED(event))
 {
-    NewOpenCommon(wxFD_SAVE);
+    if(!(m_dataPanel->UnsavedChangesExist() && SaveChangesPopup() == wxID_CANCEL)){
+        m_dbInMemory = true;
+        m_dbFile = ":memory:";
+        m_connection = GetDbConnection(m_dbFile);
+        m_dataPanel->ResetPanel(m_connection.get());
+    }
 }
 
 void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 {
-    NewOpenCommon(wxFD_OPEN);
+    if(!(m_dataPanel->UnsavedChangesExist() && SaveChangesPopup() == wxID_CANCEL)){
+        m_dbInMemory = false; //just in case there was a db in memory with no changes made to it
+        wxString dir = wxStandardPaths::Get().GetDocumentsDir();
+        wxFileDialog dlg(this, wxFileSelectorPromptStr, wxEmptyString, dir, "DB files (*.db)|*.db", wxFD_OPEN);
+        int status;
+        std::unique_ptr<cppw::Sqlite3Connection> newConnection;
+        do{
+            status = dlg.ShowModal();
+            if(status == wxID_OK){
+                m_dbFile = dlg.GetPath();
+                newConnection = GetDbConnection(m_dbFile, false);
+            }
+            else break;
+        }while(!newConnection);
+        if(newConnection && status == wxID_OK){
+            m_connection = std::move(newConnection);
+            if(m_dbFile.compare(m_settings->defaultDb))
+                DoDefaultDbPopup();
+            m_dataPanel->ResetPanel(m_connection.get());
+        }
+    }
 }
 
 void MainFrame::SwitchToDataDir()
@@ -255,6 +276,9 @@ int MainFrame::SaveChangesPopup()
     try{
         if(status == wxID_YES){
             m_connection->Commit();
+            if(m_dbInMemory){
+                WriteMemoryDbToFile();
+            }
         } else if(status == wxID_NO){
             m_connection->Rollback();
         }
@@ -270,19 +294,21 @@ int MainFrame::SaveChangesPopup()
 
 std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxString& file, bool eraseIfAlreadyExists)
 {
-    auto fileExists = wxFileName::FileExists(file);
-    if(fileExists && eraseIfAlreadyExists){
-        wxRemoveFile(file);
+    bool fileExists;
+    if(!m_dbInMemory){
+        fileExists = wxFileName::FileExists(file);
+        if(fileExists && eraseIfAlreadyExists){
+            wxRemoveFile(file);
+            fileExists = false;
+        }
+    }
+    else{
         fileExists = false;
     }
     std::unique_ptr<cppw::Sqlite3Connection> connection;
     try{
         connection = std::make_unique<cppw::Sqlite3Connection>(std::string(file.utf8_str()));
-    #ifdef NDEBUG
-        connection->SetLogging(&std::cout);
-    #endif
-        connection->EnableForeignKey(true);
-        connection->Begin();
+        SetDbFlags(connection.get());
     } catch(cppw::Sqlite3Exception& e) {
         wxMessageBox("Error creating database.\nYour hard drive may be full or you may not have "
                 "the proper permissions to write in this folder.");
@@ -320,7 +346,9 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
         if(error){
             connection->Rollback();
             connection = nullptr;
-            wxRemoveFile(file);
+            if(!m_dbInMemory){
+                wxRemoveFile(file);
+            }
             wxMessageBox(errorMsg);
             Destroy();
         }
@@ -328,26 +356,40 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
     return connection;
 }
 
-void MainFrame::NewOpenCommon(int style)
+void MainFrame::SetDbFlags(cppw::Sqlite3Connection* connection)
 {
-    if(!(m_dataPanel->UnsavedChangesExist() && SaveChangesPopup() == wxID_CANCEL)){
-        wxString dir = wxStandardPaths::Get().GetDocumentsDir();
-        wxFileDialog dlg(this, wxFileSelectorPromptStr, wxEmptyString, dir, "DB files (*.db)|*.db", style);
-        int status;
-        std::unique_ptr<cppw::Sqlite3Connection> newConnection;
-        do{
-            status = dlg.ShowModal();
-            if(status == wxID_OK){
+#ifdef NDEBUG
+    connection->SetLogging(&std::cout);
+#endif
+    connection->EnableForeignKey(true);
+    connection->Begin();
+}
+
+bool MainFrame::WriteMemoryDbToFile()
+{
+    wxString dir = wxStandardPaths::Get().GetDocumentsDir();
+    wxFileDialog dlg(this, wxFileSelectorPromptStr, wxEmptyString, dir, "DB files (*.db)|*.db", wxFD_SAVE);
+    int status;
+    bool error = false;
+    bool dbIsNowFile = false;
+    do{
+        status = dlg.ShowModal();
+        if(status == wxID_OK){
+            try{
+                m_connection = std::make_unique<cppw::Sqlite3Connection>(
+                        std::move(m_connection->BackupToFile(std::string(dlg.GetPath().utf8_str()))));
+                error = false;
+                dbIsNowFile = true;
+                SetDbFlags(m_connection.get());
                 m_dbFile = dlg.GetPath();
-                newConnection = GetDbConnection(m_dbFile, wxFD_SAVE == style);
+                m_dataPanel->SetSqlite3Connection(m_connection.get());
+                m_dbInMemory = false;
+            }catch(cppw::Sqlite3Exception& e){
+                wxMessageBox("Error creating database.\nYour hard drive may be full or you may not have "
+                        "the proper permissions to write in this folder.");
+                error = true;
             }
-            else break;
-        }while(!newConnection);
-        if(newConnection && status == wxID_OK){
-            m_connection = std::move(newConnection);
-            if(m_dbFile.compare(m_settings->defaultDb))
-                DoDefaultDbPopup();
-            m_dataPanel->ResetPanel(m_connection.get());
         }
-    }
+    }while(status == wxID_OK && error);
+    return dbIsNowFile;
 }
