@@ -276,11 +276,11 @@ int MainFrame::SaveChangesPopup()
     try{
         if(status == wxID_YES){
             m_connection->Commit();
+            m_connection->Begin();
             if(m_dbInMemory){
-                WriteMemoryDbToFile();
+                if(!WriteMemoryDbToFile())
+                    status = wxID_CANCEL;
             }
-        } else if(status == wxID_NO){
-            m_connection->Rollback();
         }
     } catch(cppw::Sqlite3Exception& e){
         wxMessageBox("Error:\n" + e.GetErrorMessage());
