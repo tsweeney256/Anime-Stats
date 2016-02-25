@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "cppw/Sqlite3.hpp"
-#ifdef NDEBUG
+#ifndef NDEBUG
 #include <iostream>
 #endif
 
@@ -357,7 +357,7 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
 
 void MainFrame::SetDbFlags(cppw::Sqlite3Connection* connection)
 {
-#ifdef NDEBUG
+#ifndef NDEBUG
     connection->SetLogging(&std::cout);
 #endif
     connection->EnableForeignKey(true);
