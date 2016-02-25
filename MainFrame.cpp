@@ -30,7 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "cppw/Sqlite3.hpp"
-#include "OpenDbDlg.hpp"
 #ifdef NDEBUG
 #include <iostream>
 #endif
