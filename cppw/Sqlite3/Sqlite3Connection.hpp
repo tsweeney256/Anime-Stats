@@ -31,8 +31,8 @@ namespace cppw
 		~Sqlite3Connection();
 		Sqlite3Connection(const Sqlite3Connection&) = delete;
 		Sqlite3Connection& operator=(const Sqlite3Connection&) = delete;
-		Sqlite3Connection(Sqlite3Connection&&) = default;
-		Sqlite3Connection& operator=(Sqlite3Connection&&) = default;
+		Sqlite3Connection(Sqlite3Connection&&);
+		Sqlite3Connection& operator=(Sqlite3Connection&&);
 
 		void Open(const std::string& filename); //delayed construction
 		void Open(const char* filename);
@@ -44,6 +44,7 @@ namespace cppw
 		int64_t GetLastInsertRowID();
 		void ExecuteQuery(const std::string& query);
 		void SetLogging(std::ostream* os);
+		Sqlite3Connection BackupToFile(const std::string& file);
 		std::unique_ptr<Sqlite3Statement> PrepareStatement(const std::string& statement);
 
 

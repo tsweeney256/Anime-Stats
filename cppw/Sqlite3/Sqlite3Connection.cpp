@@ -67,6 +67,19 @@ void cppw::Sqlite3Connection::EnableForeignKey(const bool enable)
 	ExecuteQuery(fk);
 }
 
+cppw::Sqlite3Connection cppw::Sqlite3Connection::BackupToFile(const std::string& file)
+{
+    Sqlite3Connection dest(file);
+    auto backup = sqlite3_backup_init(dest.m_connection, "main", m_connection, "main");
+    if(!backup)
+        throw Sqlite3Exception(dest.m_connection);
+    if(sqlite3_backup_step(backup, -1) != SQLITE_DONE)
+        throw Sqlite3Exception(dest.m_connection);
+    if(sqlite3_backup_finish(backup) != SQLITE_OK)
+        throw Sqlite3Exception(dest.m_connection);
+    return dest;
+}
+
 sqlite3_stmt* cppw::Sqlite3Connection::PrepareStatementCommon(const std::string& statementStr)
 {
 	sqlite3_stmt* statement;
@@ -98,6 +111,19 @@ int64_t cppw::Sqlite3Connection::GetLastInsertRowID()
 void cppw::Sqlite3Connection::SetLogging(std::ostream* os)
 {
     sqlite3_trace(m_connection, callbackFunction, static_cast<void*>(os));
+}
+
+cppw::Sqlite3Connection::Sqlite3Connection(Sqlite3Connection&& other)
+{
+    m_connection = other.m_connection;
+    other.m_connection = nullptr;
+}
+
+cppw::Sqlite3Connection& cppw::Sqlite3Connection::operator=(Sqlite3Connection&& rhs)
+{
+    m_connection = rhs.m_connection;
+    rhs.m_connection = nullptr;
+    return *this;
 }
 
 void cppw::Sqlite3Connection::callbackFunction(void* data, const char* output)
