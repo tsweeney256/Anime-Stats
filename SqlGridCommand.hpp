@@ -36,6 +36,7 @@ public:
     virtual ~SqlGridCommand() = default;
     virtual void Execute() = 0;
     virtual void UnExecute() = 0;
+    virtual void SetSqlite3Connection(cppw::Sqlite3Connection* connection);
 
 protected:
     int GetRowWithIdSeries(int64_t idSeries);
@@ -55,10 +56,6 @@ protected:
     std::vector<std::array<std::string, selectedTitleCols>> getTitlesOfSeries(int64_t idSeries);
     void InsertIntoTitle(const std::vector<std::array<std::string, selectedTitleCols>>& titles,
             const std::string& idSeries);
-
-    //sqlite3 doesn't support multithreading anyway, so there's no downsides to static
-    static std::unique_ptr<cppw::Sqlite3Statement> m_titleSelectStmt;
-    static std::unique_ptr<cppw::Sqlite3Statement> m_titleInsertStmt;
 };
 
 //various functions and data common to both insert and update commands
@@ -66,7 +63,7 @@ class InsertableOrUpdatable
 {
 public:
     InsertableOrUpdatable() = delete;
-    InsertableOrUpdatable(cppw::Sqlite3Connection* connection, DataPanel* dataPanel,
+    InsertableOrUpdatable(DataPanel* dataPanel,
             std::shared_ptr<std::vector<wxString>> addedRowIDs, int label, int64_t idSeries = -1);
     virtual ~InsertableOrUpdatable() = default;
 
@@ -74,14 +71,12 @@ protected:
     virtual void AbstractDummy() = 0; //just to keep the class abstract
     void AddRowIDToFilterList();
     void RemoveRowIDFromFilterList();
-    void CheckIfLegalTitle(std::string title);
+    void CheckIfLegalTitle(cppw::Sqlite3Connection* connection, const std::string& title);
 
     int m_idLabel;
     int64_t m_idSeries;
     DataPanel* m_dataPanel;
     std::shared_ptr<std::vector<wxString>> m_addedRowIDs;
-
-    static std::unique_ptr<cppw::Sqlite3Statement> m_dupeTitleCheckStmt;
 };
 
 class InsertCommand : public InsertDeleteCommand, public InsertableOrUpdatable
@@ -101,8 +96,6 @@ private:
     //vector of strings instead of vector of tuples to avoid string conversions, even if it takes a bit more memory
     //numTitleCols-2 because we're not going to save idTitle and idSeries
     std::vector<std::array<std::string, selectedTitleCols>> m_titles;
-    static std::unique_ptr<cppw::Sqlite3Statement> m_deleteRowStmt;
-    static std::unique_ptr<cppw::Sqlite3Statement> m_insertBlankStmt;
 };
 
 class DeleteCommand : public InsertDeleteCommand
@@ -122,10 +115,6 @@ private:
     std::vector<std::array<std::string, numViewCols>> m_seriesView;
     std::vector<std::vector<std::array<std::string, selectedTitleCols>>> m_titlesGroup; //multiple entries will each have multiple names
 
-    static std::unique_ptr<cppw::Sqlite3Statement> m_seriesSelectStmt;
-    static std::unique_ptr<cppw::Sqlite3Statement> m_seriesInsertStmt;
-    static std::unique_ptr<cppw::Sqlite3Statement> m_seriesViewSelectStmt;
-    static std::unique_ptr<cppw::Sqlite3Statement> m_seriesDeleteStmt;
     const std::string seriesColNames = " idSeries, rating, idReleaseType, idWatchedStatus, year, idSeason, episodesWatched, "
             "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished ";
 };
@@ -150,10 +139,6 @@ private:
     std::string m_oldVal;
     int m_col;
     const std::vector<wxString>* m_map;
-
-    static std::unique_ptr<cppw::Sqlite3Statement> m_selectIdTitleStmt;
-    static std::unique_ptr<cppw::Sqlite3Statement> m_updateTitleStmt;
-    static std::unique_ptr<cppw::Sqlite3Statement> m_updatePronunciationStmt;
 };
 
 class FilterCommand : public SqlGridCommand
