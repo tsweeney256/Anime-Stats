@@ -39,7 +39,6 @@ public:
     TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite3Connection* connection, int64_t idSeries, wxString title);
 
 private:
-    void OnSelect(wxListEvent& event);
     void OnActivated(wxListEvent& event);
     void OnBeginUpdate(wxListEvent& event);
     void OnEndUpdate(wxListEvent& event);
@@ -51,7 +50,6 @@ private:
     wxString m_title;
     wxListCtrl* m_list = nullptr;
     std::vector<std::unique_ptr<SqlTitleAliasCommand::SqlTitleAliasCommand>> m_commands;
-    wxString m_oldDelVal;
     wxString m_oldEditVal;
     bool m_ignoreDeleteEvent = false;;
 

@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 using namespace SqlTitleAliasCommand;
 
 BEGIN_EVENT_TABLE(TitleAliasDialog, wxDialog)
-    EVT_LIST_ITEM_SELECTED(wxID_ANY, TitleAliasDialog::OnSelect)
     EVT_LIST_ITEM_ACTIVATED(wxID_ANY, TitleAliasDialog::OnActivated)
     EVT_LIST_BEGIN_LABEL_EDIT(wxID_ANY, TitleAliasDialog::OnBeginUpdate)
     EVT_LIST_END_LABEL_EDIT(wxID_ANY, TitleAliasDialog::OnEndUpdate)
@@ -59,11 +58,6 @@ TitleAliasDialog::TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite
         m_list->InsertItem(rowPos, str);
         ++rowPos;
     }
-}
-
-void TitleAliasDialog::OnSelect(wxListEvent& event)
-{
-    m_oldDelVal = event.GetText();
 }
 
 void TitleAliasDialog::OnActivated(wxListEvent& event)
@@ -136,9 +130,9 @@ void TitleAliasDialog::OnEndUpdate(wxListEvent& event)
 
 void TitleAliasDialog::OnDelete(wxListEvent& event)
 {
+    std::string val = std::string(m_list->GetItemText(event.GetIndex()).utf8_str());
     if(!m_ignoreDeleteEvent)
-        m_commands.push_back(std::make_unique<DeleteCommand>(m_connection, m_list, m_idSeries, event.GetIndex(),
-                std::string(m_oldDelVal.utf8_str())));
+        m_commands.push_back(std::make_unique<DeleteCommand>(m_connection, m_list, m_idSeries, event.GetIndex(), std::string(val)));
     else
         m_ignoreDeleteEvent = false;
 }
