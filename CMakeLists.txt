@@ -20,10 +20,9 @@ set(SOURCE_FILES
         AdvFilterFrame.cpp
         AdvSortFrame.cpp
         App.cpp
+        CustomGridCellEditors.cpp
         DataPanel.cpp
-        GridCellDateEditor.cpp
         MainFrame.cpp
-        OpenDbDlg.cpp
         Settings.cpp
         SqlGridCommand.cpp
         SqlTitleAliasCommand.cpp
