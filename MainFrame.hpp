@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "Settings.hpp"
 
 class DataPanel;
+class wxMenu;
 
 class MainFrame : public wxFrame
 {
@@ -35,6 +36,7 @@ private:
     void OnAbout(wxCommandEvent& event);
     void OnUndo(wxCommandEvent& event);
     void OnRedo(wxCommandEvent& event);
+    void OnDefaultDbAsk(wxCommandEvent& event);
     void OnPreferencesSortByPronunciation(wxCommandEvent& event);
     void OnDefaultDb(wxCommandEvent& event);
     void OnNew(wxCommandEvent& event);
@@ -56,6 +58,8 @@ private:
 
     std::unique_ptr<cppw::Sqlite3Connection> m_connection;
     DataPanel* m_dataPanel = nullptr;
+    wxMenu* m_fileMenu;
+    wxMenu* m_preferencesMenu;
     std::unique_ptr<Settings> m_settings = nullptr;
     wxString m_dbFile;
     bool m_dbInMemory = false;
@@ -64,7 +68,8 @@ private:
     enum
     {
         SORT_BY_PRONUNCIATION = wxID_HIGHEST + 1,
-        DEFAULT_DB
+        DEFAULT_DB,
+        DEFAULT_DB_ASK
     };
 };
 

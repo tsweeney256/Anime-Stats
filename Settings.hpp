@@ -28,6 +28,7 @@ struct Settings
     Settings(const wxString& fn); //load from xml file
     void Save(const wxString& fn);
     std::string defaultDb;
+    bool defaultDbAsk = true;
     bool sortingByPronunciation = false;
     std::vector<int> colSizes;
     std::vector<std::vector<int>> cellColors;

@@ -62,6 +62,14 @@ Settings::Settings(const wxString& fn)
         if(topNode)
             defaultDb = std::string(topNode->GetNodeContent().utf8_str());
 
+        //default DB ask
+        topNode = findChildWithValue(root, "defaultDbAsk", topNode);
+        if(topNode){
+            long temp;
+            if(topNode->GetNodeContent().ToLong(&temp))
+                defaultDbAsk = temp;
+        }
+
         //sort by pronunciation?
         topNode = findChildWithValue(root, "sortingByPronunciation", topNode);
         if(topNode){
@@ -138,6 +146,9 @@ void Settings::Save(const wxString& fn)
     auto sortingByPronunciationNode = new wxXmlNode(rootNode, wxXML_ELEMENT_NODE, "sortingByPronunciation");
     sortingByPronunciationNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "",
             wxString::Format("%i", sortingByPronunciation)));
+    //defaultDbAsk
+        auto defaultDbAskNode = new wxXmlNode(rootNode, wxXML_ELEMENT_NODE, "defaultDbAsk");
+        defaultDbAskNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", wxString::Format("%i", defaultDbAsk)));
     //defaultDb
     auto defaultDbNode = new wxXmlNode(rootNode, wxXML_ELEMENT_NODE, "defaultDb");
     defaultDbNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", defaultDb));

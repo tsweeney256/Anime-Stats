@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <wx/stdpaths.h>
 #include <wx/dir.h>
 #include <wx/filedlg.h>
+#include <wx/richmsgdlg.h>
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "cppw/Sqlite3.hpp"
@@ -41,6 +42,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
 	EVT_MENU(wxID_UNDO, MainFrame::OnUndo)
 	EVT_MENU(wxID_REDO, MainFrame::OnRedo)
+	EVT_MENU(DEFAULT_DB_ASK, MainFrame::OnDefaultDbAsk)
 	EVT_MENU(SORT_BY_PRONUNCIATION, MainFrame::OnPreferencesSortByPronunciation)
 	EVT_MENU(DEFAULT_DB, MainFrame::OnDefaultDb)
 	EVT_MENU(wxID_NEW, MainFrame::OnNew)
@@ -85,29 +87,33 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 	auto menuBar = new wxMenuBar;
 	SetMenuBar(menuBar);
 
-	auto fileMenu = new wxMenu;
-	fileMenu->Append(wxID_NEW);
-	fileMenu->Append(wxID_OPEN);
-	fileMenu->Append(wxID_SAVE);
-	fileMenu->Append(DEFAULT_DB, _("Default Database"),
+	m_fileMenu = new wxMenu;
+	m_fileMenu->Append(wxID_NEW);
+	m_fileMenu->Append(wxID_OPEN);
+	m_fileMenu->Append(wxID_SAVE);
+	m_fileMenu->Append(DEFAULT_DB, _("Default Database"),
 	        _("Select or unselect this file as your default database."), wxITEM_CHECK);
-	fileMenu->Check(DEFAULT_DB, m_settings->defaultDb.size());
-	fileMenu->Append(wxID_EXIT);
+	m_fileMenu->Check(DEFAULT_DB, !m_dbInMemory);
+	m_fileMenu->Enable(DEFAULT_DB, !m_dbInMemory);
+	m_fileMenu->Append(wxID_EXIT);
 
 	auto editMenu = new wxMenu;
 	editMenu->Append(wxID_UNDO);
 	editMenu->Append(wxID_REDO);
-	auto preferencesMenu = new wxMenu;
-	preferencesMenu->Append(SORT_BY_PRONUNCIATION, _("Sort title by pronunciation"),
+	m_preferencesMenu = new wxMenu;
+	m_preferencesMenu->Append(DEFAULT_DB_ASK, _("Always ask to change default database"),
+	        _("Toggle whether or not you get asked to change your default database when you open a new one."), wxITEM_CHECK);
+	m_preferencesMenu->Check(DEFAULT_DB_ASK, m_settings->defaultDbAsk);
+	m_preferencesMenu->Append(SORT_BY_PRONUNCIATION, _("Sort title by pronunciation"),
 	        _("Sorts the title column by the user given pronunciation instead of by its Unicode values."
 	        "Useful for things like chinese characters."), wxITEM_CHECK);
-	preferencesMenu->Check(SORT_BY_PRONUNCIATION, m_settings->sortingByPronunciation);
-	editMenu->AppendSubMenu(preferencesMenu, _("Preferences"));
+	m_preferencesMenu->Check(SORT_BY_PRONUNCIATION, m_settings->sortingByPronunciation);
+	editMenu->AppendSubMenu(m_preferencesMenu, _("Preferences"));
 
 	auto helpMenu = new wxMenu;
 	helpMenu->Append(wxID_ABOUT);
 
-	menuBar->Append(fileMenu, _("&File"));
+	menuBar->Append(m_fileMenu, _("&File"));
 	menuBar->Append(editMenu, _("&Edit"));
 	menuBar->Append(helpMenu, _("&Help"));
 
@@ -167,6 +173,10 @@ void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
     }
     if(m_dbInMemory){
         savedChanges = WriteMemoryDbToFile();
+        if(savedChanges){
+            DoDefaultDbPopup();
+            m_fileMenu->Enable(DEFAULT_DB, true);
+        }
     }
     if(savedChanges){
         m_dataPanel->SetUnsavedChanges(false);
@@ -193,6 +203,11 @@ void MainFrame::OnUndo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Undo(); }
 
 void MainFrame::OnRedo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Redo(); }
 
+void MainFrame::OnDefaultDbAsk(wxCommandEvent& event)
+{
+    m_settings->defaultDbAsk = event.IsChecked();
+}
+
 void MainFrame::OnPreferencesSortByPronunciation(wxCommandEvent& event)
 {
     m_dataPanel->SortByPronunciation(event.IsChecked());
@@ -212,6 +227,8 @@ void MainFrame::OnNew(wxCommandEvent& WXUNUSED(event))
     if(!(m_dataPanel->UnsavedChangesExist() && SaveChangesPopup() == wxID_CANCEL)){
         m_dbInMemory = true;
         m_dbFile = ":memory:";
+        m_fileMenu->Check(DEFAULT_DB, false);
+        m_fileMenu->Enable(DEFAULT_DB, false);
         m_connection = GetDbConnection(m_dbFile);
         m_dataPanel->ResetPanel(m_connection.get());
     }
@@ -235,8 +252,12 @@ void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
         }while(!newConnection);
         if(newConnection && status == wxID_OK){
             m_connection = std::move(newConnection);
-            if(m_dbFile.compare(m_settings->defaultDb))
+            if(m_dbFile.compare(m_settings->defaultDb)){
                 DoDefaultDbPopup();
+            }else{
+                m_fileMenu->Enable(DEFAULT_DB, true);
+                m_fileMenu->Check(DEFAULT_DB, true);
+            }
             m_dataPanel->ResetPanel(m_connection.get());
         }
     }
@@ -262,9 +283,17 @@ void MainFrame::SwitchToDataDir()
 
 void MainFrame::DoDefaultDbPopup()
 {
-    auto status = wxMessageBox("Do you want to make this file your default database?", "Make Default?", wxYES_NO, this);
-    if(status == wxYES)
-        m_settings->defaultDb = m_dbFile;
+    if(m_settings->defaultDbAsk){
+        wxRichMessageDialog msgBox(this, "Do you want to make this file your default database?", "Make Default?", wxYES_NO);
+        msgBox.ShowCheckBox("Never ask me again", false);
+        auto status = msgBox.ShowModal();
+        if(status == wxID_YES){ //picky about wxYES and wxID_YES
+            m_settings->defaultDb = m_dbFile;
+        }
+        m_fileMenu->Check(DEFAULT_DB, status == wxID_YES);
+        m_settings->defaultDbAsk = !msgBox.IsCheckBoxChecked();
+        m_preferencesMenu->Check(DEFAULT_DB_ASK, !msgBox.IsCheckBoxChecked());
+    }
 }
 
 int MainFrame::SaveChangesPopup()
