@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "DataPanel.hpp"
 #include "AppIDs.hpp"
 #include "cppw/Sqlite3.hpp"
-#include "GridCellDateEditor.hpp"
+#include "CustomGridCellEditors.hpp"
 #include "AdvFilterFrame.hpp"
 #include "AdvSortFrame.hpp"
 #include "TitleAliasDialog.hpp"
