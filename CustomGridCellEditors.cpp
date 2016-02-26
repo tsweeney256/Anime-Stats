@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <wx/textctrl.h>
 #include <wx/msgdlg.h>
 #include <cctype>
-#include "GridCellDateEditor.hpp"
+#include "CustomGridCellEditors.hpp"
 
 BEGIN_EVENT_TABLE(DateValidator, wxTextValidator)
     EVT_KEY_DOWN(DateValidator::OnKeyDown)
@@ -90,4 +90,26 @@ void DateValidator::OnKeyDown(wxKeyEvent& event)
     if(isalpha(std::string(control->GetValue().ToUTF8())[0]))
         control->SetValue("");
     event.Skip();
+}
+
+CustomGridCellNumberEditor::CustomGridCellNumberEditor(size_t maxChars)
+    : wxGridCellTextEditor(maxChars)
+{
+    wxTextValidator intValidator(wxFILTER_INCLUDE_CHAR_LIST);
+    intValidator.SetCharIncludes("0123456789");
+    SetValidator(intValidator);
+}
+
+bool CustomGridCellNumberEditor::IsAcceptedKey(wxKeyEvent& event)
+{
+    if(!wxGridCellTextEditor::IsAcceptedKey(event)){
+        return false;
+    }
+    //must be a number
+    else if(event.GetUnicodeKey() < 0x30 || event.GetUnicodeKey() > 0x39){
+        return false;
+    }
+    else{
+        return true;
+    }
 }

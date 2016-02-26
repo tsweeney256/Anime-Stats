@@ -47,4 +47,12 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
+//Pretty much wxGridCellNumberEditor but actually uses IsAcceptedKey() and allows nulls
+class CustomGridCellNumberEditor : public wxGridCellTextEditor
+{
+public:
+    CustomGridCellNumberEditor(size_t maxChars=0);
+    virtual bool IsAcceptedKey(wxKeyEvent& event) override;
+};
+
 #endif
