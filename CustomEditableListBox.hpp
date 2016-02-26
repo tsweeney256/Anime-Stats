@@ -13,6 +13,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
+#ifndef CUSTOMEDITABLELISTBOX_HPP
+#define CUSTOMEDITABLELISTBOX_HPP
+
 #include <memory>
 #include <wx/editlbox.h>
 #include <wx/listctrl.h>
@@ -71,3 +74,5 @@ private:
         Bind(wxEVT_LIST_END_LABEL_EDIT, &CustomEditableListBox::OnEndLabelEditCustom, this, id);
     }
 };
+
+#endif
