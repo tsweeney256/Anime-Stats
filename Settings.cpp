@@ -40,14 +40,9 @@ static wxXmlNode* findChildWithValue(wxXmlNode* node, const wxString& val, wxXml
     return nullptr;
 }
 
-//we construct cellColors this way instead of doing it all in one go because
-//we don't want to rely on the columns existing or being in a certain order
 Settings::Settings()
-    : cellColors(col::NUM_COLS - col::FIRST_VISIBLE_COL)
 {
-    //wxColor interprets hex as BGR instead of RGB for some reason
-    cellColors[col::RATING - col::FIRST_VISIBLE_COL] = std::vector<long> {-1, 0x6B69F8, 0x84EBFF, 0x7BBE63};
-    cellColors[col::WATCHED_STATUS - col::FIRST_VISIBLE_COL] = std::vector<long> {-1, 0xFFFFFF, 0xFFC271, 0x94FF3B, 0x83B8F9, 0x7D7DFF};
+    InitCellColors(*this);
 }
 
 Settings::Settings(const wxString& fn)
@@ -115,6 +110,39 @@ Settings::Settings(const wxString& fn)
         throw SettingsLoadException();
 }
 
+void Settings::InitCellColors(Settings& settings)
+{
+    settings.cellColors.clear();
+    for(int i = 0; i < col::NUM_COLS - col::FIRST_VISIBLE_COL; ++i){
+        settings.cellColors.emplace_back();
+        InitCellColors(settings.cellColors[i], i);
+    }
+}
+
+void Settings::InitCellColors(std::vector<long>& colColors, int col)
+{
+    col += col::FIRST_VISIBLE_COL; //offset
+    if(col == col::RATING){
+        colColors = {-1, 0x6B69F8, 0x84EBFF, 0x7BBE63};
+
+    }else if(col == col::WATCHED_STATUS){
+        colColors = {-1, -1, 0xFFC271, 0x94FF3B, 0x83B8F9, 0x7D7DFF};
+
+    } else if(col == col::TITLE || col == col::PRONUNCIATION || col == col::DATE_STARTED || col == col::DATE_FINISHED){
+        colColors = {-1, -1};
+
+    }else if(col == col::YEAR || col == col::EPISODES_WATCHED || col == col::TOTAL_EPISODES ||
+            col == col::REWATCHED_EPISODES || col == col::EPISODE_LENGTH){
+        colColors = {-1, -1, -1, -1};
+
+    }else if(col == col::RELEASE_TYPE){
+        colColors = {-1, -1, -1, -1, -1, -1};
+
+    }else if(col == col::SEASON){
+        colColors =  {-1, -1, -1, -1, -1};
+    }
+}
+
 //have to attach the child nodes in backwards order because wxWidgets is dumb as hell and their documentation is completely wrong
 void Settings::Save(const wxString& fn)
 {
@@ -133,13 +161,13 @@ void Settings::Save(const wxString& fn)
             colorsNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", ""));
             for(auto it = cellColors[i].rbegin(); it != cellColors[i].rend(); ++it){
                 auto colorsChildNode = new wxXmlNode(colorsNode, wxXML_ELEMENT_NODE, "color");
-                colorsChildNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", wxString::Format("%i", *it)));
+                colorsChildNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", wxString::Format("%li", *it)));
             }
         }
         //col size
         if(colSizes.size()){ //the program should be able to handle colSizes not existing and so we don't need to write values for them here.
             auto sizeNode = new wxXmlNode(iNode, wxXML_ELEMENT_NODE, "size");
-            sizeNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", wxString::Format("%i", colSizes[i])));
+            sizeNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", wxString::Format("%li", colSizes[i])));
         }
     }
     //sortingByPronunciation
