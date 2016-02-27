@@ -125,7 +125,7 @@ void Settings::InitCellColors(std::vector<long>& colColors, int col)
 {
     col += col::FIRST_VISIBLE_COL; //offset
     if(col == col::RATING){
-        colColors = {-1, 0x6B69F8, 0x84EBFF, 0x7BBE63};
+        colColors = {-1, -1, 0x6B69F8, 0x84EBFF, 0x7BBE63};
 
     }else if(col == col::WATCHED_STATUS){
         colColors = {-1, -1, 0xFFC271, 0x94FF3B, 0x83B8F9, 0x7D7DFF};
@@ -135,13 +135,13 @@ void Settings::InitCellColors(std::vector<long>& colColors, int col)
 
     }else if(col == col::YEAR || col == col::EPISODES_WATCHED || col == col::TOTAL_EPISODES ||
             col == col::REWATCHED_EPISODES || col == col::EPISODE_LENGTH){
-        colColors = {-1, -1, -1, -1};
+        colColors = {-1, -1, -1, -1, -1};
 
     }else if(col == col::RELEASE_TYPE){
-        colColors = {-1, -1, -1, -1, -1, -1};
+        colColors = {-1, -1, -1, -1, -1, -1, -1};
 
     }else if(col == col::SEASON){
-        colColors =  {-1, -1, -1, -1, -1};
+        colColors =  {-1, -1, -1, -1, -1, -1};
     }
 }
 

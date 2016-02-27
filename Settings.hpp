@@ -38,6 +38,7 @@ struct Settings
     //for numerical based coloring
     enum{
         TEXT,
+        BLANK,
         MIN,
         MID,
         MAX
