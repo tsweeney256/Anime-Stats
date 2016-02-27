@@ -46,8 +46,8 @@ Settings::Settings()
     : cellColors(col::NUM_COLS - col::FIRST_VISIBLE_COL)
 {
     //wxColor interprets hex as BGR instead of RGB for some reason
-    cellColors[col::RATING - col::FIRST_VISIBLE_COL] = std::vector<int> {0x6B69F8, 0x84EBFF, 0x7BBE63};
-    cellColors[col::WATCHED_STATUS - col::FIRST_VISIBLE_COL] = std::vector<int> {0xFFFFFF, 0xFFC271, 0x94FF3B, 0x83B8F9, 0x7D7DFF};
+    cellColors[col::RATING - col::FIRST_VISIBLE_COL] = std::vector<long> {-1, 0x6B69F8, 0x84EBFF, 0x7BBE63};
+    cellColors[col::WATCHED_STATUS - col::FIRST_VISIBLE_COL] = std::vector<long> {-1, 0xFFFFFF, 0xFFC271, 0x94FF3B, 0x83B8F9, 0x7D7DFF};
 }
 
 Settings::Settings(const wxString& fn)

@@ -30,11 +30,12 @@ struct Settings
     std::string defaultDb;
     bool defaultDbAsk = true;
     bool sortingByPronunciation = false;
-    std::vector<int> colSizes;
-    std::vector<std::vector<int>> cellColors;
+    std::vector<long> colSizes;
+    std::vector<std::vector<long>> cellColors;
 
     //for numerical based coloring
     enum{
+        TEXT,
         MIN,
         MID,
         MAX
