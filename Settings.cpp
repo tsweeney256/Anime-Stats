@@ -77,8 +77,8 @@ Settings::Settings(const wxString& fn)
         topNode = findChildWithValue(root, "cols", topNode);
         if(topNode){
             wxXmlNode* colNode = nullptr;
+            InitCellColors(*this); //so that we'll still have valid values even if the settings file is malformed
             for(int i = 0; i < col::NUM_COLS - col::FIRST_VISIBLE_COL; ++i){
-                cellColors.emplace_back(); //we want cellColors to have a spot for all the columns no matter what
                 colNode = findChildWithValue(topNode, wxString::Format("col%i", i), colNode);
                 if(colNode){
                     //sizes
@@ -94,12 +94,14 @@ Settings::Settings(const wxString& fn)
                     auto colorsNode = findChildWithValue(colNode, "colors", sizeNode);
                     if(colorsNode){
                         auto child = colorsNode->GetChildren();
-                        if(child)
+                        if(child){
+                            int k = 0;
                             do{
                                 long temp;
                                 if(child->GetNodeContent().ToLong(&temp))
-                                    cellColors.back().push_back(temp);
+                                    cellColors[i][k++] = temp;;
                             }while((child = child->GetNext()));
+                        }
                     }
                         
                 }
