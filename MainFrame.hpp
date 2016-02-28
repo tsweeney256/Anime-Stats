@@ -41,6 +41,7 @@ private:
     void OnDefaultDb(wxCommandEvent& event);
     void OnNew(wxCommandEvent& event);
     void OnOpen(wxCommandEvent& event);
+    void OnColorOptions(wxCommandEvent& event);
 
     void SwitchToDataDir();
     void DoDefaultDbPopup();
@@ -69,7 +70,8 @@ private:
     {
         SORT_BY_PRONUNCIATION = wxID_HIGHEST + 1,
         DEFAULT_DB,
-        DEFAULT_DB_ASK
+        DEFAULT_DB_ASK,
+        COLOR_OPTIONS
     };
 };
 

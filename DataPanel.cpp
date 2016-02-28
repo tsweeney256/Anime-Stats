@@ -945,3 +945,27 @@ void DataPanel::ResetFilterGui()
     m_allCheck->Disable();
     m_titleFilterTextField->SetValue("");
 }
+
+wxArrayString DataPanel::GetColNames()
+{
+    wxArrayString arr;
+    for(int i = col::FIRST_VISIBLE_COL; i < col::NUM_COLS; ++i){
+        arr.Add(m_grid->GetColLabelValue(i));
+    }
+    return arr;
+}
+
+const std::vector<wxString>* DataPanel::GetAllowedWatchedVals()
+{
+    return &m_allowedWatchedVals;
+}
+
+const std::vector<wxString>* DataPanel::GetAllowedReleaseVals()
+{
+    return &m_allowedReleaseVals;
+}
+
+const std::vector<wxString>* DataPanel::GetAllowedSeasonVals()
+{
+    return &m_allowedSeasonVals;
+}

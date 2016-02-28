@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <wx/richmsgdlg.h>
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
+#include "ColorOptionsDlg.hpp"
 #include "cppw/Sqlite3.hpp"
 #ifndef NDEBUG
 #include <iostream>
@@ -45,6 +46,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(DEFAULT_DB_ASK, MainFrame::OnDefaultDbAsk)
 	EVT_MENU(SORT_BY_PRONUNCIATION, MainFrame::OnPreferencesSortByPronunciation)
 	EVT_MENU(DEFAULT_DB, MainFrame::OnDefaultDb)
+	EVT_MENU(COLOR_OPTIONS, MainFrame::OnColorOptions)
 	EVT_MENU(wxID_NEW, MainFrame::OnNew)
 	EVT_MENU(wxID_OPEN, MainFrame::OnOpen)
 wxEND_EVENT_TABLE()
@@ -107,6 +109,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 	m_preferencesMenu->Append(SORT_BY_PRONUNCIATION, _("Sort title by pronunciation"),
 	        _("Sorts the title column by the user given pronunciation instead of by its Unicode values."
 	        "Useful for things like chinese characters."), wxITEM_CHECK);
+	m_preferencesMenu->Append(COLOR_OPTIONS, _("Grid Colors"), _("Change what colors the grid uses."));
 	m_preferencesMenu->Check(SORT_BY_PRONUNCIATION, m_settings->sortingByPronunciation);
 	editMenu->AppendSubMenu(m_preferencesMenu, _("Preferences"));
 
@@ -420,4 +423,10 @@ bool MainFrame::WriteMemoryDbToFile()
         }
     }while(status == wxID_OK && error);
     return dbIsNowFile;
+}
+
+void MainFrame::OnColorOptions(wxCommandEvent& WXUNUSED(event))
+{
+    ColorOptionsDlg dlg(m_settings.get(), m_dataPanel, this);
+    dlg.ShowModal();
 }

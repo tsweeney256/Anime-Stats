@@ -55,6 +55,10 @@ public:
     void WriteSizesToSettings();
     void SetSqlite3Connection(cppw::Sqlite3Connection* connection); //preserves everything on the panel and the command history
     void ResetPanel(cppw::Sqlite3Connection* connection); //resets everything
+    wxArrayString GetColNames();
+    const std::vector<wxString>* GetAllowedWatchedVals();
+    const std::vector<wxString>* GetAllowedReleaseVals();
+    const std::vector<wxString>* GetAllowedSeasonVals();
 
 private:
     void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);
