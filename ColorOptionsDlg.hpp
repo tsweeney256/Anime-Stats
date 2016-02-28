@@ -8,6 +8,7 @@ class DataPanel;
 class wxBoxSizer;
 class wxGridSizer;
 class wxPanel;
+class wxListBox;
 
 class ColorOptionsDlg : private wxDialog
 {
@@ -17,8 +18,11 @@ public:
     using wxDialog::ShowModal;
 
 private:
+    void OnListBox(wxCommandEvent& event);
+
     void ConstructNumericalPage(int col);
     void ConstructLimitedValsPage(int col);
+    void UpdateLayout();
     //will not use checkbox if checkBoxId is negative
     wxBoxSizer* ConstructItemSizer(wxWindow* parent, wxWindowID id, const wxString& label, long color);
 
@@ -28,6 +32,7 @@ private:
     wxPanel* m_mainPanel;
     wxBoxSizer* m_bottomColorSizer;
     wxBoxSizer* m_mainSizer;
+    wxListBox* m_list;
 
     const char* checkBoxText = "Use system default";
 
@@ -39,6 +44,8 @@ private:
         NUMBER,
         OPTION,
     };
+
+    wxDECLARE_EVENT_TABLE();
 };
 
 #endif

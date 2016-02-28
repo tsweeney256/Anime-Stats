@@ -10,13 +10,17 @@
 #include "DataPanel.hpp"
 #include "Settings.hpp"
 
+wxBEGIN_EVENT_TABLE(ColorOptionsDlg, wxDialog)
+    EVT_LISTBOX(wxID_ANY, ColorOptionsDlg::OnListBox)
+wxEND_EVENT_TABLE()
+
 ColorOptionsDlg::ColorOptionsDlg(Settings* settings, DataPanel* dataPanel, wxWindow* parent, wxWindowID id)
     : wxDialog(parent, id, "Cell Color Options"), m_settings(settings), m_tempSettings(*settings), m_dataPanel(dataPanel)
 {
     //controls
     auto colNames = m_dataPanel->GetColNames();
     m_mainPanel = new wxPanel(this, wxID_ANY);
-    auto list = new wxListBox(m_mainPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, colNames);
+    m_list = new wxListBox(m_mainPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, colNames);
     auto defaultBtn = new wxButton(m_mainPanel, wxID_HELP, "Default");
     auto applyBtn = new wxButton(m_mainPanel, wxID_APPLY, "Apply");
     auto okBtn = new wxButton(m_mainPanel, wxID_OK, "OK");
@@ -48,6 +52,7 @@ ColorOptionsDlg::ColorOptionsDlg(Settings* settings, DataPanel* dataPanel, wxWin
     auto expandFlags = wxSizerFlags(0).Border(wxALL).Expand();
     auto centerExpandFlags = wxSizerFlags(0).Border(wxALL).Expand().Center();
 
+    //Set up the layout
     textOutlineSizer->Add(textCheckBox, noExpandFlags);
     textOutlineSizer->Add(textColorCtrl, centerNoExpandFlags);
     backgroundOutlineSizer->Add(backgroundCheckBox, noExpandFlags);
@@ -56,7 +61,7 @@ ColorOptionsDlg::ColorOptionsDlg(Settings* settings, DataPanel* dataPanel, wxWin
     topColorSizer->Add(backgroundOutlineSizer, centerExpandFlags);
     rightSizer->Add(topColorSizer, expandFlags);
     rightSizer->Add(m_bottomColorSizer, expandFlags);
-    topSizer->Add(list, wxSizerFlags(0).Border(wxALL).Expand());
+    topSizer->Add(m_list, wxSizerFlags(0).Border(wxALL).Expand());
     topSizer->Add(rightSizer, expandFlags);
     buttonSizer->AddButton(defaultBtn);
     buttonSizer->AddButton(applyBtn);
@@ -67,11 +72,25 @@ ColorOptionsDlg::ColorOptionsDlg(Settings* settings, DataPanel* dataPanel, wxWin
     m_mainSizer->Add(buttonSizer, wxSizerFlags(0).Border(wxALL).Right());
     m_mainPanel->SetSizerAndFit(m_mainSizer);
     SetClientSize(m_mainPanel->GetClientSize());
+
+    //Initial state
+    m_list->Select(0);
+    UpdateLayout();
+}
+
+void ColorOptionsDlg::OnListBox(wxCommandEvent& WXUNUSED(event))
+{
+    m_bottomColorSizer->Clear(true);
+    UpdateLayout();
+    m_mainPanel->Layout(); //sizers bug out without this for some reason
+    m_mainPanel->Fit();
+    SetClientSize(m_mainPanel->GetClientSize());
 }
 
 void ColorOptionsDlg::ConstructNumericalPage(int col)
 {
-    m_bottomColorSizer->Clear(true);
+
+    col = col - col::FIRST_VISIBLE_COL;
     auto sizerFlags = wxSizerFlags(0).Border(wxALL);
     auto centerSizerFlags = wxSizerFlags(0).Border(wxALL).Center();
     auto outlineSizer = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, "Cell Value Colors");
@@ -91,7 +110,6 @@ void ColorOptionsDlg::ConstructNumericalPage(int col)
 
 void ColorOptionsDlg::ConstructLimitedValsPage(int col)
 {
-    m_bottomColorSizer->Clear(true);
     auto sizerFlags = wxSizerFlags(0).Border(wxALL);
     auto expandFlags = wxSizerFlags(1).Border(wxALL);
     auto outlineSizer = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, "Cell Value Colors");
@@ -119,6 +137,19 @@ void ColorOptionsDlg::ConstructLimitedValsPage(int col)
     }
     outlineSizer->Add(horizontalSizer, expandFlags);
     m_bottomColorSizer->Add(outlineSizer, expandFlags);
+}
+
+void ColorOptionsDlg::UpdateLayout()
+{
+    int idx = m_list->GetSelection() + col::FIRST_VISIBLE_COL; //list index plus offset
+    if(idx == col::RATING || idx == col::YEAR || idx == col::EPISODES_WATCHED || idx == col::TOTAL_EPISODES ||
+            idx == col::REWATCHED_EPISODES || idx == col::EPISODE_LENGTH){
+        ConstructNumericalPage(idx);
+
+    }else if(idx == col::WATCHED_STATUS || idx == col::RELEASE_TYPE || idx == col::SEASON){
+        ConstructLimitedValsPage(idx);
+
+    }
 }
 
 wxBoxSizer* ColorOptionsDlg::ConstructItemSizer(wxWindow* parent, wxWindowID id, const wxString& label, long color)

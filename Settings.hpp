@@ -27,8 +27,8 @@ struct Settings
     Settings();
     Settings(const wxString& fn); //load from xml file
     void Save(const wxString& fn);
-    void InitCellColors(Settings& settings);
-    void InitCellColors(std::vector<long>& colColors, int col);
+    static void InitCellColors(Settings& settings);
+    static void InitCellColors(std::vector<long>& colColors, int col);
     std::string defaultDb;
     bool defaultDbAsk = true;
     bool sortingByPronunciation = false;
@@ -38,8 +38,9 @@ struct Settings
     //for numerical based coloring
     enum{
         TEXT,
-        BLANK,
-        MIN,
+        BACKGROUND,
+        VAL,
+        MIN = VAL,
         MID,
         MAX
     };
