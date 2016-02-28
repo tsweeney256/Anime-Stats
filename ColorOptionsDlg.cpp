@@ -6,12 +6,19 @@
 #include <wx/checkbox.h>
 #include <wx/statbox.h>
 #include <vector>
+#include <cstdlib>
 #include "ColorOptionsDlg.hpp"
 #include "DataPanel.hpp"
 #include "Settings.hpp"
 
 wxBEGIN_EVENT_TABLE(ColorOptionsDlg, wxDialog)
     EVT_LISTBOX(wxID_ANY, ColorOptionsDlg::OnListBox)
+    EVT_CHECKBOX(wxID_ANY, ColorOptionsDlg::OnCheckBox)
+    EVT_COLOURPICKER_CHANGED(wxID_ANY, ColorOptionsDlg::OnColorCtrl)
+    EVT_BUTTON(wxID_CANCEL, ColorOptionsDlg::OnCancel)
+    EVT_BUTTON(wxID_APPLY, ColorOptionsDlg::OnApply)
+    EVT_BUTTON(wxID_OK, ColorOptionsDlg::OnOk)
+    EVT_BUTTON(wxID_HELP, ColorOptionsDlg::OnDefault)
 wxEND_EVENT_TABLE()
 
 ColorOptionsDlg::ColorOptionsDlg(Settings* settings, DataPanel* dataPanel, wxWindow* parent, wxWindowID id)
@@ -39,12 +46,12 @@ ColorOptionsDlg::ColorOptionsDlg(Settings* settings, DataPanel* dataPanel, wxWin
     auto textStaticBox = textOutlineSizer->GetStaticBox();
     auto backgroundOutlineSizer = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, "Cell Background Color");
     auto backgroundStaticBox = backgroundOutlineSizer->GetStaticBox();
-    auto textCheckBox = new wxCheckBox(textStaticBox, BASIC_TEXT, checkBoxText);
-    auto backgroundCheckBox = new wxCheckBox(backgroundStaticBox, BASIC_BACKGROUND, checkBoxText);
-    auto textColorCtrl = new wxColourPickerCtrl(textStaticBox, BASIC_TEXT,
-            wxColour(m_tempSettings.cellColors[col::TITLE][Settings::TEXT]));
-    auto backgroundColorCtrl = new wxColourPickerCtrl(backgroundStaticBox, BASIC_BACKGROUND,
-            wxColour(m_tempSettings.cellColors[col::TITLE][Settings::BLANK]));
+    m_textCheckBox = new wxCheckBox(textStaticBox, Settings::TEXT + idOffset, checkBoxText);
+    m_backgroundCheckBox = new wxCheckBox(backgroundStaticBox, Settings::BACKGROUND + idOffset, checkBoxText);
+    m_textColorCtrl = new wxColourPickerCtrl(textStaticBox, Settings::TEXT + idOffset,
+            wxColour(abs(m_tempSettings.cellColors[col::TITLE][Settings::TEXT])));
+    m_backgroundColorCtrl = new wxColourPickerCtrl(backgroundStaticBox, Settings::BACKGROUND + idOffset,
+            wxColour(abs(m_tempSettings.cellColors[col::TITLE][Settings::BACKGROUND])));
 
     //sizer flags
     auto noExpandFlags = wxSizerFlags(0).Border(wxALL);
@@ -53,10 +60,10 @@ ColorOptionsDlg::ColorOptionsDlg(Settings* settings, DataPanel* dataPanel, wxWin
     auto centerExpandFlags = wxSizerFlags(0).Border(wxALL).Expand().Center();
 
     //Set up the layout
-    textOutlineSizer->Add(textCheckBox, noExpandFlags);
-    textOutlineSizer->Add(textColorCtrl, centerNoExpandFlags);
-    backgroundOutlineSizer->Add(backgroundCheckBox, noExpandFlags);
-    backgroundOutlineSizer->Add(backgroundColorCtrl, centerNoExpandFlags);
+    textOutlineSizer->Add(m_textCheckBox, noExpandFlags);
+    textOutlineSizer->Add(m_textColorCtrl, centerNoExpandFlags);
+    backgroundOutlineSizer->Add(m_backgroundCheckBox, noExpandFlags);
+    backgroundOutlineSizer->Add(m_backgroundColorCtrl, centerNoExpandFlags);
     topColorSizer->Add(textOutlineSizer, centerExpandFlags);
     topColorSizer->Add(backgroundOutlineSizer, centerExpandFlags);
     rightSizer->Add(topColorSizer, expandFlags);
@@ -80,11 +87,53 @@ ColorOptionsDlg::ColorOptionsDlg(Settings* settings, DataPanel* dataPanel, wxWin
 
 void ColorOptionsDlg::OnListBox(wxCommandEvent& WXUNUSED(event))
 {
-    m_bottomColorSizer->Clear(true);
     UpdateLayout();
-    m_mainPanel->Layout(); //sizers bug out without this for some reason
-    m_mainPanel->Fit();
-    SetClientSize(m_mainPanel->GetClientSize());
+}
+
+void ColorOptionsDlg::OnCheckBox(wxCommandEvent& event)
+{
+    int idx = event.GetId() - idOffset;
+    if(event.GetId() == Settings::TEXT + idOffset){
+        m_textColorCtrl->Enable(!event.IsChecked());
+        m_tempSettings.cellColors[idx][Settings::TEXT] *= -1;
+
+    }else if(event.GetId() == Settings::BACKGROUND + idOffset){
+        m_backgroundColorCtrl->Enable(!event.IsChecked());
+        m_tempSettings.cellColors[idx][Settings::BACKGROUND] *= -1;
+
+    }else{ //Settings::VAL + idOffset
+        for(size_t i = 0; i < m_valColorPickers.size(); ++i){
+            m_valColorPickers[i]->Enable(!event.IsChecked());
+            m_tempSettings.cellColors[m_list->GetSelection()][Settings::VAL + i] *= -1;
+        }
+    }
+}
+
+void ColorOptionsDlg::OnColorCtrl(wxColourPickerEvent& event)
+{
+    m_tempSettings.cellColors[m_list->GetSelection()][event.GetId() - idOffset] = event.GetColour().GetRGB();
+}
+
+void ColorOptionsDlg::OnCancel(wxCommandEvent& WXUNUSED(event))
+{
+    EndModal(wxID_CANCEL);
+}
+
+void ColorOptionsDlg::OnApply(wxCommandEvent& WXUNUSED(event))
+{
+    SaveChanges();
+}
+
+void ColorOptionsDlg::OnOk(wxCommandEvent& WXUNUSED(event))
+{
+    SaveChanges();
+    EndModal(wxID_OK);
+}
+
+void ColorOptionsDlg::OnDefault(wxCommandEvent& WXUNUSED(event))
+{
+   Settings::InitCellColors(m_tempSettings);
+   UpdateLayout();
 }
 
 void ColorOptionsDlg::ConstructNumericalPage(int col)
@@ -96,14 +145,14 @@ void ColorOptionsDlg::ConstructNumericalPage(int col)
     auto outlineSizer = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, "Cell Value Colors");
     auto gridSizer = new wxGridSizer(3);
     auto staticBox = outlineSizer->GetStaticBox();
-    auto checkBox = new wxCheckBox(staticBox, NUMBER, "Use above background color");
+    m_valCheckBox = new wxCheckBox(staticBox, Settings::VAL + idOffset, "Use above background color");
     auto minSizer = ConstructItemSizer(staticBox, Settings::MIN + idOffset, "Min", m_tempSettings.cellColors[col][Settings::MIN]);
     auto midSizer = ConstructItemSizer(staticBox, Settings::MID + idOffset, "Mid", m_tempSettings.cellColors[col][Settings::MID]);
     auto maxSizer = ConstructItemSizer(staticBox, Settings::MAX + idOffset, "Max", m_tempSettings.cellColors[col][Settings::MAX]);
     gridSizer->Add(minSizer, centerSizerFlags);
     gridSizer->Add(midSizer, centerSizerFlags);
     gridSizer->Add(maxSizer, centerSizerFlags);
-    outlineSizer->Add(checkBox, sizerFlags);
+    outlineSizer->Add(m_valCheckBox, sizerFlags);
     outlineSizer->Add(gridSizer, centerSizerFlags);
     m_bottomColorSizer->Add(outlineSizer, sizerFlags);
 }
@@ -115,8 +164,8 @@ void ColorOptionsDlg::ConstructLimitedValsPage(int col)
     auto outlineSizer = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, "Cell Value Colors");
     auto staticBox = outlineSizer->GetStaticBox();
     auto horizontalSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto checkBox = new wxCheckBox(staticBox, OPTION, checkBoxText);
-    std::vector<wxBoxSizer*> valSizers;
+    m_valCheckBox = new wxCheckBox(staticBox, Settings::VAL + idOffset, checkBoxText);
+    //std::vector<wxBoxSizer*> valSizers;
     const std::vector<wxString>* allowedVals;
     if(col == col::WATCHED_STATUS){
         allowedVals = m_dataPanel->GetAllowedWatchedVals();
@@ -127,13 +176,10 @@ void ColorOptionsDlg::ConstructLimitedValsPage(int col)
     }else{ //seasons
         allowedVals = m_dataPanel->GetAllowedSeasonVals();
     }
+    outlineSizer->Add(m_valCheckBox, sizerFlags);
     for(size_t i = 1; i < allowedVals->size(); ++i){
-        valSizers.emplace_back(ConstructItemSizer(staticBox, idOffset + i, (*allowedVals)[i],
-                m_tempSettings.cellColors[col - col::FIRST_VISIBLE_COL][i+1]));
-    }
-    outlineSizer->Add(checkBox, sizerFlags);
-    for(const auto& sizer : valSizers){
-        horizontalSizer->Add(sizer, sizerFlags);
+        horizontalSizer->Add(ConstructItemSizer(staticBox, Settings::VAL + idOffset + i - 1, (*allowedVals)[i],
+                m_tempSettings.cellColors[col - col::FIRST_VISIBLE_COL][i+1]), sizerFlags);
     }
     outlineSizer->Add(horizontalSizer, expandFlags);
     m_bottomColorSizer->Add(outlineSizer, expandFlags);
@@ -141,15 +187,40 @@ void ColorOptionsDlg::ConstructLimitedValsPage(int col)
 
 void ColorOptionsDlg::UpdateLayout()
 {
-    int idx = m_list->GetSelection() + col::FIRST_VISIBLE_COL; //list index plus offset
-    if(idx == col::RATING || idx == col::YEAR || idx == col::EPISODES_WATCHED || idx == col::TOTAL_EPISODES ||
-            idx == col::REWATCHED_EPISODES || idx == col::EPISODE_LENGTH){
-        ConstructNumericalPage(idx);
+    m_bottomColorSizer->Clear(true);
+    m_valColorPickers.clear();
+    m_valCheckBox = nullptr;
+    int col = m_list->GetSelection() + col::FIRST_VISIBLE_COL; //list index plus offset
+    if(col == col::RATING || col == col::YEAR || col == col::EPISODES_WATCHED || col == col::TOTAL_EPISODES ||
+            col == col::REWATCHED_EPISODES || col == col::EPISODE_LENGTH){
+        ConstructNumericalPage(col);
 
-    }else if(idx == col::WATCHED_STATUS || idx == col::RELEASE_TYPE || idx == col::SEASON){
-        ConstructLimitedValsPage(idx);
+    }else if(col == col::WATCHED_STATUS || col == col::RELEASE_TYPE || col == col::SEASON){
+        ConstructLimitedValsPage(col);
 
     }
+
+    int idx = m_list->GetSelection();
+    bool textChecked = m_tempSettings.cellColors[idx][Settings::TEXT] < 0;
+    m_textCheckBox->SetValue(textChecked);
+    m_textColorCtrl->Enable(!textChecked);
+    m_textColorCtrl->SetColour(wxColour(abs(m_tempSettings.cellColors[idx][Settings::TEXT])));
+
+    bool backgroundChecked = m_tempSettings.cellColors[idx][Settings::BACKGROUND] < 0;
+    m_backgroundCheckBox->SetValue(backgroundChecked);
+    m_backgroundColorCtrl->Enable(!backgroundChecked);
+    m_backgroundColorCtrl->SetColour(wxColour(abs(m_tempSettings.cellColors[idx][Settings::BACKGROUND])));
+
+    if(m_valColorPickers.size()){
+        bool valChecked = m_tempSettings.cellColors[idx][Settings::VAL] < 0;
+        m_valCheckBox->SetValue(valChecked);
+        for(auto ctrl : m_valColorPickers){
+            ctrl->Enable(!valChecked);
+        }
+    }
+    m_mainPanel->Layout(); //sizers bug out without this for some reason
+    m_mainPanel->Fit();
+    SetClientSize(m_mainPanel->GetClientSize());
 }
 
 wxBoxSizer* ColorOptionsDlg::ConstructItemSizer(wxWindow* parent, wxWindowID id, const wxString& label, long color)
@@ -157,8 +228,14 @@ wxBoxSizer* ColorOptionsDlg::ConstructItemSizer(wxWindow* parent, wxWindowID id,
     auto sizer = new wxBoxSizer(wxVERTICAL);
     auto sizerFlags = wxSizerFlags(0).Border(wxALL).Center();
     auto labelCtrl = new wxStaticText(parent, wxID_ANY, label);
-    auto colorCtrl = new wxColourPickerCtrl(parent, id, wxColour(color));
+    auto colorCtrl = new wxColourPickerCtrl(parent, id, wxColour(abs(color)));
     sizer->Add(labelCtrl, sizerFlags);
     sizer->Add(colorCtrl, sizerFlags);
+    m_valColorPickers.emplace_back(colorCtrl);
     return sizer;
+}
+
+void ColorOptionsDlg::SaveChanges()
+{
+    *m_settings = m_tempSettings;
 }

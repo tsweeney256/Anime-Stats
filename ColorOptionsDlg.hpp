@@ -1,6 +1,8 @@
 #ifndef COLOROPTIONSDLG_HPP
 #define COLOROPTIONSDLG_HPP
 
+#include <vector>
+#include <memory>
 #include <wx/dialog.h>
 #include "Settings.hpp"
 
@@ -9,6 +11,9 @@ class wxBoxSizer;
 class wxGridSizer;
 class wxPanel;
 class wxListBox;
+class wxColourPickerCtrl;
+class wxCheckBox;
+class wxColourPickerEvent;
 
 class ColorOptionsDlg : private wxDialog
 {
@@ -19,10 +24,17 @@ public:
 
 private:
     void OnListBox(wxCommandEvent& event);
+    void OnCheckBox(wxCommandEvent& event);
+    void OnColorCtrl(wxColourPickerEvent& event);
+    void OnCancel(wxCommandEvent& event);
+    void OnApply(wxCommandEvent& event);
+    void OnOk(wxCommandEvent& event);
+    void OnDefault(wxCommandEvent& event);
 
     void ConstructNumericalPage(int col);
     void ConstructLimitedValsPage(int col);
     void UpdateLayout();
+    void SaveChanges();
     //will not use checkbox if checkBoxId is negative
     wxBoxSizer* ConstructItemSizer(wxWindow* parent, wxWindowID id, const wxString& label, long color);
 
@@ -33,17 +45,17 @@ private:
     wxBoxSizer* m_bottomColorSizer;
     wxBoxSizer* m_mainSizer;
     wxListBox* m_list;
+    wxColourPickerCtrl* m_textColorCtrl;
+    wxColourPickerCtrl* m_backgroundColorCtrl;
+    wxCheckBox* m_textCheckBox;
+    wxCheckBox* m_backgroundCheckBox;
+    wxCheckBox* m_valCheckBox;
+
+    std::vector<wxColourPickerCtrl*> m_valColorPickers;
 
     const char* checkBoxText = "Use system default";
 
-    enum{
-        BASIC_TEXT = wxID_HIGHEST + 1,
-        BASIC_BACKGROUND,
-        idOffset = BASIC_BACKGROUND,
-        TITLE,
-        NUMBER,
-        OPTION,
-    };
+    enum{idOffset = wxID_HIGHEST + 1};
 
     wxDECLARE_EVENT_TABLE();
 };
