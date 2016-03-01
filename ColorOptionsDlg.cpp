@@ -92,18 +92,22 @@ void ColorOptionsDlg::OnListBox(wxCommandEvent& WXUNUSED(event))
 
 void ColorOptionsDlg::OnCheckBox(wxCommandEvent& event)
 {
-    int idx = event.GetId() - idOffset;
     if(event.GetId() == Settings::TEXT + idOffset){
         m_textColorCtrl->Enable(!event.IsChecked());
-        m_tempSettings.cellColors[idx][Settings::TEXT] *= -1;
+        //hack to get around not being able to save negative 0.
+        //Makes the 25th bit in a 24bit color color code 1 so that the long can be made negative without it affecting the color
+        m_tempSettings.cellColors[m_list->GetSelection()][Settings::TEXT] ^= 0x1000000;
+        m_tempSettings.cellColors[m_list->GetSelection()][Settings::TEXT] *= -1;
 
     }else if(event.GetId() == Settings::BACKGROUND + idOffset){
         m_backgroundColorCtrl->Enable(!event.IsChecked());
-        m_tempSettings.cellColors[idx][Settings::BACKGROUND] *= -1;
+        m_tempSettings.cellColors[m_list->GetSelection()][Settings::BACKGROUND] ^= 0x1000000;
+        m_tempSettings.cellColors[m_list->GetSelection()][Settings::BACKGROUND] *= -1;
 
     }else{ //Settings::VAL + idOffset
         for(size_t i = 0; i < m_valColorPickers.size(); ++i){
             m_valColorPickers[i]->Enable(!event.IsChecked());
+            m_tempSettings.cellColors[m_list->GetSelection()][Settings::VAL + i] ^= 0x1000000;
             m_tempSettings.cellColors[m_list->GetSelection()][Settings::VAL + i] *= -1;
         }
     }
