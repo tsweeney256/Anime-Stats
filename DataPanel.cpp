@@ -1094,7 +1094,7 @@ int DataPanel::GetColMedian(const std::string& colName)
 
 void DataPanel::RefreshGridColors()
 {
-    for(int i = 0; i < m_grid->GetNumberRows(); ++i){
+    for(int i = 0; i < m_grid->GetNumberRows()-1; ++i){
         for(int k = col::FIRST_VISIBLE_COL; k < m_grid->GetNumberCols(); ++k){
             UpdateCellColor(i, k);
         }
@@ -1103,7 +1103,7 @@ void DataPanel::RefreshGridColors()
 
 void DataPanel::RefreshColColors(int col)
 {
-    for(int i = 0; i < m_grid->GetNumberRows(); ++i){
+    for(int i = 0; i < m_grid->GetNumberRows()-1; ++i){
         UpdateCellColor(i, col);
     }
 }
