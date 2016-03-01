@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #define APPIDS_HPP
 
 #include <vector>
+#include <string>
 #include <wx/defs.h>
 
 namespace col
@@ -40,6 +41,10 @@ namespace col
         DATE_FINISHED,
         NUM_COLS
     };
+
+    bool isColText(int col);
+    bool isColNumeric(int col);
+    bool isColLimitedValue(int col);
 }
 
 //the various custom IDs that we use for the application
@@ -93,5 +98,7 @@ const int numSeriesCols = 12;
 const int numViewCols = 14; //including the hidden 1
 const std::vector<std::string> colViewName {"idSeries", "name", "pronunciation", "rating", "idWatchedStatus", "idReleaseType", "year", "idSeason",
     "episodesWatched", "totalEpisodes", "rewatchedEpisodes", "episodeLength", "dateStarted", "dateFinished"};
+const std::vector<size_t> numericCols {col::RATING, col::YEAR, col::EPISODES_WATCHED, col::TOTAL_EPISODES,
+        col::REWATCHED_EPISODES, col::EPISODE_LENGTH};
 
 #endif // APPIDS_HPP
