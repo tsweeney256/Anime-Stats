@@ -171,7 +171,7 @@ void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
         m_connection->Begin();
         savedChanges = true;
     }catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error saving.\n" + e.GetErrorMessage());
+        wxMessageBox(std::string("Error saving.\n") + e.what());
         return;
     }
     if(m_dbInMemory){
@@ -314,7 +314,7 @@ int MainFrame::SaveChangesPopup()
             }
         }
     } catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error:\n" + e.GetErrorMessage());
+        wxMessageBox(std::string("Error:\n") + e.what());
         if(status == wxID_YES) //if there is an error saving, let the user figure out what they want to do
             return wxID_CANCEL;
         //else just shrug and let the program do its thing
@@ -361,8 +361,8 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
                 }
                 catch(cppw::Sqlite3Exception& e){
                     error = true;
-                    errorMsg <<_("Error: Could not execute create command.\n sqlite3 error: ") << e.GetExtendedErrorCode() <<
-                           _(" ") << e.GetErrorMessage();
+                    errorMsg <<_("Error: Could not execute create command.\n sqlite3 error: ") << e.GetErrorCode() <<
+                           _(" ") << e.what();
                 }
             }
             else{

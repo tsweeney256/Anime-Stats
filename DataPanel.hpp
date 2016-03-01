@@ -98,6 +98,7 @@ private:
     int GetColAggregate(std::string colName, std::string function);
     int GetColMedian(const std::string& colName);
     void RefreshColColors(int col);
+    void ShowSqliteBusyErrorBox();
 
     class CellColorInfo{
     public:

@@ -207,7 +207,7 @@ void DataPanel::Undo()
         }
     }
     catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error while undoing action.\n" + e.GetErrorMessage());
+        wxMessageBox(std::string("Error while undoing action.\n") + e.what());
         m_top->Close(true);
     }
 }
@@ -221,7 +221,7 @@ void DataPanel::Redo()
         }
     }
     catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error while redoing action.\n" + e.GetErrorMessage());
+        wxMessageBox(std::string("Error while redoing action.\n") + e.what());
         m_top->Close(true);
     }
 }
@@ -310,8 +310,15 @@ void DataPanel::OnDeleteRow(wxCommandEvent& WXUNUSED(event))
         m_commands.push_back(std::make_unique<DeleteCommand>(m_connection, m_grid, idSeries));
     }
     catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error deleting row(s)\n" + e.GetErrorMessage());
-        m_top->Destroy();
+        if(e.GetErrorCode() == SQLITE_BUSY){
+            ShowSqliteBusyErrorBox();
+            return;
+        }
+        else{
+            wxMessageBox(std::string("Error deleting row(s)\n") + e.what());
+            m_top->Close(true);
+            return;
+        }
     }
     ++m_commandLevel;
     HandleCommandChecking();
@@ -365,8 +372,15 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
             AppendLastGridRow(true);
         }
         catch(cppw::Sqlite3Exception& e){
-            wxMessageBox("Error making InsertCommand.\n" + e.GetErrorMessage());
-            m_top->Close(true);
+            if(e.GetErrorCode() == SQLITE_BUSY){
+                ShowSqliteBusyErrorBox();
+                event.Veto();
+                return;
+            }
+            else{
+                wxMessageBox(std::string("Error making InsertCommand.\n") + e.what());
+                m_top->Close(true);
+            }
         }
         catch(SqlGridCommandException& e){
             wxMessageBox("Error: " + std::string(e.what()));
@@ -406,8 +420,15 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
                     map, 1, m_changedRows));
         }
         catch(cppw::Sqlite3Exception& e){
-            wxMessageBox("Error making UpdateCommand.\n" + e.GetErrorMessage());
-            m_top->Close(true);
+            if(e.GetErrorCode() == SQLITE_BUSY){
+                ShowSqliteBusyErrorBox();
+                event.Veto();
+                return;
+            }
+            else{
+                wxMessageBox(std::string("Error making UpdateCommand.\n") + e.what());
+                m_top->Close(true);
+            }
         }
         catch(SqlGridCommandException& e){
             wxMessageBox("Error: " + std::string(e.what()));
@@ -710,7 +731,7 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         m_titleFilterTextField->SetValue(newBasicFilterInfo->title);
     }
     catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error applying filter.\n" + e.GetErrorMessage());
+        wxMessageBox(std::string("Error applying filter.\n") + e.what());
         m_top->Close(true);
     }
 }
@@ -745,7 +766,7 @@ void DataPanel::ApplyFullGrid()
         ResetTable(results);
     }
     catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error preparing basic select statement.\n" + e.GetErrorMessage());
+        wxMessageBox(std::string("Error preparing basic select statement.\n") + e.what());
         m_top->Close(true);
     }
 }
@@ -810,7 +831,7 @@ void DataPanel::BuildAllowedValsMap(std::vector<wxString>& map, const std::strin
         while(results->NextRow())
             map.emplace_back(results->GetString(0).c_str(), wxMBConvUTF8());
     }catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error building allowed values map.\n" + e.GetErrorMessage());
+        wxMessageBox(std::string("Error building allowed values map.\n") + e.what());
         m_top->Close(true);
     }
 }
@@ -1041,7 +1062,7 @@ int DataPanel::GetColAggregate(std::string colName, std::string function)
         return results->GetInt(0);
 
     }catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error preparing or executing minimum statement\n" + e.GetErrorMessage());
+        wxMessageBox(std::string("Error preparing or executing minimum statement\n") + e.what());
         m_top->Close(true);
     }
     return -1; //this will never run
@@ -1065,7 +1086,7 @@ int DataPanel::GetColMedian(const std::string& colName)
         return result->GetInt(0);
 
     } catch(cppw::Sqlite3Exception& e){
-        wxMessageBox("Error preparing or executing median statement.\n" + e.GetErrorMessage() + "\n" + medianStrCpy);
+        wxMessageBox(std::string("Error preparing or executing median statement.\n") + e.what() + "\n" + medianStrCpy);
         m_top->Close(true);
     }
     return -1; //this will never run
@@ -1085,4 +1106,9 @@ void DataPanel::RefreshColColors(int col)
     for(int i = 0; i < m_grid->GetNumberRows(); ++i){
         UpdateCellColor(i, col);
     }
+}
+
+void DataPanel::ShowSqliteBusyErrorBox()
+{
+    wxMessageBox("Error applying change.\nThe database is locked because its in use by another program.");
 }
