@@ -152,7 +152,7 @@ void ColorOptionsDlg::ConstructNumericalPage(int col)
     auto outlineSizer = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, "Cell Value Colors");
     auto gridSizer = new wxGridSizer(3);
     auto staticBox = outlineSizer->GetStaticBox();
-    m_valCheckBox = new wxCheckBox(staticBox, Settings::VAL + idOffset, "Use above background color");
+    m_valCheckBox = new wxCheckBox(staticBox, Settings::VAL + idOffset, "Disable");
     auto minSizer = ConstructItemSizer(staticBox, Settings::MIN + idOffset, "Min", m_tempSettings.cellColors[col][Settings::MIN]);
     auto midSizer = ConstructItemSizer(staticBox, Settings::MID + idOffset, "Mid", m_tempSettings.cellColors[col][Settings::MID]);
     auto maxSizer = ConstructItemSizer(staticBox, Settings::MAX + idOffset, "Max", m_tempSettings.cellColors[col][Settings::MAX]);
@@ -171,7 +171,7 @@ void ColorOptionsDlg::ConstructLimitedValsPage(int col)
     auto outlineSizer = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, "Cell Value Colors");
     auto staticBox = outlineSizer->GetStaticBox();
     auto horizontalSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_valCheckBox = new wxCheckBox(staticBox, Settings::VAL + idOffset, checkBoxText);
+    m_valCheckBox = new wxCheckBox(staticBox, Settings::VAL + idOffset, "Disable");
     //std::vector<wxBoxSizer*> valSizers;
     const std::vector<wxString>* allowedVals;
     if(col == col::WATCHED_STATUS){
