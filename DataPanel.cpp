@@ -432,6 +432,7 @@ void DataPanel::OnGridCellChanged(wxGridEvent& event)
     else{
         UpdateCellColor(event.GetRow(), event.GetCol());
     }
+    m_grid->Refresh(); //needed for Windows
 }
 
 void DataPanel::OnComboDropDown(wxCommandEvent& event)
