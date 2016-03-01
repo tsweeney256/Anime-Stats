@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <sstream>
 #include <iomanip>
+#include <cstring>
+#include <cmath>
 #include <wx/checkbox.h>
 #include <wx/button.h>
 #include <wx/textctrl.h>
@@ -37,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "TitleAliasDialog.hpp"
 #include "MainFrame.hpp"
 #include "Settings.hpp"
+#include "SqlStrings.hpp"
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_CHECKBOX(ID_WATCHED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
@@ -56,6 +59,7 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_BUTTON(ID_TITLE_ALIAS_BTN, DataPanel::OnAliasTitle)
     EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
     EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
+    EVT_GRID_CELL_CHANGED(DataPanel::OnGridCellChanged)
     EVT_COMBOBOX_DROPDOWN(wxID_ANY, DataPanel::OnComboDropDown)
     EVT_WINDOW_DESTROY(DataPanel::OnAdvrFrameDestruction)
     EVT_GRID_LABEL_RIGHT_CLICK(DataPanel::OnLabelContextMenu)
@@ -391,13 +395,9 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
                     map = &m_allowedSeasonVals;
                 else if(event.GetCol() == col::WATCHED_STATUS){
                     map = &m_allowedWatchedVals;
-                    SetWatchedStatusColor(event.GetRow(), std::string(event.GetString().utf8_str()));
                 }
             }
             else{
-                if(event.GetCol() == col::RATING){
-                    SetRatingColor(event.GetRow(), event.GetString().ToUTF8());
-                }
                 newVal = std::string(event.GetString().utf8_str());
                 oldVal = std::string(m_grid->GetCellValue(event.GetRow(), event.GetCol()).utf8_str());
             }
@@ -420,6 +420,11 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
         HandleCommandChecking();
         SetUnsavedChanges(true);
     }
+}
+
+void DataPanel::OnGridCellChanged(wxGridEvent& event)
+{
+    UpdateCellColor(event.GetRow(), event.GetCol());
 }
 
 void DataPanel::OnComboDropDown(wxCommandEvent& event)
@@ -508,6 +513,7 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
                 m_labelContextMenu->Check(id, true);
             }
         }
+        UpdateCellColorInfo();
     }
     int rowPos = 0;
     while(results->NextRow()){
@@ -515,11 +521,8 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
         m_grid->SetRowSize(rowPos, rowSize);
         m_grid->DisableRowResize(rowPos);
         for(int i = 0; i < numViewCols; ++i){
-            if(i == col::RATING)
-                SetRatingColor(rowPos, results->GetString(i).c_str());
-            else if(i == col::WATCHED_STATUS)
-                SetWatchedStatusColor(rowPos, results->GetString(i));
             m_grid->SetCellValue(rowPos, i, wxString::FromUTF8(results->GetString(i).c_str()));
+            UpdateCellColor(rowPos, i);
         }
         ++rowPos;
     }
@@ -804,70 +807,17 @@ void DataPanel::BuildAllowedValsMap(std::vector<wxString>& map, const std::strin
     }
 }
 
-void DataPanel::SetRatingColor(int row, const char* valStr)
-{
-    if(valStr && valStr[0] != '\0' && m_ratingColorEnabled){ //only have color if not null or blank
-        int val = atoi(valStr)-1;
-        if(val > m_maxRating)
-            val = m_maxRating;
-        int cellColour[3];
-
-        if(val < m_midRating){
-            for(int i=0; i<3; ++i){
-                cellColour[i] = m_ratingColor[ratingColor::MID][i] +
-                        (m_ratingColor[ratingColor::MIN][i] - m_ratingColor[ratingColor::MID][i]) *
-                        ((m_midRating-val)/static_cast<double>(m_midRating));
-            }
-            m_grid->SetCellBackgroundColour(row, col::RATING,
-                    wxColour(cellColour[ratingColor::R], cellColour[ratingColor::G], cellColour[ratingColor::B]));
-        }
-        else{
-            for(int i=0; i<3; ++i){
-                cellColour[i] = m_ratingColor[ratingColor::MAX][i] -
-                        (m_ratingColor[ratingColor::MAX][i] - m_ratingColor[ratingColor::MID][i]) *
-                        ((m_maxRating-val)/static_cast<double>(m_midRating-1));
-            }
-            m_grid->SetCellBackgroundColour(row, col::RATING,
-                    wxColour(cellColour[ratingColor::R], cellColour[ratingColor::G], cellColour[ratingColor::B]));
-        }
-    }
-    else{
-        m_grid->SetCellBackgroundColour(row, col::RATING, wxColour(255, 255, 255));
-    }
-}
-
-void DataPanel::SetWatchedStatusColor(int row, const std::string& valStr)
-{
-    if(m_watchedStatusColorEnabled){
-        int idx = -1;
-        //can't get the index of the combobox control because they possibly haven't been created yet and it'd be way
-        //more inefficient to pre-create a combobox for every cell than to just do a few string comparisons for each one
-        for(unsigned int i = 0; i < m_allowedWatchedVals.size(); ++i)
-            if(!valStr.compare(m_allowedWatchedVals[i])){
-                idx = i;
-                break;
-            }
-        wxASSERT_MSG(idx > -1, "Illegal Watched Status value.");
-        m_grid->SetCellBackgroundColour(row, col::WATCHED_STATUS, wxColour(m_watchedStatusColor[idx]));
-    }
-}
-
 void DataPanel::HandleUndoRedoColorChange()
 {
     auto rows = m_grid->GetSelectedRows();
     for(unsigned int i = 0; i < rows.Count(); ++i){
-        SetRatingColor(rows.Item(i), m_grid->GetCellValue(rows.Item(i), col::RATING).ToUTF8());
-        SetWatchedStatusColor(rows.Item(i), std::string(m_grid->GetCellValue(rows.Item(i), col::WATCHED_STATUS).utf8_str()));
+        for(int k=0; k < col::NUM_COLS; ++k){
+            UpdateCellColor(rows.Item(i), k);
+        }
     }
     auto cells = m_grid->GetSelectionBlockTopLeft();
     if(cells.Count() == 1){ //there should never be more than one cell selected from undoing/redoing
-        if(cells.Item(0).GetCol() == col::RATING){
-            SetRatingColor(cells.Item(0).GetRow(), m_grid->GetCellValue(cells.Item(0).GetRow(), col::RATING).ToUTF8());
-        }
-        else if(cells.Item(0).GetCol() == col::WATCHED_STATUS){
-            SetWatchedStatusColor(cells.Item(0).GetRow(),
-                    std::string(m_grid->GetCellValue(cells.Item(0).GetRow(), col::WATCHED_STATUS).utf8_str()));
-        }
+        UpdateCellColor(cells.Item(0).GetRow(), cells.Item(0).GetCol());
     }
 }
 
@@ -968,4 +918,150 @@ const std::vector<wxString>* DataPanel::GetAllowedReleaseVals()
 const std::vector<wxString>* DataPanel::GetAllowedSeasonVals()
 {
     return &m_allowedSeasonVals;
+}
+
+void DataPanel::UpdateCellColor(int row, int col)
+{
+    if(col != col::ID_SERIES){
+        int offsetCol = col - col::FIRST_VISIBLE_COL;
+        bool setBgColor = false;
+        bool valColorEnabled = m_settings->cellColors[offsetCol][Settings::VAL] > -1;
+        const auto& cellVal = m_grid->GetCellValue(row, col);
+
+        if(m_settings->cellColors[offsetCol][Settings::TEXT] > -1){
+            m_grid->SetCellTextColour(row, col, wxColour(m_settings->cellColors[offsetCol][Settings::TEXT]));
+        }
+        else{
+            m_grid->SetCellTextColour(row, col, m_grid->GetDefaultCellTextColour());
+        }
+
+        if(!cellVal.empty() && valColorEnabled){
+            if(col::isColLimitedValue(col)){
+                wxASSERT(m_cellColorInfo[col].allowedVals);
+                int idx = -1;
+                //can't get the index of the combobox control because they possibly haven't been created yet and it'd be way
+                //more inefficient to pre-create a combobox for every cell than to just do a few string comparisons for each one
+                for(size_t i = 0; i < m_cellColorInfo[col].allowedVals->size(); ++i)
+                    if(!m_grid->GetCellValue(row, col).compare((*m_cellColorInfo[col].allowedVals)[i])){
+                        //account for blanks being tracked by allowedVals but not in Settings
+                        idx = i - (Settings::VAL - Settings::BACKGROUND);
+                        break;
+                    }
+                wxASSERT_MSG(idx > -1, "Illegal Limited Value");
+                //blank vals handled by the set background color
+                if(idx != 0 - (Settings::VAL - Settings::BACKGROUND)){
+                    m_grid->SetCellBackgroundColour(row, col, wxColour(m_settings->cellColors[offsetCol][Settings::VAL + idx]));
+                    setBgColor = true;
+                }
+            }else if(col::isColNumeric(col)){
+                long val;
+                if(!cellVal.ToLong(&val)){
+                    wxMessageBox("Error converting cell to long while coloring");
+                    m_top->Close(true);
+                }
+                long extremeVal;
+                int extremeColorIdx;
+                long midVal = m_cellColorInfo[col].mid;
+                if(val > midVal){
+                    extremeVal = m_cellColorInfo[col].max;
+                    extremeColorIdx = CellColorInfo::MAX;
+                }else{
+                    extremeVal = m_cellColorInfo[col].min;
+                    extremeColorIdx = CellColorInfo::MIN;
+                }
+                int componentColors[3][3];
+                for(int i = Settings::MIN; i < Settings::MAX + 1; ++i){
+                    wxColour color(m_settings->cellColors[offsetCol][i]);
+                    componentColors[i - Settings::MIN][CellColorInfo::R] =  color.Red();
+                    componentColors[i - Settings::MIN][CellColorInfo::G] =  color.Green();
+                    componentColors[i - Settings::MIN][CellColorInfo::B] =  color.Blue();
+                }
+                int cellColour[3];
+                for(int i=0; i<3; ++i){
+                    int valNumerator = std::abs(val - midVal);
+                    int valDenominator = std::abs(midVal - extremeVal);
+                    int colorMultiplier = componentColors[extremeColorIdx][i] - componentColors[CellColorInfo::MID][i];
+                    if(valDenominator == 0){
+                        cellColour[i] = componentColors[CellColorInfo::MID][i];
+                    }
+                    else{
+                        cellColour[i] = valNumerator/static_cast<double>(valDenominator) * colorMultiplier + componentColors[CellColorInfo::MID][i];
+                    }
+                }
+                m_grid->SetCellBackgroundColour(row, col,
+                        wxColour(cellColour[CellColorInfo::R], cellColour[CellColorInfo::G], cellColour[CellColorInfo::B]));
+                setBgColor = true;
+            }
+        }
+        if(!setBgColor && m_settings->cellColors[offsetCol][Settings::BACKGROUND] > -1){
+            m_grid->SetCellBackgroundColour(row, col, wxColour(m_settings->cellColors[offsetCol][Settings::BACKGROUND]));
+        }
+        else if(!setBgColor){
+            m_grid->SetCellBackgroundColour(row, col, m_grid->GetDefaultCellBackgroundColour());
+        }
+    }
+}
+
+void DataPanel::UpdateCellColorInfo()
+{
+    for(int i = 0; i < col::NUM_COLS; ++i){
+        m_cellColorInfo[i].allowedVals = nullptr;
+    }
+    m_cellColorInfo[col::WATCHED_STATUS].allowedVals = &m_allowedWatchedVals;
+    m_cellColorInfo[col::RELEASE_TYPE].allowedVals = &m_allowedReleaseVals;
+    m_cellColorInfo[col::SEASON].allowedVals = &m_allowedSeasonVals;
+
+    for(auto col : numericCols){
+        m_cellColorInfo[col].min = GetColAggregate(colViewName[col], "min");
+        m_cellColorInfo[col].mid = GetColMedian(colViewName[col]);
+        m_cellColorInfo[col].max = GetColAggregate(colViewName[col], "max");
+    }
+}
+
+int DataPanel::GetColAggregate(std::string colName, std::string function)
+{
+    try{
+        auto stmt = m_connection->PrepareStatement("select " + function + "(" + colName + ") from series");
+        auto results = stmt->GetResults();
+        results->NextRow();
+        return results->GetInt(0);
+
+    }catch(cppw::Sqlite3Exception& e){
+        wxMessageBox("Error preparing or executing minimum statement\n" + e.GetErrorMessage());
+        m_top->Close(true);
+    }
+    return -1; //this will never run
+}
+
+int DataPanel::GetColMedian(const std::string& colName)
+{
+    //prepare sql statement
+    const int buffSize = 512;
+    char medianStrCpy[buffSize];
+    if(buffSize <= std::snprintf(medianStrCpy, buffSize, SqlStrings::medianStr,
+            colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str())){
+        wxMessageBox("Failed to format median sql string");
+        m_top->Close(true);
+    }
+
+    try{
+        auto stmt = m_connection->PrepareStatement(medianStrCpy);
+        auto result = stmt->GetResults();
+        result->NextRow();
+        return result->GetInt(0);
+
+    } catch(cppw::Sqlite3Exception& e){
+        wxMessageBox("Error preparing or executing median statement.\n" + e.GetErrorMessage() + "\n" + medianStrCpy);
+        m_top->Close(true);
+    }
+    return -1; //this will never run
+}
+
+void DataPanel::RefreshGridColors()
+{
+    for(int i = 0; i < m_grid->GetNumberRows(); ++i){
+        for(int k = col::FIRST_VISIBLE_COL; k < m_grid->GetNumberCols(); ++k){
+            UpdateCellColor(i, k);
+        }
+    }
 }

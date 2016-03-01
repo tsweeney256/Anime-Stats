@@ -54,7 +54,8 @@ public:
     //This can't be done in the destructor for some reason or else it gets screwed up
     void WriteSizesToSettings();
     void SetSqlite3Connection(cppw::Sqlite3Connection* connection); //preserves everything on the panel and the command history
-    void ResetPanel(cppw::Sqlite3Connection* connection); //resets everything
+    void ResetPanel(cppw::Sqlite3Connection* connection); //resets everything except for color
+    void RefreshGridColors();
     wxArrayString GetColNames();
     const std::vector<wxString>* GetAllowedWatchedVals();
     const std::vector<wxString>* GetAllowedReleaseVals();
@@ -74,6 +75,7 @@ private:
     void OnAliasTitle(wxCommandEvent& event);
     void OnGridColSort(wxGridEvent& event);
     void OnGridCellChanging(wxGridEvent& event);
+    void OnGridCellChanged(wxGridEvent& event);
     void OnComboDropDown(wxCommandEvent& event);
     void OnAdvrFrameDestruction(wxWindowDestroyEvent& event);
     void OnLabelContextMenu(wxGridEvent& event);
@@ -86,15 +88,21 @@ private:
     void NewBasicFilter();
     void HandleCommandChecking();
     void BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr);
-    void SetRatingColor(int row, const char* valStr);
-    void SetWatchedStatusColor(int row, const std::string& valStr);
     void HandleUndoRedoColorChange();
     void UpdateOldFilterData();
     std::string GetAddedRowsSqlStr(std::vector<wxString>* changedRows);
     void ResetFilterGui();
+    void UpdateCellColor(int row, int col);
+    void UpdateCellColorInfo();
+    int GetColAggregate(std::string colName, std::string function);
+    int GetColMedian(const std::string& colName);
 
-    class ratingColor{
+    class CellColorInfo{
     public:
+        int min = -1;
+        int mid = -1;
+        int max = -1;
+        std::vector<wxString>* allowedVals = nullptr;
         enum{MIN, MID, MAX};
         enum{R, G, B};
     };
@@ -132,17 +140,11 @@ private:
     std::shared_ptr<AdvFilterInfo> m_advFilterInfo;
     std::shared_ptr<BasicFilterInfo> m_oldBasicFilterInfo;
     std::shared_ptr<AdvFilterInfo> m_oldAdvFilterInfo;
-    bool m_ratingColorEnabled = true, m_watchedStatusColorEnabled = true;
-    int m_ratingColor[3][3] {{248, 105, 107}, {255, 235, 132}, {99, 190, 123}};
-    //the hex is bgr instead of rgb because wxwidgets implemented it backwards
-    std::vector<wxColour> m_watchedStatusColor {0xFFFFFF, 0xFFC271, 0x94FF3B, 0x83B8F9, 0x7D7DFF};
-    int m_minRating = 0;
-    int m_midRating = 5;
-    int m_maxRating = 9;
     wxBoxSizer* m_panelSizer;
     std::shared_ptr<std::vector<wxString>> m_changedRows; //managed by the command classes
     wxArrayString m_colList;
     bool m_sortByPronunciation = false;
+    CellColorInfo m_cellColorInfo[col::NUM_COLS];
 
     DECLARE_EVENT_TABLE()
 };

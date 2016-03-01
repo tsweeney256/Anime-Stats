@@ -126,11 +126,14 @@ void ColorOptionsDlg::OnCancel(wxCommandEvent& WXUNUSED(event))
 void ColorOptionsDlg::OnApply(wxCommandEvent& WXUNUSED(event))
 {
     SaveChanges();
+    m_dataPanel->RefreshGridColors();
+    m_parent->Refresh();
 }
 
 void ColorOptionsDlg::OnOk(wxCommandEvent& WXUNUSED(event))
 {
     SaveChanges();
+    m_dataPanel->RefreshGridColors();
     EndModal(wxID_OK);
 }
 
