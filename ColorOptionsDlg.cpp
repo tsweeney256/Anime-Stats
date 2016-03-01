@@ -134,6 +134,7 @@ void ColorOptionsDlg::OnOk(wxCommandEvent& WXUNUSED(event))
 {
     SaveChanges();
     m_dataPanel->RefreshGridColors();
+    m_parent->Refresh(); //for Windows
     EndModal(wxID_OK);
 }
 
