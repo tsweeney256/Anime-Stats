@@ -16,21 +16,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #define CPPW_SQLITE3_SQLITE3EXCEPTION_HPP_
 
 #include <string>
+#include <exception>
 #include "../Sqlite3.hpp"
 
 namespace cppw
 {
-	class Sqlite3Exception
+	class Sqlite3Exception : public std::exception
 	{
 	public:
-		Sqlite3Exception(sqlite3* connection);
+		Sqlite3Exception(int errCode);
 
 		int GetErrorCode() const;
-		int GetExtendedErrorCode() const;
-		std::string GetErrorMessage() const;
+		virtual const char* what() const noexcept;
 
 	private:
-		sqlite3* m_connection;
+		int m_errCode;
 	};
 }
 
