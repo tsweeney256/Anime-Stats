@@ -424,7 +424,14 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
 
 void DataPanel::OnGridCellChanged(wxGridEvent& event)
 {
-    UpdateCellColor(event.GetRow(), event.GetCol());
+    //this isn't even remotely optimized, but it runs so fast anyway I'm not sure it needs to be
+    if(col::isColNumeric(event.GetCol())){
+        UpdateNumericalCellColorInfo(event.GetCol());
+        RefreshColColors(event.GetCol());
+    }
+    else{
+        UpdateCellColor(event.GetRow(), event.GetCol());
+    }
 }
 
 void DataPanel::OnComboDropDown(wxCommandEvent& event)
@@ -882,6 +889,7 @@ void DataPanel::ResetPanel(cppw::Sqlite3Connection* connection)
     m_oldBasicFilterInfo = nullptr;
     m_oldAdvFilterInfo = nullptr;
 
+    UpdateCellColorInfo();
     ApplyFullGrid();
 }
 
@@ -1012,10 +1020,15 @@ void DataPanel::UpdateCellColorInfo()
     m_cellColorInfo[col::SEASON].allowedVals = &m_allowedSeasonVals;
 
     for(auto col : numericCols){
-        m_cellColorInfo[col].min = GetColAggregate(colViewName[col], "min");
-        m_cellColorInfo[col].mid = GetColMedian(colViewName[col]);
-        m_cellColorInfo[col].max = GetColAggregate(colViewName[col], "max");
+        UpdateNumericalCellColorInfo(col);
     }
+}
+
+void DataPanel::UpdateNumericalCellColorInfo(int col)
+{
+    m_cellColorInfo[col].min = GetColAggregate(colViewName[col], "min");
+    m_cellColorInfo[col].mid = GetColMedian(colViewName[col]);
+    m_cellColorInfo[col].max = GetColAggregate(colViewName[col], "max");
 }
 
 int DataPanel::GetColAggregate(std::string colName, std::string function)
@@ -1063,5 +1076,12 @@ void DataPanel::RefreshGridColors()
         for(int k = col::FIRST_VISIBLE_COL; k < m_grid->GetNumberCols(); ++k){
             UpdateCellColor(i, k);
         }
+    }
+}
+
+void DataPanel::RefreshColColors(int col)
+{
+    for(int i = 0; i < m_grid->GetNumberRows(); ++i){
+        UpdateCellColor(i, col);
     }
 }

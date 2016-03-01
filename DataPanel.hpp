@@ -94,8 +94,10 @@ private:
     void ResetFilterGui();
     void UpdateCellColor(int row, int col);
     void UpdateCellColorInfo();
+    void UpdateNumericalCellColorInfo(int col);
     int GetColAggregate(std::string colName, std::string function);
     int GetColMedian(const std::string& colName);
+    void RefreshColColors(int col);
 
     class CellColorInfo{
     public:
