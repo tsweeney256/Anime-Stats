@@ -20,6 +20,8 @@ set(SOURCE_FILES
         AdvFilterFrame.cpp
         AdvSortFrame.cpp
         App.cpp
+        AppIDs.cpp
+        ColorOptionsDlg.cpp
         CustomGridCellEditors.cpp
         DataPanel.cpp
         MainFrame.cpp
