@@ -45,11 +45,11 @@ namespace cppw
 		void ExecuteQuery(const std::string& query);
 		void SetLogging(std::ostream* os);
 		Sqlite3Connection BackupToFile(const std::string& file);
-		std::unique_ptr<Sqlite3Statement> PrepareStatement(const std::string& statement);
+		std::unique_ptr<Sqlite3Statement> PrepareStatement(const std::string& statementStr);
+		std::unique_ptr<Sqlite3Statement> PrepareStatement(const char* statementStr, size_t size = -1);
 
 
 	private:
-		sqlite3_stmt* PrepareStatementCommon(const std::string& statement);
 		static void callbackFunction(void* data, const char* output);
 		sqlite3* m_connection = nullptr;
 	};

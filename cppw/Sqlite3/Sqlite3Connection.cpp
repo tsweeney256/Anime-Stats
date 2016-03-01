@@ -12,6 +12,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
+#include <cstring>
 #include "../Sqlite3.hpp"
 
 cppw::Sqlite3Connection::Sqlite3Connection(const std::string& filename)
@@ -80,27 +81,35 @@ cppw::Sqlite3Connection cppw::Sqlite3Connection::BackupToFile(const std::string&
     return dest;
 }
 
-sqlite3_stmt* cppw::Sqlite3Connection::PrepareStatementCommon(const std::string& statementStr)
-{
-	sqlite3_stmt* statement;
-	if(sqlite3_prepare_v2(m_connection,
-			statementStr.c_str(),
-			statementStr.size(),
-			&statement,
-			nullptr) != SQLITE_OK){
-		throw Sqlite3Exception(m_connection);
-	}
-	return statement;
-}
-
 void cppw::Sqlite3Connection::ExecuteQuery(const std::string& query)
 {
     Sqlite3Result(m_connection, query);
 }
 
-std::unique_ptr<cppw::Sqlite3Statement> cppw::Sqlite3Connection::PrepareStatement(const std::string& statement)
+std::unique_ptr<cppw::Sqlite3Statement> cppw::Sqlite3Connection::PrepareStatement(const std::string& statementStr)
 {
-    return std::unique_ptr<Sqlite3Statement>(new Sqlite3Statement(PrepareStatementCommon(statement)));
+    sqlite3_stmt* statement;
+    if(sqlite3_prepare_v2(m_connection,
+            statementStr.c_str(),
+            statementStr.size(),
+            &statement,
+            nullptr) != SQLITE_OK){
+        throw Sqlite3Exception(m_connection);
+    }
+    return std::unique_ptr<Sqlite3Statement>(new Sqlite3Statement(statement));
+}
+
+std::unique_ptr<cppw::Sqlite3Statement> cppw::Sqlite3Connection::PrepareStatement(const char* statementStr, size_t size)
+{
+    sqlite3_stmt* statement;
+    if(sqlite3_prepare_v2(m_connection,
+            statementStr,
+            size,
+            &statement,
+            nullptr) != SQLITE_OK){
+        throw Sqlite3Exception(m_connection);
+    }
+    return std::unique_ptr<Sqlite3Statement>(new Sqlite3Statement(statement));
 }
 
 int64_t cppw::Sqlite3Connection::GetLastInsertRowID()
