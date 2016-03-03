@@ -124,7 +124,7 @@ int64_t cppw::Sqlite3Connection::GetLastInsertRowID()
 
 void cppw::Sqlite3Connection::SetLogging(std::ostream* os)
 {
-    sqlite3_trace(m_connection, callbackFunction, static_cast<void*>(os));
+    sqlite3_trace(m_connection, callbackFunction, reinterpret_cast<void*>(os));
 }
 
 cppw::Sqlite3Connection::Sqlite3Connection(Sqlite3Connection&& other)
@@ -142,5 +142,5 @@ cppw::Sqlite3Connection& cppw::Sqlite3Connection::operator=(Sqlite3Connection&& 
 
 void cppw::Sqlite3Connection::callbackFunction(void* data, const char* output)
 {
-    *static_cast<std::ostream*>(data) << output << std::endl;
+    *reinterpret_cast<std::ostream*>(data) << output << std::endl;
 }
