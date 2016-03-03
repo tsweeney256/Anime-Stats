@@ -1072,23 +1072,23 @@ int DataPanel::GetColAggregate(std::string colName, std::string function)
 
 int DataPanel::GetColMedian(const std::string& colName)
 {
-    //prepare sql statement
-    const int buffSize = 512;
-    char medianStrCpy[buffSize];
-    if(buffSize <= std::snprintf(medianStrCpy, buffSize, SqlStrings::medianStr,
+    int medianStrLen = std::strlen(SqlStrings::medianStr);
+    int medianStrCpyLen = medianStrLen + (colName.size() - 2)*SqlStrings::numToFormatMedianStr + 1;
+    std::unique_ptr<char, decltype(std::free)*> medianStrCpy {reinterpret_cast<char*>(malloc(medianStrCpyLen)), std::free };
+
+    if(medianStrCpyLen <= std::snprintf(medianStrCpy.get(), medianStrCpyLen, SqlStrings::medianStr,
             colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str())){
         wxMessageBox("Failed to format median sql string");
         m_top->Close(true);
     }
-
     try{
-        auto stmt = m_connection->PrepareStatement(medianStrCpy);
+        auto stmt = m_connection->PrepareStatement(medianStrCpy.get(), medianStrCpyLen);
         auto result = stmt->GetResults();
         result->NextRow();
         return result->GetInt(0);
 
     } catch(cppw::Sqlite3Exception& e){
-        wxMessageBox(std::string("Error preparing or executing median statement.\n") + e.what() + "\n" + medianStrCpy);
+        wxMessageBox(std::string("Error preparing or executing median statement.\n") + e.what() + "\n" + medianStrCpy.get());
         m_top->Close(true);
     }
     return -1; //this will never run
