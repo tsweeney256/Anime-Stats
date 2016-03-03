@@ -47,7 +47,8 @@ END_EVENT_TABLE()
 AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size)
     : wxFrame(parent, ID_ADV_FILTER_FRAME, title, pos, size, wxDEFAULT_FRAME_STYLE & ~(/*wxRESIZE_BORDER |*/ wxMAXIMIZE_BOX))
 {
-    m_parent = static_cast<DataPanel*>(parent);
+    m_parent = dynamic_cast<DataPanel*>(parent);
+    wxASSERT(parent);
     m_mainPanel = new wxScrolledWindow(this, wxID_ANY);
     m_mainPanel->SetScrollRate(10, 10);
 

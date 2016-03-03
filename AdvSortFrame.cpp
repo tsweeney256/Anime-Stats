@@ -36,8 +36,9 @@ END_EVENT_TABLE()
 
 AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
     : wxFrame(parent, ID_ADV_SORT_FRAME, "Advanced Sorting", wxDefaultPosition, wxDefaultSize,
-            wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER |wxMAXIMIZE_BOX)), m_dataPanel(static_cast<DataPanel*>(parent))
+            wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER |wxMAXIMIZE_BOX)), m_dataPanel(dynamic_cast<DataPanel*>(parent))
 {
+    wxASSERT(m_dataPanel);
     auto mainPanel = new wxPanel(this, wxID_ANY);
 
     m_sortList = new wxListBox(mainPanel, ID_LISTBOX_LEFT);

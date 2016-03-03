@@ -85,7 +85,8 @@ DateValidator::DateValidator()
 
 void DateValidator::OnKeyDown(wxKeyEvent& event)
 {
-    auto control = static_cast<wxTextCtrl*>(event.GetEventObject());
+    auto control = dynamic_cast<wxTextCtrl*>(event.GetEventObject());
+    wxASSERT(control);
     //is the first character an alpha character, i.e. is the hint showing
     if(isalpha(std::string(control->GetValue().ToUTF8())[0]))
         control->SetValue("");

@@ -398,7 +398,8 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
             if(event.GetCol() == col::RELEASE_TYPE || event.GetCol() == col::SEASON ||
                     event.GetCol() == col::WATCHED_STATUS){
                 auto editor = m_grid->GetCellEditor(event.GetRow(), event.GetCol());
-                auto control = static_cast<wxComboBox*>(editor->GetControl());
+                auto control = dynamic_cast<wxComboBox*>(editor->GetControl());
+                wxASSERT(control);
                 int selectedIdx = control->GetCurrentSelection();
                 newVal = std::to_string(selectedIdx);
                 oldVal = m_oldCellComboIndex;
@@ -458,7 +459,8 @@ void DataPanel::OnGridCellChanged(wxGridEvent& event)
 
 void DataPanel::OnComboDropDown(wxCommandEvent& event)
 {
-    auto control = static_cast<wxComboBox*>(event.GetEventObject());
+    auto control = dynamic_cast<wxComboBox*>(event.GetEventObject());
+    wxASSERT(control);
     m_oldCellComboIndex = std::to_string(control->GetCurrentSelection());
 }
 
