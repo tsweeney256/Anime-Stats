@@ -844,15 +844,26 @@ void DataPanel::BuildAllowedValsMap(std::vector<wxString>& map, const std::strin
 void DataPanel::HandleUndoRedoColorChange()
 {
     auto rows = m_grid->GetSelectedRows();
-    for(unsigned int i = 0; i < rows.Count(); ++i){
-        for(int k=0; k < col::NUM_COLS; ++k){
-            UpdateCellColor(rows.Item(i), k);
+    if(rows.Count()){
+        UpdateCellColorInfo();
+        for(unsigned int i = 0; i < rows.Count(); ++i){
+            for(int k=col::FIRST_VISIBLE_COL; k < col::NUM_COLS; ++k){
+                UpdateCellColor(rows.Item(i), k);
+            }
         }
     }
     auto cells = m_grid->GetSelectionBlockTopLeft();
     if(cells.Count() == 1){ //there should never be more than one cell selected from undoing/redoing
-        UpdateCellColor(cells.Item(0).GetRow(), cells.Item(0).GetCol());
+        int col = cells.Item(0).GetCol();
+        if(col::isColNumeric(col)){
+            UpdateNumericalCellColorInfo(col);
+            RefreshColColors(col);
+
+        }else{
+            UpdateCellColor(cells.Item(0).GetRow(), cells.Item(0).GetCol());
+        }
     }
+    m_grid->Refresh();
 }
 
 void DataPanel::UpdateOldFilterData()
