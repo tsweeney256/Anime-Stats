@@ -69,9 +69,13 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     }catch(SettingsSaveException& e){
         auto status = wxMessageBox(wxString(e.what()) + "\nContinue Anyway?", "Error", wxYES_NO);
         if(status == wxNO)
-            Destroy();
+            Close(true);
+        return;
+
     }catch(SettingsLoadException& e){
         wxMessageBox(wxString(e.what()) + "\nThe program will now close.");
+        Close(true);
+        return;
     }
     wxSetWorkingDirectory(appDir);
     if(!wxFileName::FileExists(m_settings->defaultDb)){
@@ -146,9 +150,10 @@ void MainFrame::OnClose(wxCloseEvent& event)
     m_dataPanel->WriteSizesToSettings();
     try{
         m_settings->Save(settingsFileName); //save the settings file no matter what
-    }
-    catch(SettingsSaveException& e){
+
+    }catch(SettingsSaveException& e){
         wxMessageBox("Unable to save application settings.");
+        return;
     }
     if(m_dataPanel->UnsavedChangesExist() && event.CanVeto()){
         auto status = SaveChangesPopup();
@@ -313,7 +318,7 @@ int MainFrame::SaveChangesPopup()
                     status = wxID_CANCEL;
             }
         }
-    } catch(cppw::Sqlite3Exception& e){
+    }catch(cppw::Sqlite3Exception& e){
         wxMessageBox(std::string("Error:\n") + e.what());
         if(status == wxID_YES) //if there is an error saving, let the user figure out what they want to do
             return wxID_CANCEL;
@@ -340,7 +345,8 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
     try{
         connection = std::make_unique<cppw::Sqlite3Connection>(std::string(file.utf8_str()));
         SetDbFlags(connection.get());
-    } catch(cppw::Sqlite3Exception& e) {
+
+    }catch(cppw::Sqlite3Exception& e) {
         wxMessageBox("Error creating database.\nYour hard drive may be full or you may not have "
                 "the proper permissions to write in this folder.");
         return nullptr;
@@ -358,8 +364,8 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
                     connection->ExecuteQuery(sql);
                     connection->Commit();
                     connection->Begin();
-                }
-                catch(cppw::Sqlite3Exception& e){
+
+                }catch(cppw::Sqlite3Exception& e){
                     error = true;
                     errorMsg <<_("Error: Could not execute create command.\n sqlite3 error: ") << e.GetErrorCode() <<
                            _(" ") << e.what();
@@ -415,6 +421,7 @@ bool MainFrame::WriteMemoryDbToFile()
                 m_dbFile = dlg.GetPath();
                 m_dataPanel->SetSqlite3Connection(m_connection.get());
                 m_dbInMemory = false;
+
             }catch(cppw::Sqlite3Exception& e){
                 wxMessageBox("Error creating database.\nYour hard drive may be full or you may not have "
                         "the proper permissions to write in this folder.");
