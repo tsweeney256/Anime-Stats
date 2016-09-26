@@ -1,17 +1,17 @@
 /*Anime Stats
-Copyright (C) 2016 Thomas Sweeney
-This file is part of Anime Stats.
-Anime Stats is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-Anime Stats is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+  Copyright (C) 2016 Thomas Sweeney
+  This file is part of Anime Stats.
+  Anime Stats is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  Anime Stats is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <string>
 #include <memory>
@@ -39,20 +39,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_CLOSE(MainFrame::OnClose)
     EVT_MENU(wxID_SAVE, MainFrame::OnSave)
-	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
-	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
-	EVT_MENU(wxID_UNDO, MainFrame::OnUndo)
-	EVT_MENU(wxID_REDO, MainFrame::OnRedo)
-	EVT_MENU(DEFAULT_DB_ASK, MainFrame::OnDefaultDbAsk)
-	EVT_MENU(SORT_BY_PRONUNCIATION, MainFrame::OnPreferencesSortByPronunciation)
-	EVT_MENU(DEFAULT_DB, MainFrame::OnDefaultDb)
-	EVT_MENU(COLOR_OPTIONS, MainFrame::OnColorOptions)
-	EVT_MENU(wxID_NEW, MainFrame::OnNew)
-	EVT_MENU(wxID_OPEN, MainFrame::OnOpen)
+    EVT_MENU(wxID_EXIT, MainFrame::OnExit)
+    EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
+    EVT_MENU(wxID_UNDO, MainFrame::OnUndo)
+    EVT_MENU(wxID_REDO, MainFrame::OnRedo)
+    EVT_MENU(DEFAULT_DB_ASK, MainFrame::OnDefaultDbAsk)
+    EVT_MENU(SORT_BY_PRONUNCIATION, MainFrame::OnPreferencesSortByPronunciation)
+    EVT_MENU(DEFAULT_DB, MainFrame::OnDefaultDb)
+    EVT_MENU(COLOR_OPTIONS, MainFrame::OnColorOptions)
+    EVT_MENU(wxID_NEW, MainFrame::OnNew)
+    EVT_MENU(wxID_OPEN, MainFrame::OnOpen)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
-		: wxFrame(NULL, wxID_ANY, title, pos, size)
+    : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
     //
     //settings
@@ -65,7 +65,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
         else{
             m_settings = std::make_unique<Settings>();
             m_settings->Save(settingsFileName);
-	    
+            
         }
     }catch(SettingsSaveException& e){
         auto status = wxMessageBox(wxString(e.what()) + "\nContinue Anyway?", "Error", wxYES_NO);
@@ -88,42 +88,42 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     }
     else
         m_dbFile = m_settings->defaultDb;
-	//
-	//menuBar
-	//
-	auto menuBar = new wxMenuBar;
-	SetMenuBar(menuBar);
+    //
+    //menuBar
+    //
+    auto menuBar = new wxMenuBar;
+    SetMenuBar(menuBar);
 
-	m_fileMenu = new wxMenu;
-	m_fileMenu->Append(wxID_NEW);
-	m_fileMenu->Append(wxID_OPEN);
-	m_fileMenu->Append(wxID_SAVE);
-	m_fileMenu->Append(DEFAULT_DB, _("Default Database"),
-	        _("Select or unselect this file as your default database."), wxITEM_CHECK);
-	m_fileMenu->Check(DEFAULT_DB, !m_dbInMemory);
-	m_fileMenu->Enable(DEFAULT_DB, !m_dbInMemory);
-	m_fileMenu->Append(wxID_EXIT);
+    m_fileMenu = new wxMenu;
+    m_fileMenu->Append(wxID_NEW);
+    m_fileMenu->Append(wxID_OPEN);
+    m_fileMenu->Append(wxID_SAVE);            
+    m_fileMenu->Append(DEFAULT_DB, _("Default Database"),
+                       _("Select or unselect this file as your default database."), wxITEM_CHECK);
+    m_fileMenu->Check(DEFAULT_DB, !m_dbInMemory);
+    m_fileMenu->Enable(DEFAULT_DB, !m_dbInMemory);
+    m_fileMenu->Append(wxID_EXIT);
 
-	auto editMenu = new wxMenu;
-	editMenu->Append(wxID_UNDO);
-	editMenu->Append(wxID_REDO);
-	m_preferencesMenu = new wxMenu;
-	m_preferencesMenu->Append(DEFAULT_DB_ASK, _("Always ask to change default database"),
-	        _("Toggle whether or not you get asked to change your default database when you open a new one."), wxITEM_CHECK);
-	m_preferencesMenu->Check(DEFAULT_DB_ASK, m_settings->defaultDbAsk);
-	m_preferencesMenu->Append(SORT_BY_PRONUNCIATION, _("Sort title by pronunciation"),
-	        _("Sorts the title column by the user given pronunciation instead of by its Unicode values."
-	        "Useful for things like chinese characters."), wxITEM_CHECK);
-	m_preferencesMenu->Append(COLOR_OPTIONS, _("Grid Colors"), _("Change what colors the grid uses."));
-	m_preferencesMenu->Check(SORT_BY_PRONUNCIATION, m_settings->sortingByPronunciation);
-	editMenu->AppendSubMenu(m_preferencesMenu, _("Preferences"));
+    auto editMenu = new wxMenu;
+    editMenu->Append(wxID_UNDO);
+    editMenu->Append(wxID_REDO);
+    m_preferencesMenu = new wxMenu;
+    m_preferencesMenu->Append(DEFAULT_DB_ASK, _("Always ask to change default database"),
+                              _("Toggle whether or not you get asked to change your default database when you open a new one."), wxITEM_CHECK);
+    m_preferencesMenu->Check(DEFAULT_DB_ASK, m_settings->defaultDbAsk);
+    m_preferencesMenu->Append(SORT_BY_PRONUNCIATION, _("Sort title by pronunciation"),
+                              _("Sorts the title column by the user given pronunciation instead of by its Unicode values."
+                                "Useful for things like chinese characters."), wxITEM_CHECK);
+    m_preferencesMenu->Append(COLOR_OPTIONS, _("Grid Colors"), _("Change what colors the grid uses."));
+    m_preferencesMenu->Check(SORT_BY_PRONUNCIATION, m_settings->sortingByPronunciation);
+    editMenu->AppendSubMenu(m_preferencesMenu, _("Preferences"));
 
-	auto helpMenu = new wxMenu;
-	helpMenu->Append(wxID_ABOUT);
+    auto helpMenu = new wxMenu;
+    helpMenu->Append(wxID_ABOUT);
 
-	menuBar->Append(m_fileMenu, _("&File"));
-	menuBar->Append(editMenu, _("&Edit"));
-	menuBar->Append(helpMenu, _("&Help"));
+    menuBar->Append(m_fileMenu, _("&File"));
+    menuBar->Append(editMenu, _("&Edit"));
+    menuBar->Append(helpMenu, _("&Help"));
 
     //
     //database
@@ -194,18 +194,18 @@ void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnExit(wxCommandEvent& WXUNUSED(event))
 {
-	Close(false);
+    Close(false);
 }
 
 void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-	wxAboutDialogInfo info;
-	info.SetName(_("Anime Stats"));
-	info.SetVersion("0.02");
-	info.SetDescription(_("Helps keep track of anime stats"));
-	info.SetCopyright("(C) 2015 Thomas Sweeney");
-
-	wxAboutBox(info);
+    wxAboutDialogInfo info;
+    info.SetName(_("Anime Stats"));
+    info.SetVersion("0.02");
+    info.SetDescription(_("Helps keep track of anime stats"));
+    info.SetCopyright("(C) 2015 Thomas Sweeney");
+    
+    wxAboutBox(info);
 }
 
 void MainFrame::OnUndo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Undo(); }
@@ -308,7 +308,7 @@ void MainFrame::DoDefaultDbPopup()
 int MainFrame::SaveChangesPopup()
 {
     auto dlg = new wxMessageDialog(this, _("Save changes to database before closing?"),
-            wxMessageBoxCaptionStr, wxCANCEL|wxYES_NO|wxCANCEL_DEFAULT|wxCENTER);
+                                   wxMessageBoxCaptionStr, wxCANCEL|wxYES_NO|wxCANCEL_DEFAULT|wxCENTER);
     auto status  = dlg->ShowModal();
     try{
         if(status == wxID_YES){
@@ -349,7 +349,7 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
 
     }catch(cppw::Sqlite3Exception& e) {
         wxMessageBox("Error creating database.\nYour hard drive may be full or you may not have "
-                "the proper permissions to write in this folder.");
+                     "the proper permissions to write in this folder.");
         return nullptr;
     }
     if(!fileExists){
@@ -369,7 +369,7 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
                 }catch(cppw::Sqlite3Exception& e){
                     error = true;
                     errorMsg <<_("Error: Could not execute create command.\n sqlite3 error: ") << e.GetErrorCode() <<
-                           _(" ") << e.what();
+                        _(" ") << e.what();
                 }
             }
             else{
@@ -415,7 +415,7 @@ bool MainFrame::WriteMemoryDbToFile()
         if(status == wxID_OK){
             try{
                 m_connection = std::make_unique<cppw::Sqlite3Connection>(
-                        std::move(m_connection->BackupToFile(std::string(dlg.GetPath().utf8_str()))));
+                    std::move(m_connection->BackupToFile(std::string(dlg.GetPath().utf8_str()))));
                 error = false;
                 dbIsNowFile = true;
                 SetDbFlags(m_connection.get());
@@ -425,7 +425,7 @@ bool MainFrame::WriteMemoryDbToFile()
 
             }catch(cppw::Sqlite3Exception& e){
                 wxMessageBox("Error creating database.\nYour hard drive may be full or you may not have "
-                        "the proper permissions to write in this folder.");
+                             "the proper permissions to write in this folder.");
                 error = true;
             }
         }

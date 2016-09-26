@@ -12,17 +12,17 @@
 #include "Settings.hpp"
 
 wxBEGIN_EVENT_TABLE(ColorOptionsDlg, wxDialog)
-    EVT_LISTBOX(wxID_ANY, ColorOptionsDlg::OnListBox)
-    EVT_CHECKBOX(wxID_ANY, ColorOptionsDlg::OnCheckBox)
-    EVT_COLOURPICKER_CHANGED(wxID_ANY, ColorOptionsDlg::OnColorCtrl)
-    EVT_BUTTON(wxID_CANCEL, ColorOptionsDlg::OnCancel)
+EVT_LISTBOX(wxID_ANY, ColorOptionsDlg::OnListBox)
+EVT_CHECKBOX(wxID_ANY, ColorOptionsDlg::OnCheckBox)
+EVT_COLOURPICKER_CHANGED(wxID_ANY, ColorOptionsDlg::OnColorCtrl)
+EVT_BUTTON(wxID_CANCEL, ColorOptionsDlg::OnCancel)
     EVT_BUTTON(wxID_APPLY, ColorOptionsDlg::OnApply)
-    EVT_BUTTON(wxID_OK, ColorOptionsDlg::OnOk)
+EVT_BUTTON(wxID_OK, ColorOptionsDlg::OnOk)
     EVT_BUTTON(wxID_HELP, ColorOptionsDlg::OnDefault)
-wxEND_EVENT_TABLE()
+    wxEND_EVENT_TABLE()
 
 ColorOptionsDlg::ColorOptionsDlg(Settings* settings, DataPanel* dataPanel, wxWindow* parent, wxWindowID id)
-    : wxDialog(parent, id, "Cell Color Options"), m_settings(settings), m_tempSettings(*settings), m_dataPanel(dataPanel)
+: wxDialog(parent, id, "Cell Color Options"), m_settings(settings), m_tempSettings(*settings), m_dataPanel(dataPanel)
 {
     //controls
     auto colNames = m_dataPanel->GetColNames();
@@ -48,9 +48,9 @@ ColorOptionsDlg::ColorOptionsDlg(Settings* settings, DataPanel* dataPanel, wxWin
     m_textCheckBox = new wxCheckBox(textStaticBox, Settings::TEXT + idOffset, checkBoxText);
     m_backgroundCheckBox = new wxCheckBox(backgroundStaticBox, Settings::BACKGROUND + idOffset, checkBoxText);
     m_textColorCtrl = new wxColourPickerCtrl(textStaticBox, Settings::TEXT + idOffset,
-            wxColour(abs(m_tempSettings.cellColors[col::TITLE][Settings::TEXT])));
+                                             wxColour(abs(m_tempSettings.cellColors[col::TITLE][Settings::TEXT])));
     m_backgroundColorCtrl = new wxColourPickerCtrl(backgroundStaticBox, Settings::BACKGROUND + idOffset,
-            wxColour(abs(m_tempSettings.cellColors[col::TITLE][Settings::BACKGROUND])));
+                                                   wxColour(abs(m_tempSettings.cellColors[col::TITLE][Settings::BACKGROUND])));
 
     //sizer flags
     auto noExpandFlags = wxSizerFlags(0).Border(wxALL);
@@ -139,8 +139,8 @@ void ColorOptionsDlg::OnOk(wxCommandEvent& WXUNUSED(event))
 
 void ColorOptionsDlg::OnDefault(wxCommandEvent& WXUNUSED(event))
 {
-   Settings::InitCellColors(m_tempSettings);
-   UpdateLayout();
+    Settings::InitCellColors(m_tempSettings);
+    UpdateLayout();
 }
 
 void ColorOptionsDlg::ConstructNumericalPage(int col)
@@ -186,7 +186,7 @@ void ColorOptionsDlg::ConstructLimitedValsPage(int col)
     outlineSizer->Add(m_valCheckBox, sizerFlags);
     for(size_t i = 1; i < allowedVals->size(); ++i){
         horizontalSizer->Add(ConstructItemSizer(staticBox, Settings::VAL + idOffset + i - 1, (*allowedVals)[i],
-                m_tempSettings.cellColors[col - col::FIRST_VISIBLE_COL][i+1]), sizerFlags);
+                                                m_tempSettings.cellColors[col - col::FIRST_VISIBLE_COL][i+1]), sizerFlags);
     }
     outlineSizer->Add(horizontalSizer, expandFlags);
     m_bottomColorSizer->Add(outlineSizer, expandFlags);
@@ -199,7 +199,7 @@ void ColorOptionsDlg::UpdateLayout()
     m_valCheckBox = nullptr;
     int col = m_list->GetSelection() + col::FIRST_VISIBLE_COL; //list index plus offset
     if(col == col::RATING || col == col::YEAR || col == col::EPISODES_WATCHED || col == col::TOTAL_EPISODES ||
-            col == col::REWATCHED_EPISODES || col == col::EPISODE_LENGTH){
+       col == col::REWATCHED_EPISODES || col == col::EPISODE_LENGTH){
         ConstructNumericalPage(col);
 
     }else if(col == col::WATCHED_STATUS || col == col::RELEASE_TYPE || col == col::SEASON){

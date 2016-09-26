@@ -1,17 +1,17 @@
 /*Anime Stats
-Copyright (C) 2016 Thomas Sweeney
-This file is part of Anime Stats.
-Anime Stats is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-Anime Stats is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+  Copyright (C) 2016 Thomas Sweeney
+  This file is part of Anime Stats.
+  Anime Stats is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  Anime Stats is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <sstream>
 #include <iomanip>
@@ -67,8 +67,8 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
 END_EVENT_TABLE()
 
 DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, Settings* settings,
-        wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-		: wxPanel(parent, id, pos, size, style, name), m_top(top), m_settings(settings), m_connection(connection)
+                     wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+    : wxPanel(parent, id, pos, size, style, name), m_top(top), m_settings(settings), m_connection(connection)
 {
     ////
     ////Top Bar
@@ -80,83 +80,83 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     //
     //checkboxes
     //
-	m_watchedCheck = new wxCheckBox(topBar, ID_WATCHED_CB, _("Watched"));
-	m_watchingCheck = new wxCheckBox(topBar, ID_WATCHING_CB, _("Watching"));
-	m_stalledCheck = new wxCheckBox(topBar, ID_STALLED_CB, _("Stalled"));
-	m_droppedCheck = new wxCheckBox(topBar, ID_DROPPED_CB, _("Dropped"));
-	m_blankCheck = new wxCheckBox(topBar, ID_BLANK_CB,  _("Blank"));
-	m_allCheck = new wxCheckBox(topBar, ID_ALL_CB, _("Enable All"));
+    m_watchedCheck = new wxCheckBox(topBar, ID_WATCHED_CB, _("Watched"));
+    m_watchingCheck = new wxCheckBox(topBar, ID_WATCHING_CB, _("Watching"));
+    m_stalledCheck = new wxCheckBox(topBar, ID_STALLED_CB, _("Stalled"));
+    m_droppedCheck = new wxCheckBox(topBar, ID_DROPPED_CB, _("Dropped"));
+    m_blankCheck = new wxCheckBox(topBar, ID_BLANK_CB,  _("Blank"));
+    m_allCheck = new wxCheckBox(topBar, ID_ALL_CB, _("Enable All"));
 
-	m_watchedCheck->SetValue(true);
-	m_watchingCheck->SetValue(true);
-	m_stalledCheck->SetValue(true);
-	m_droppedCheck->SetValue(true);
-	m_blankCheck->SetValue(true);
-	m_allCheck->SetValue(true);
-	m_allCheck->Disable();
+    m_watchedCheck->SetValue(true);
+    m_watchingCheck->SetValue(true);
+    m_stalledCheck->SetValue(true);
+    m_droppedCheck->SetValue(true);
+    m_blankCheck->SetValue(true);
+    m_allCheck->SetValue(true);
+    m_allCheck->Disable();
 
-	//
-	//buttons and textfield
-	//
+    //
+    //buttons and textfield
+    //
     m_titleFilterTextField = new wxTextCtrl(topBar, ID_TITLE_FILTER_FIELD, wxEmptyString,
-            wxDefaultPosition, wxSize(250, -1), wxTE_PROCESS_ENTER);
-	auto applyFilterButton = new wxButton(topBar, ID_APPLY_FILTER_BTN, "Apply Filter");
-	auto resetFilterButton = new wxButton(topBar, ID_RESET_FILTER_BTN, "Reset Filter");
-	m_advFilterButton = new wxButton(topBar, ID_ADV_FILTER_BTN, "Adv. Filter");
-	m_advSortButton = new wxButton(topBar, ID_ADV_SORT_BTN, "Adv. Sort");
-	auto addRowButton = new wxButton(topBar, ID_ADD_ROW_BTN, "Add Row");
-	auto deleteRowButton = new wxButton(topBar, ID_DELETE_ROW_BTN, "Delete Rows");
-	auto titleAliasButton = new wxButton(topBar, ID_TITLE_ALIAS_BTN, "Alias Title");
-	auto refreshButton = new wxButton(topBar, ID_REFRESH_BTN, "Refresh");
+                                            wxDefaultPosition, wxSize(250, -1), wxTE_PROCESS_ENTER);
+    auto applyFilterButton = new wxButton(topBar, ID_APPLY_FILTER_BTN, "Apply Filter");
+    auto resetFilterButton = new wxButton(topBar, ID_RESET_FILTER_BTN, "Reset Filter");
+    m_advFilterButton = new wxButton(topBar, ID_ADV_FILTER_BTN, "Adv. Filter");
+    m_advSortButton = new wxButton(topBar, ID_ADV_SORT_BTN, "Adv. Sort");
+    auto addRowButton = new wxButton(topBar, ID_ADD_ROW_BTN, "Add Row");
+    auto deleteRowButton = new wxButton(topBar, ID_DELETE_ROW_BTN, "Delete Rows");
+    auto titleAliasButton = new wxButton(topBar, ID_TITLE_ALIAS_BTN, "Alias Title");
+    auto refreshButton = new wxButton(topBar, ID_REFRESH_BTN, "Refresh");
 
-	//
-	//top bar sizers
-	//
-	auto checkBoxSizer = new wxGridSizer(3, 5, 5);
-	auto checkBoxSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Watched Status"));
-	auto titleFilterSizer = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Title"));
-	auto topControlBarSizer = new wxBoxSizer(wxHORIZONTAL);
-	m_panelSizer = new wxBoxSizer(wxVERTICAL);
-	auto btnSizer = new wxGridSizer(2, 4, 0, 0);
+    //
+    //top bar sizers
+    //
+    auto checkBoxSizer = new wxGridSizer(3, 5, 5);
+    auto checkBoxSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Watched Status"));
+    auto titleFilterSizer = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Title"));
+    auto topControlBarSizer = new wxBoxSizer(wxHORIZONTAL);
+    m_panelSizer = new wxBoxSizer(wxVERTICAL);
+    auto btnSizer = new wxGridSizer(2, 4, 0, 0);
 
-	auto checkBoxFlags = wxSizerFlags(1).Expand();
-	checkBoxSizerOutline->Add(checkBoxSizer, wxSizerFlags(1).Border(wxALL).Expand());
-	checkBoxSizer->Add(m_watchedCheck, checkBoxFlags);
-	checkBoxSizer->Add(m_stalledCheck, checkBoxFlags);
-	checkBoxSizer->Add(m_blankCheck, checkBoxFlags);
-	checkBoxSizer->Add(m_watchingCheck, checkBoxFlags);
-	checkBoxSizer->Add(m_droppedCheck, checkBoxFlags);
-	checkBoxSizer->Add(m_allCheck, checkBoxFlags);
+    auto checkBoxFlags = wxSizerFlags(1).Expand();
+    checkBoxSizerOutline->Add(checkBoxSizer, wxSizerFlags(1).Border(wxALL).Expand());
+    checkBoxSizer->Add(m_watchedCheck, checkBoxFlags);
+    checkBoxSizer->Add(m_stalledCheck, checkBoxFlags);
+    checkBoxSizer->Add(m_blankCheck, checkBoxFlags);
+    checkBoxSizer->Add(m_watchingCheck, checkBoxFlags);
+    checkBoxSizer->Add(m_droppedCheck, checkBoxFlags);
+    checkBoxSizer->Add(m_allCheck, checkBoxFlags);
 
-	titleFilterSizer->Add(m_titleFilterTextField, wxSizerFlags(1).Border(wxALL).Center());
+    titleFilterSizer->Add(m_titleFilterTextField, wxSizerFlags(1).Border(wxALL).Center());
 
-	auto btnFlags = wxSizerFlags(1).Expand();
-	//row 1
-	btnSizer->Add(applyFilterButton, btnFlags);
-	btnSizer->Add(m_advFilterButton, btnFlags);
-	btnSizer->Add(addRowButton, btnFlags);
-	btnSizer->Add(titleAliasButton, btnFlags);
-	//row 2
-	btnSizer->Add(resetFilterButton, btnFlags);
-	btnSizer->Add(m_advSortButton, btnFlags);
-	btnSizer->Add(deleteRowButton, btnFlags);
-	btnSizer->Add(refreshButton, btnFlags);
+    auto btnFlags = wxSizerFlags(1).Expand();
+    //row 1
+    btnSizer->Add(applyFilterButton, btnFlags);
+    btnSizer->Add(m_advFilterButton, btnFlags);
+    btnSizer->Add(addRowButton, btnFlags);
+    btnSizer->Add(titleAliasButton, btnFlags);
+    //row 2
+    btnSizer->Add(resetFilterButton, btnFlags);
+    btnSizer->Add(m_advSortButton, btnFlags);
+    btnSizer->Add(deleteRowButton, btnFlags);
+    btnSizer->Add(refreshButton, btnFlags);
 
-	auto topControlBarFlags = wxSizerFlags(0).Bottom().Expand().Border(wxALL);
-	topControlBarSizer->Add(checkBoxSizerOutline, topControlBarFlags);
-	topControlBarSizer->Add(titleFilterSizer, topControlBarFlags);
-	topControlBarSizer->Add(btnSizer, topControlBarFlags);
-	topBar->SetSizerAndFit(topControlBarSizer);
+    auto topControlBarFlags = wxSizerFlags(0).Bottom().Expand().Border(wxALL);
+    topControlBarSizer->Add(checkBoxSizerOutline, topControlBarFlags);
+    topControlBarSizer->Add(titleFilterSizer, topControlBarFlags);
+    topControlBarSizer->Add(btnSizer, topControlBarFlags);
+    topBar->SetSizerAndFit(topControlBarSizer);
 
-	////
-	////grid
-	////
+    ////
+    ////grid
+    ////
 
-	m_grid = new wxGrid(this, ID_DATA_GRID);
-	m_grid->CreateGrid(0,0);
+    m_grid = new wxGrid(this, ID_DATA_GRID);
+    m_grid->CreateGrid(0,0);
 
-	//get basic select statement from file and prepare it
-	wxString basicSelectFileName = "sql/basicSelect.sql";
+    //get basic select statement from file and prepare it
+    wxString basicSelectFileName = "sql/basicSelect.sql";
     bool error = false;
     if(wxFileName::FileExists(basicSelectFileName)){
         wxFile selectFile(basicSelectFileName);
@@ -173,18 +173,18 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     BuildAllowedValsMap(m_allowedReleaseVals, "select type from ReleaseType order by idReleaseType");
     BuildAllowedValsMap(m_allowedSeasonVals, "select season from Season order by idSeason");
     ApplyFullGrid();
-	//
-	//panel sizer
-	//
-	m_panelSizer->Add(topBar, wxSizerFlags(0).Border(wxALL, 2));
-	m_panelSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
-	SetSizerAndFit(m_panelSizer);
+    //
+    //panel sizer
+    //
+    m_panelSizer->Add(topBar, wxSizerFlags(0).Border(wxALL, 2));
+    m_panelSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
+    SetSizerAndFit(m_panelSizer);
 
-	//
-	//Misc initializations
-	//
-	m_basicFilterInfo = BasicFilterInfo::MakeShared(); //already initialized how we want it
-	m_oldBasicFilterInfo = BasicFilterInfo::MakeShared();
+    //
+    //Misc initializations
+    //
+    m_basicFilterInfo = BasicFilterInfo::MakeShared(); //already initialized how we want it
+    m_oldBasicFilterInfo = BasicFilterInfo::MakeShared();
 }
 
 bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
@@ -234,7 +234,7 @@ void DataPanel::SetAddedFilterRows(std::shared_ptr<std::vector<wxString> > chang
 void DataPanel::OnGeneralWatchedStatusCheckbox(wxCommandEvent& WXUNUSED(event))
 {
     if(m_watchedCheck->GetValue() && m_watchingCheck->GetValue() && m_stalledCheck->GetValue()
-            && m_droppedCheck->GetValue() && m_blankCheck->GetValue()){
+       && m_droppedCheck->GetValue() && m_blankCheck->GetValue()){
         m_allCheck->SetValue(true);
         m_allCheck->Disable();
     }
@@ -335,7 +335,7 @@ void DataPanel::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
         wxMessageBox("Error: No row was selected.");
     else{
         auto aliasDlg = new TitleAliasDialog(this, wxID_ANY, m_connection,
-                wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)), m_grid->GetCellValue(rows[0], col::TITLE));
+                                             wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)), m_grid->GetCellValue(rows[0], col::TITLE));
         if(aliasDlg->ShowModal() == wxID_OK)
             SetUnsavedChanges(true);
     }
@@ -368,7 +368,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
     if(event.GetRow() == m_grid->GetNumberRows()-1 && event.GetCol() == col::TITLE){
         try{
             m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_grid, this, std::string(event.GetString().utf8_str()), 1,
-                    m_changedRows));
+                                                                 m_changedRows));
             AppendLastGridRow(true);
 
         }catch(cppw::Sqlite3Exception& e){
@@ -396,7 +396,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
             auto col = event.GetCol();
             std::vector<wxString>* map = nullptr;
             if(event.GetCol() == col::RELEASE_TYPE || event.GetCol() == col::SEASON ||
-                    event.GetCol() == col::WATCHED_STATUS){
+               event.GetCol() == col::WATCHED_STATUS){
                 auto editor = m_grid->GetCellEditor(event.GetRow(), event.GetCol());
                 auto control = dynamic_cast<wxComboBox*>(editor->GetControl());
                 wxASSERT(control);
@@ -418,7 +418,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
             }
 
             m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_grid, this, idSeries, newVal, oldVal, col,
-                    map, 1, m_changedRows));
+                                                                 map, 1, m_changedRows));
 
         }catch(cppw::Sqlite3Exception& e){
             if(e.GetErrorCode() == SQLITE_BUSY){
@@ -589,7 +589,7 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 }
 
 void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-        std::shared_ptr<AdvFilterInfo> newAdvFilterInfo, std::vector<wxString>* changedRows)
+                            std::shared_ptr<AdvFilterInfo> newAdvFilterInfo, std::vector<wxString>* changedRows)
 //don't ever free changedRows
 {
     try{
@@ -665,7 +665,7 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                     newAdvFilterInfo->ratingHigh << ") ";
             if(newAdvFilterInfo->yearEnabled)
                 statusStr << " and (year between " << newAdvFilterInfo->yearLow << " and "
-                    << newAdvFilterInfo->yearHigh << ") ";
+                          << newAdvFilterInfo->yearHigh << ") ";
             if(newAdvFilterInfo->epsWatchedEnabled)
                 statusStr << " and (episodesWatched between " << newAdvFilterInfo->epsWatchedLow <<
                     " and " << newAdvFilterInfo->epsWatchedHigh <<") ";
@@ -710,9 +710,9 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
             }
         }
         auto sqlStr = std::string(m_basicSelectString.utf8_str()) +
-                " where 1=1 " + //just a dumb hack so I don't have to worry about when to start using 'and's and 'or's
-                (showNothing ? " and 1 <> 1 " : statusStr.str()) + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") +
-                " order by " + m_curOrderCombined;
+            " where 1=1 " + //just a dumb hack so I don't have to worry about when to start using 'and's and 'or's
+            (showNothing ? " and 1 <> 1 " : statusStr.str()) + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") +
+            " order by " + m_curOrderCombined;
         auto statement = m_connection->PrepareStatement(sqlStr);
         std::string bindStr = "%" + newBasicFilterInfo->title + "%";
         statement->Bind(1, bindStr);
@@ -725,7 +725,7 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         m_droppedCheck->SetValue(newBasicFilterInfo->dropped);
         m_blankCheck->SetValue(newBasicFilterInfo->watchedBlank);
         if(newBasicFilterInfo->watched && newBasicFilterInfo->watching && newBasicFilterInfo->stalled &&
-                newBasicFilterInfo->dropped && newBasicFilterInfo->watchedBlank){
+           newBasicFilterInfo->dropped && newBasicFilterInfo->watchedBlank){
             m_allCheck->SetValue(true);
             m_allCheck->Disable();
         }
@@ -764,7 +764,7 @@ void DataPanel::ApplyFullGrid()
 {
     try{
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.ToUTF8()) +
-                "order by " + m_curOrderCombined);
+                                                        "order by " + m_curOrderCombined);
         statement->Bind(1, "%%");
         statement->Bind(2, "%%");
         auto results = statement->GetResults();
@@ -797,12 +797,12 @@ void DataPanel::AppendLastGridRow(bool whiteOutPrevious)
 }
 
 void DataPanel::NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-        std::shared_ptr<AdvFilterInfo> newAdvFilterInfo)
+                          std::shared_ptr<AdvFilterInfo> newAdvFilterInfo)
 {
     m_basicFilterInfo = newBasicFilterInfo;
     m_advFilterInfo = newAdvFilterInfo;
     m_commands.push_back(std::make_unique<FilterCommand>(this, m_basicFilterInfo, m_oldBasicFilterInfo,
-            m_advFilterInfo, m_oldAdvFilterInfo, m_changedRows));
+                                                         m_advFilterInfo, m_oldAdvFilterInfo, m_changedRows));
     UpdateOldFilterData();
     ++m_commandLevel;
     HandleCommandChecking();
@@ -1038,7 +1038,7 @@ void DataPanel::UpdateCellColor(int row, int col)
                     }
                 }
                 m_grid->SetCellBackgroundColour(row, col,
-                        wxColour(cellColour[CellColorInfo::R], cellColour[CellColorInfo::G], cellColour[CellColorInfo::B]));
+                                                wxColour(cellColour[CellColorInfo::R], cellColour[CellColorInfo::G], cellColour[CellColorInfo::B]));
                 setBgColor = true;
             }
         }
@@ -1095,7 +1095,7 @@ int DataPanel::GetColMedian(const std::string& colName)
     std::unique_ptr<char, decltype(std::free)*> medianStrCpy {reinterpret_cast<char*>(malloc(medianStrCpyLen)), std::free };
 
     if(medianStrCpyLen <= std::snprintf(medianStrCpy.get(), medianStrCpyLen, SqlStrings::medianStr,
-            colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str())){
+                                        colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str(), colName.c_str())){
         wxMessageBox("Failed to format median sql string");
         m_top->Close(true);
     }

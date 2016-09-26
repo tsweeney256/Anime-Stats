@@ -1,17 +1,17 @@
 /*Anime Stats
-Copyright (C) 2016 Thomas Sweeney
-This file is part of Anime Stats.
-Anime Stats is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-Anime Stats is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+  Copyright (C) 2016 Thomas Sweeney
+  This file is part of Anime Stats.
+  Anime Stats is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  Anime Stats is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <wx/xml/xml.h>
 #include "Settings.hpp"
@@ -134,7 +134,7 @@ void Settings::InitCellColors(std::vector<long>& colColors, int col)
         colColors = {-0xFFFFFF, -0xFFFFFF};
 
     }else if(col == col::YEAR || col == col::EPISODES_WATCHED || col == col::TOTAL_EPISODES ||
-            col == col::REWATCHED_EPISODES || col == col::EPISODE_LENGTH){
+             col == col::REWATCHED_EPISODES || col == col::EPISODE_LENGTH){
         colColors = {-0xFFFFFF, -0xFFFFFF, -0xFFFFFF, -0xFFFFFF, -0xFFFFFF};
 
     }else if(col == col::RELEASE_TYPE){
@@ -175,10 +175,10 @@ void Settings::Save(const wxString& fn)
     //sortingByPronunciation
     auto sortingByPronunciationNode = new wxXmlNode(rootNode, wxXML_ELEMENT_NODE, "sortingByPronunciation");
     sortingByPronunciationNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "",
-            wxString::Format("%i", sortingByPronunciation)));
+                                                       wxString::Format("%i", sortingByPronunciation)));
     //defaultDbAsk
-        auto defaultDbAskNode = new wxXmlNode(rootNode, wxXML_ELEMENT_NODE, "defaultDbAsk");
-        defaultDbAskNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", wxString::Format("%i", defaultDbAsk)));
+    auto defaultDbAskNode = new wxXmlNode(rootNode, wxXML_ELEMENT_NODE, "defaultDbAsk");
+    defaultDbAskNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", wxString::Format("%i", defaultDbAsk)));
     //defaultDb
     auto defaultDbNode = new wxXmlNode(rootNode, wxXML_ELEMENT_NODE, "defaultDb");
     defaultDbNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", defaultDb));

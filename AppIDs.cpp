@@ -8,7 +8,7 @@ bool col::isColText(int col)
 bool col::isColNumeric(int col)
 {
     return col == RATING || col == YEAR || col == EPISODES_WATCHED || col == TOTAL_EPISODES ||
-            col == REWATCHED_EPISODES || col == EPISODE_LENGTH;
+        col == REWATCHED_EPISODES || col == EPISODE_LENGTH;
 }
 
 bool col::isColLimitedValue(int col)

@@ -1,17 +1,17 @@
 /*Anime Stats
-Copyright (C) 2016 Thomas Sweeney
-This file is part of Anime Stats.
-Anime Stats is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-Anime Stats is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+  Copyright (C) 2016 Thomas Sweeney
+  This file is part of Anime Stats.
+  Anime Stats is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  Anime Stats is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 #ifndef SQLGRIDCOMMAND_HPP
 #define SQLGRIDCOMMAND_HPP
@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include "FilterStructs.hpp"
 
 namespace cppw { class Sqlite3Connection;
-                 class Sqlite3Statement; }
+    class Sqlite3Statement; }
 class wxGrid;
 class wxString;
 class DataPanel;
@@ -55,7 +55,7 @@ protected:
 
     std::vector<std::array<std::string, selectedTitleCols>> getTitlesOfSeries(int64_t idSeries);
     void InsertIntoTitle(const std::vector<std::array<std::string, selectedTitleCols>>& titles,
-            const std::string& idSeries);
+                         const std::string& idSeries);
 };
 
 //various functions and data common to both insert and update commands
@@ -64,7 +64,7 @@ class InsertableOrUpdatable
 public:
     InsertableOrUpdatable() = delete;
     InsertableOrUpdatable(DataPanel* dataPanel,
-            std::shared_ptr<std::vector<wxString>> addedRowIDs, int label, int64_t idSeries = -1);
+                          std::shared_ptr<std::vector<wxString>> addedRowIDs, int label, int64_t idSeries = -1);
     virtual ~InsertableOrUpdatable() = default;
 
 protected:
@@ -84,7 +84,7 @@ class InsertCommand : public InsertDeleteCommand, public InsertableOrUpdatable
 public:
     InsertCommand() = delete;
     InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, std::string title,
-            int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs); //updates the database upon construction
+                  int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs); //updates the database upon construction
     void Execute() override;
     void UnExecute() override;
 
@@ -116,7 +116,7 @@ private:
     std::vector<std::vector<std::array<std::string, selectedTitleCols>>> m_titlesGroup; //multiple entries will each have multiple names
 
     const std::string seriesColNames = " idSeries, rating, idReleaseType, idWatchedStatus, year, idSeason, episodesWatched, "
-            "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished ";
+        "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished ";
 };
 
 class UpdateCommand : public SqlGridCommand, public InsertableOrUpdatable
@@ -124,8 +124,8 @@ class UpdateCommand : public SqlGridCommand, public InsertableOrUpdatable
 public:
     UpdateCommand() = delete;
     UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries,
-            std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map, int label,
-            std::shared_ptr<std::vector<wxString>> addedRowIDs);
+                  std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map, int label,
+                  std::shared_ptr<std::vector<wxString>> addedRowIDs);
     void Execute() override;
     void UnExecute() override;
 
@@ -146,8 +146,8 @@ class FilterCommand : public SqlGridCommand
 public:
     FilterCommand() = delete;
     FilterCommand(DataPanel* dataPanel, std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-            std::shared_ptr<BasicFilterInfo> oldBasicFilterInfo, std::shared_ptr<AdvFilterInfo> newAdvFilterInfo,
-            std::shared_ptr<AdvFilterInfo> oldAdvFilterInfo, std::shared_ptr<std::vector<wxString>> addedRowIDs);
+                  std::shared_ptr<BasicFilterInfo> oldBasicFilterInfo, std::shared_ptr<AdvFilterInfo> newAdvFilterInfo,
+                  std::shared_ptr<AdvFilterInfo> oldAdvFilterInfo, std::shared_ptr<std::vector<wxString>> addedRowIDs);
     void Execute() override;
     void UnExecute() override;
 

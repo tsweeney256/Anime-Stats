@@ -13,40 +13,40 @@ set(CMAKE_EXE_LINKER_FLAGS_STATIC_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${S
 set(CMAKE_EXE_LINKER_FLAGS_STATIC_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${STATIC_ARGS}")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "Static_Debug")
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 endif(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "Static_Debug")
 
 set(SOURCE_FILES 
-        AdvFilterFrame.cpp
-        AdvSortFrame.cpp
-        App.cpp
-        AppIDs.cpp
-        ColorOptionsDlg.cpp
-        CustomGridCellEditors.cpp
-        DataPanel.cpp
-        MainFrame.cpp
-        Settings.cpp
-        SqlGridCommand.cpp
-        SqlTitleAliasCommand.cpp
-        TitleAliasDialog.cpp
-        )
+  AdvFilterFrame.cpp
+  AdvSortFrame.cpp
+  App.cpp
+  AppIDs.cpp
+  ColorOptionsDlg.cpp
+  CustomGridCellEditors.cpp
+  DataPanel.cpp
+  MainFrame.cpp
+  Settings.cpp
+  SqlGridCommand.cpp
+  SqlTitleAliasCommand.cpp
+  TitleAliasDialog.cpp
+  )
 set(CPPW_SQLITE3 cppw/Sqlite3/Sqlite3Connection.cpp
-        cppw/Sqlite3/Sqlite3Exception.cpp
-        cppw/Sqlite3/Sqlite3Result.cpp
-        cppw/Sqlite3/Sqlite3Statement.cpp)
+  cppw/Sqlite3/Sqlite3Exception.cpp
+  cppw/Sqlite3/Sqlite3Result.cpp
+  cppw/Sqlite3/Sqlite3Statement.cpp)
 add_executable(AnimeStats ${CPPW_SQLITE3} ${SOURCE_FILES})
 if(WIN STREQUAL "true" OR WIN32)
-    target_sources(AnimeStats PUBLIC resource.rc)
+  target_sources(AnimeStats PUBLIC resource.rc)
 endif(WIN STREQUAL "true" OR WIN32)
 
 find_package(SQLite3 REQUIRED)
 if(SQLITE3_FOUND)
-    include_directories(${SQLITE3_INCLUDE_DIRS})
-    target_link_libraries(AnimeStats ${SQLITE3_LIBRARIES})
+  include_directories(${SQLITE3_INCLUDE_DIRS})
+  target_link_libraries(AnimeStats ${SQLITE3_LIBRARIES})
 endif(SQLITE3_FOUND)
 
 find_package(wxWidgets REQUIRED)
 if(wxWidgets_FOUND)
-    include("${wxWidgets_USE_FILE}")
-    target_link_libraries(AnimeStats ${wxWidgets_LIBRARIES})
+  include("${wxWidgets_USE_FILE}")
+  target_link_libraries(AnimeStats ${wxWidgets_LIBRARIES})
 endif(wxWidgets_FOUND)

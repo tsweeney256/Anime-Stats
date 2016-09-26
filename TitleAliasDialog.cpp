@@ -1,17 +1,17 @@
 /*Anime Stats
-Copyright (C) 2016 Thomas Sweeney
-This file is part of Anime Stats.
-Anime Stats is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-Anime Stats is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+  Copyright (C) 2016 Thomas Sweeney
+  This file is part of Anime Stats.
+  Anime Stats is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  Anime Stats is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <cctype>
 #include <wx/sizer.h>
@@ -32,12 +32,12 @@ BEGIN_EVENT_TABLE(TitleAliasDialog, wxDialog)
 END_EVENT_TABLE()
 
 TitleAliasDialog::TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite3Connection* connection,
-        int64_t idSeries, wxString title)
+                                   int64_t idSeries, wxString title)
     : wxDialog(parent, id, "Title Alias"), m_connection(connection), m_idSeries(idSeries), m_title(title)
 {
     //create the dialog controls
     auto list = new CustomEditableListBox(this, wxID_ANY, m_title, wxDefaultPosition,
-            wxDefaultSize, wxEL_DEFAULT_STYLE | wxEL_NO_REORDER);
+                                          wxDefaultSize, wxEL_DEFAULT_STYLE | wxEL_NO_REORDER);
     m_list = list->GetListCtrl();
 
     auto btnSizer = CreateButtonSizer(wxOK | wxCANCEL);
@@ -124,7 +124,7 @@ void TitleAliasDialog::OnEndUpdate(wxListEvent& event)
         //else it is an update
         else
             m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_list, m_idSeries,
-                    event.GetIndex(), std::string(event.GetText().utf8_str()), std::string(m_oldEditVal.utf8_str())));
+                                                                 event.GetIndex(), std::string(event.GetText().utf8_str()), std::string(m_oldEditVal.utf8_str())));
     }
 }
 

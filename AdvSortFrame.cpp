@@ -1,17 +1,17 @@
 /*Anime Stats
-Copyright (C) 2016 Thomas Sweeney
-This file is part of Anime Stats.
-Anime Stats is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-Anime Stats is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+  Copyright (C) 2016 Thomas Sweeney
+  This file is part of Anime Stats.
+  Anime Stats is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  Anime Stats is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <algorithm>
 #include <wx/panel.h>
@@ -36,7 +36,7 @@ END_EVENT_TABLE()
 
 AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
     : wxFrame(parent, ID_ADV_SORT_FRAME, "Advanced Sorting", wxDefaultPosition, wxDefaultSize,
-            wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER |wxMAXIMIZE_BOX)), m_dataPanel(dynamic_cast<DataPanel*>(parent))
+          wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER |wxMAXIMIZE_BOX)), m_dataPanel(dynamic_cast<DataPanel*>(parent))
 {
     wxASSERT(m_dataPanel);
     auto mainPanel = new wxPanel(this, wxID_ANY);
@@ -196,7 +196,7 @@ void AdvSortFrame::ApplyOkCommon()
         std::string sortStr;
         for(unsigned int i = 0; i < m_sortList->GetCount(); ++i)
             sortStr += std::string(std::string("`") + m_toSort[i].name.utf8_str()) + "` collate nocase " +
-                    (m_toSort[i].asc ? " asc " : " desc ") + (i + 1 == m_sortList->GetCount() ? "" : ", ");
+                (m_toSort[i].asc ? " asc " : " desc ") + (i + 1 == m_sortList->GetCount() ? "" : ", ");
         m_dataPanel->SetSort(sortStr);
     }
 }

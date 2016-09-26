@@ -1,17 +1,17 @@
 /*Anime Stats
-Copyright (C) 2016 Thomas Sweeney
-This file is part of Anime Stats.
-Anime Stats is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-Anime Stats is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+  Copyright (C) 2016 Thomas Sweeney
+  This file is part of Anime Stats.
+  Anime Stats is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  Anime Stats is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <wx/grid.h>
 #include <wx/file.h>
@@ -69,7 +69,7 @@ std::vector<std::array<std::string, InsertDeleteCommand::selectedTitleCols>> Ins
 }
 
 void InsertDeleteCommand::InsertIntoTitle(const std::vector<std::array<std::string, selectedTitleCols>>& titles,
-        const std::string& idSeries)
+                                          const std::string& idSeries)
 {
     auto titleInsertStmt = m_connection->PrepareStatement("insert into Title (name, idSeries, idLabel, pronunciation) values (?, ?, ?, ?)");
     for(const auto& row : titles){
@@ -88,7 +88,7 @@ void InsertDeleteCommand::InsertIntoTitle(const std::vector<std::array<std::stri
 }
 
 InsertableOrUpdatable::InsertableOrUpdatable(DataPanel* dataPanel,
-        std::shared_ptr<std::vector<wxString> > addedRowIDs, int label, int64_t idSeries)
+                                             std::shared_ptr<std::vector<wxString> > addedRowIDs, int label, int64_t idSeries)
     : m_idLabel(label), m_idSeries(idSeries), m_dataPanel(dataPanel), m_addedRowIDs(addedRowIDs) {}
 
 void InsertableOrUpdatable::AddRowIDToFilterList()
@@ -139,7 +139,7 @@ void InsertableOrUpdatable::CheckIfLegalTitle(cppw::Sqlite3Connection* connectio
 }
 
 InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, std::string title,
-        int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs)
+                             int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs)
     : InsertDeleteCommand(connection, grid), InsertableOrUpdatable(dataPanel, addedRowIDs, idLabel), m_title(title)
 {
     CheckIfLegalTitle(m_connection, title); //throws and cancels the construction if not legal
@@ -213,7 +213,7 @@ void DeleteCommand::UnExecute()
         questionStr += " ,?";
     }
     auto seriesInsertStmt = m_connection->PrepareStatement("insert into Series (" + seriesColNames + ") values(" +
-            questionStr + ")");
+                                                           questionStr + ")");
     wxGridUpdateLocker lock(m_grid);
     int insertLoc = m_grid->GetNumberRows()-1;
     m_grid->InsertRows(insertLoc, m_series.size());
@@ -260,7 +260,7 @@ void DeleteCommand::ExecuteCommon()
         throw std::string("just something stupid to crash the program");
 
     auto seriesViewSelectStmt = m_connection->PrepareStatement(std::string(statementStr.utf8_str()) +
-            " where rightSide.idSeries= ?");
+                                                               " where rightSide.idSeries= ?");
     wxGridUpdateLocker lock(m_grid);
     //for(auto idSeries : m_idSeries){
     for(unsigned int i = 0; i < m_idSeries.size(); ++i){ //range based for loop crashes the debugger for some strange reason
@@ -304,8 +304,8 @@ void DeleteCommand::ExecuteCommon()
 }
 
 UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries,
-        std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map, int label,
-        std::shared_ptr<std::vector<wxString>> addedRowIDs)
+                             std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map, int label,
+                             std::shared_ptr<std::vector<wxString>> addedRowIDs)
     : SqlGridCommand(connection, grid), InsertableOrUpdatable(dataPanel, addedRowIDs, label, idSeries),
       m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol), m_map(map)
 {
@@ -393,9 +393,9 @@ void UpdateCommand::CheckIfLegalPronunciation(const std::string& str)
 
 std::string UpdateCommand::GetIdName(const std::string& name)
 {
-        //so that we only grab the main title's id
+    //so that we only grab the main title's id
     auto m_selectIdTitleStmt = m_connection->PrepareStatement("select idName from Title inner join Label "
-            "on Title.idLabel = Label.idLabel where name = ? and Main=1");
+                                                              "on Title.idLabel = Label.idLabel where name = ? and Main=1");
     m_selectIdTitleStmt->Reset();
     m_selectIdTitleStmt->ClearBindings();
     m_selectIdTitleStmt->Bind(1, name);
@@ -405,8 +405,8 @@ std::string UpdateCommand::GetIdName(const std::string& name)
 }
 
 FilterCommand::FilterCommand(DataPanel* dataPanel, std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-        std::shared_ptr<BasicFilterInfo> oldBasicFilterInfo, std::shared_ptr<AdvFilterInfo> newAdvFilterInfo,
-        std::shared_ptr<AdvFilterInfo> oldAdvFilterInfo, std::shared_ptr<std::vector<wxString>> addedRowIDs)
+                             std::shared_ptr<BasicFilterInfo> oldBasicFilterInfo, std::shared_ptr<AdvFilterInfo> newAdvFilterInfo,
+                             std::shared_ptr<AdvFilterInfo> oldAdvFilterInfo, std::shared_ptr<std::vector<wxString>> addedRowIDs)
     : SqlGridCommand(nullptr, nullptr), m_dataPanel(dataPanel), m_newBasicFilterInfo(newBasicFilterInfo),
       m_oldBasicFilterInfo(oldBasicFilterInfo), m_newAdvFilterInfo(newAdvFilterInfo),
       m_oldAdvFilterInfo(oldAdvFilterInfo), m_addedRowIDs(addedRowIDs)
