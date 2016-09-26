@@ -622,7 +622,10 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
             showNothing = true;
 
         if(newAdvFilterInfo){
-            //releaseType
+	    firstStatus = true;
+	    if(newAdvFilterInfo->studio.size() > 0)
+		AppendStatusStr(statusStr, std::string("studio LIKE '%") + newAdvFilterInfo->studio + "%')", firstStatus);
+	    
             firstStatus = true;
             if(newAdvFilterInfo->tv)
                 AppendStatusStr(statusStr, releaseType + "= 1 ", firstStatus);
