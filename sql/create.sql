@@ -32,21 +32,23 @@ CREATE TABLE "Title" (
 	FOREIGN KEY(`idLabel`) REFERENCES `Label`(`idLabel`) ON DELETE SET DEFAULT ON UPDATE CASCADE
 );
 CREATE TABLE "Series" (
-  "idSeries" INTEGER PRIMARY KEY,
-  "rating" INTEGER DEFAULT NULL,
-  "idReleaseType" INTEGER DEFAULT 0,
-  "idWatchedStatus" INTEGER DEFAULT 0,
-  "year" INTEGER DEFAULT NULL,
-  "idSeason" INTEGER DEFAULT 0,
-  "episodesWatched" INTEGER DEFAULT NULL,
-  "totalEpisodes" INTEGER DEFAULT NULL,
-  "rewatchedEpisodes" INTEGER DEFAULT NULL,
-  "episodeLength" INTEGER DEFAULT NULL,
-  "dateStarted" TEXT DEFAULT NULL,
-  "dateFinished" TEXT DEFAULT NULL,
-  CONSTRAINT "fk_Show_ReleaseType1" FOREIGN KEY ("idReleaseType") REFERENCES "ReleaseType" ("idReleaseType") ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT "fk_Show_Season1" FOREIGN KEY ("idSeason") REFERENCES "Season" ("idSeason") ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT "fk_Show_WatchedStatus1" FOREIGN KEY ("idWatchedStatus") REFERENCES "WatchedStatus" ("idWatchedStatus") ON DELETE NO ACTION ON UPDATE NO ACTION
+	`idSeries`	INTEGER,
+	`rating`	INTEGER DEFAULT NULL,
+	`idReleaseType`	INTEGER DEFAULT 0,
+	`idWatchedStatus`	INTEGER DEFAULT 0,
+	`year`	INTEGER DEFAULT NULL,
+	`idSeason`	INTEGER DEFAULT 0,
+	`episodesWatched`	INTEGER DEFAULT NULL,
+	`totalEpisodes`	INTEGER DEFAULT NULL,
+	`rewatchedEpisodes`	INTEGER DEFAULT NULL,
+	`episodeLength`	INTEGER DEFAULT NULL,
+	`dateStarted`	TEXT DEFAULT NULL,
+	`dateFinished`	TEXT DEFAULT NULL,
+	`studio`	TEXT DEFAULT NULL,
+	PRIMARY KEY(idSeries),
+	FOREIGN KEY(`idReleaseType`) REFERENCES "ReleaseType" ( "idReleaseType" ) ON DELETE NO ACTION ON UPDATE NO ACTION,
+	FOREIGN KEY(`idWatchedStatus`) REFERENCES "WatchedStatus" ( "idWatchedStatus" ) ON DELETE NO ACTION ON UPDATE NO ACTION,
+	FOREIGN KEY(`idSeason`) REFERENCES "Season" ( "idSeason" ) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 CREATE TABLE "Season" (
   "idSeason" INTEGER PRIMARY KEY,

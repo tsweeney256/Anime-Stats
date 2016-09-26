@@ -65,6 +65,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
         else{
             m_settings = std::make_unique<Settings>();
             m_settings->Save(settingsFileName);
+	    
         }
     }catch(SettingsSaveException& e){
         auto status = wxMessageBox(wxString(e.what()) + "\nContinue Anyway?", "Error", wxYES_NO);

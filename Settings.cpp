@@ -130,7 +130,7 @@ void Settings::InitCellColors(std::vector<long>& colColors, int col)
     }else if(col == col::WATCHED_STATUS){
         colColors = {-0xFFFFFF, -0xFFFFFF, 0xFFC271, 0x94FF3B, 0x83B8F9, 0x7D7DFF};
 
-    } else if(col == col::TITLE || col == col::PRONUNCIATION || col == col::DATE_STARTED || col == col::DATE_FINISHED){
+    } else if(col == col::TITLE || col == col::PRONUNCIATION || col == col::DATE_STARTED || col == col::DATE_FINISHED || col == col::STUDIO){
         colColors = {-0xFFFFFF, -0xFFFFFF};
 
     }else if(col == col::YEAR || col == col::EPISODES_WATCHED || col == col::TOTAL_EPISODES ||

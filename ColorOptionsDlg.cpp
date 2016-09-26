@@ -32,7 +32,6 @@ ColorOptionsDlg::ColorOptionsDlg(Settings* settings, DataPanel* dataPanel, wxWin
     auto applyBtn = new wxButton(m_mainPanel, wxID_APPLY, "Apply");
     auto okBtn = new wxButton(m_mainPanel, wxID_OK, "OK");
     auto cancelBtn= new wxButton(m_mainPanel, wxID_CANCEL, "Cancel");
-
     //sizers
     m_mainSizer = new wxBoxSizer(wxVERTICAL);
     auto topSizer = new wxBoxSizer(wxHORIZONTAL); //inside of mainSizer, everything above the buttons
