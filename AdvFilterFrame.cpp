@@ -677,14 +677,14 @@ void AdvFilterFrame::ApplyFilter()
     auto basic = BasicFilterInfo::MakeShared();
     auto adv = AdvFilterInfo::MakeShared();
 
-    basic->title = m_titleTextField->GetValue();
+    basic->title = m_titleTextField->GetValue().utf8_str();
     basic->watched = m_watchedCheck->GetValue();
     basic->watching = m_watchingCheck->GetValue();
     basic->stalled = m_stalledCheck->GetValue();
     basic->dropped = m_droppedCheck->GetValue();
     basic->watchedBlank = m_watchedStatusBlankCheck->GetValue();
 
-    adv->studio = m_studioTextField->GetValue();
+    adv->studio = m_studioTextField->GetValue().utf8_str();
     
     adv->tv = m_tvCheck->GetValue();
     adv->ova = m_ovaCheck->GetValue();
