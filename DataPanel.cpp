@@ -733,7 +733,7 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
             m_allCheck->SetValue(false);
             m_allCheck->Enable();
         }
-        m_titleFilterTextField->SetValue(newBasicFilterInfo->title);
+        m_titleFilterTextField->SetValue(wxString::FromUTF8(newBasicFilterInfo->title.c_str()));
     }catch(cppw::Sqlite3Exception& e){
         wxMessageBox(std::string("Error applying filter.\n") + e.what());
         m_top->Close(true);
