@@ -55,7 +55,9 @@ public:
     void WriteSizesToSettings();
     void SetSqlite3Connection(cppw::Sqlite3Connection* connection); //preserves everything on the panel and the command history
     void ResetPanel(cppw::Sqlite3Connection* connection); //resets everything except for color
-    void RefreshGridColors();
+    void RefreshFilter(); //does not refresh colors
+    void RefreshGridColors(); //does not update value color mappings
+    void UpdateCellColorInfo(); //update value color mappings
     wxArrayString GetColNames();
     const std::vector<wxString>* GetAllowedWatchedVals();
     const std::vector<wxString>* GetAllowedReleaseVals();
@@ -93,7 +95,6 @@ private:
     std::string GetAddedRowsSqlStr(std::vector<wxString>* changedRows);
     void ResetFilterGui();
     void UpdateCellColor(int row, int col);
-    void UpdateCellColorInfo();
     void UpdateNumericalCellColorInfo(int col);
     int GetColAggregate(std::string colName, std::string function);
     int GetColMedian(const std::string& colName);

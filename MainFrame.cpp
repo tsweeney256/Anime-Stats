@@ -394,6 +394,9 @@ void MainFrame::OnImportMAL(wxCommandEvent &event)
                     }
                 }
             }while((child = child->GetNext()));
+            m_dataPanel->SetUnsavedChanges(true);
+            m_dataPanel->UpdateCellColorInfo();
+            m_dataPanel->RefreshFilter();
         }
     }
 }

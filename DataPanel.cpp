@@ -1129,6 +1129,11 @@ void DataPanel::RefreshColColors(int col)
     }
 }
 
+void DataPanel::RefreshFilter()
+{
+    ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
+}
+
 void DataPanel::ShowSqliteBusyErrorBox()
 {
     wxMessageBox("Error applying change.\nThe database is locked because its in use by another program.");
