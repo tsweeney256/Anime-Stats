@@ -42,7 +42,8 @@ private:
     void OnNew(wxCommandEvent& event);
     void OnOpen(wxCommandEvent& event);
     void OnColorOptions(wxCommandEvent& event);
-
+    void OnImportMAL(wxCommandEvent& event);
+    
     void SwitchToDataDir();
     void DoDefaultDbPopup();
     int SaveChangesPopup();
@@ -71,7 +72,8 @@ private:
         SORT_BY_PRONUNCIATION = wxID_HIGHEST + 1,
         DEFAULT_DB,
         DEFAULT_DB_ASK,
-        COLOR_OPTIONS
+        COLOR_OPTIONS,
+        MAL_IMPORT
     };
 };
 

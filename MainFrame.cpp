@@ -14,6 +14,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <string>
+#include <unordered_map>
 #include <memory>
 #include <wx/menu.h>
 #include <wx/panel.h>
@@ -28,6 +29,7 @@
 #include <wx/dir.h>
 #include <wx/filedlg.h>
 #include <wx/richmsgdlg.h>
+#include <wx/xml/xml.h>
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "ColorOptionsDlg.hpp"
@@ -49,6 +51,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(COLOR_OPTIONS, MainFrame::OnColorOptions)
     EVT_MENU(wxID_NEW, MainFrame::OnNew)
     EVT_MENU(wxID_OPEN, MainFrame::OnOpen)
+    EVT_MENU(MAL_IMPORT, MainFrame::OnImportMAL)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -97,7 +100,11 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     m_fileMenu = new wxMenu;
     m_fileMenu->Append(wxID_NEW);
     m_fileMenu->Append(wxID_OPEN);
-    m_fileMenu->Append(wxID_SAVE);            
+    m_fileMenu->Append(wxID_SAVE);
+    auto importMenu = new wxMenu;
+    m_fileMenu->AppendSubMenu(importMenu, "Import");
+    importMenu->Append(MAL_IMPORT, "MAL");  
+            
     m_fileMenu->Append(DEFAULT_DB, _("Default Database"),
                        _("Select or unselect this file as your default database."), wxITEM_CHECK);
     m_fileMenu->Check(DEFAULT_DB, !m_dbInMemory);
@@ -268,6 +275,125 @@ void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
                 m_fileMenu->Check(DEFAULT_DB, true);
             }
             m_dataPanel->ResetPanel(m_connection.get());
+        }
+    }
+}
+
+void MainFrame::OnImportMAL(wxCommandEvent &event)
+{
+    auto dir = wxStandardPaths::Get().GetDocumentsDir();
+    wxFileDialog dlg(this, wxFileSelectorPromptStr, wxEmptyString, dir, "XML files (*.xml)|*.xml", wxFD_OPEN);
+    auto status = dlg.ShowModal();
+    if(status == wxID_OK){
+        auto path = dlg.GetPath();
+        wxXmlDocument doc;
+        if(!doc.Load(path)){
+            wxMessageBox("Invalid XML file");
+            return;
+        }else{
+            auto root = doc.GetRoot();
+            if(root->GetName() != "myanimelist"){
+                wxMessageBox("Unrecognized XML file type.\nExpected MAL Export XML file.");
+                return;
+            }
+            auto child = root->GetChildren();
+            if(!child){
+                wxMessageBox("There was an error parsing the MAL Export file.\n"
+                             "Unable to find child of root node.");
+                return;
+            }
+            auto seriesStmt = m_connection->PrepareStatement(
+                "INSERT INTO Series (rating, idReleaseType, idWatchedStatus, episodesWatched, totalEpisodes, "
+                "rewatchedEpisodes, dateStarted, dateFinished) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            auto titleStmt = m_connection->PrepareStatement("INSERT INTO Title (name, idSeries, idLabel) VALUES (?, ?, 1)");
+            
+            std::unordered_map<std::string, int> allowedValsMap
+            {
+                {"TV",        1},
+                {"OVA",       2},
+                {"Movie",     4},
+                {"Special",   5},
+                {"ONA",       3},
+                {"Watching",  2},
+                {"Completed", 1},
+                {"On-Hold",   3},
+                {"Dropped",   4}
+            };
+            
+            do{
+                if(child->GetName() == "anime"){
+                    auto dataNode = child->GetChildren();
+                    auto totalEpisodes = 0;
+                    auto fullRewatchCount = 0;
+                    auto currentRewatchCount = 0;
+
+                    try{
+                        seriesStmt->Reset();
+                        seriesStmt->ClearBindings();
+                        titleStmt->Reset();
+                        titleStmt->ClearBindings();
+                        bool recordEntry = true;
+                        do{
+                            const auto tag = std::string(dataNode->GetName().utf8_str());
+                            const auto content = std::string(dataNode->GetNodeContent().utf8_str());
+                            //could probably just always assume a certain order, but I'm being paranoid
+                            if(tag == "series_title"){
+                                titleStmt->Bind(1, content.c_str());
+                            }else if(tag == "series_type"){
+                                auto result = allowedValsMap.find(content);
+                                if(result != allowedValsMap.end()){
+                                    seriesStmt->Bind(2, result->second);
+                                }
+                            }else if(tag == "series_episodes"){
+                                try{
+                                    totalEpisodes = std::stoi(content);
+                                    seriesStmt->Bind(5, totalEpisodes);
+                                }catch(...){/*if invalid, it just defaults to null anyway*/}
+                            }else if(tag == "my_watched_episodes"){
+                                if(content != "0")
+                                    seriesStmt->Bind(4, content);
+                            }else if(tag == "my_start_date"){
+                                if(content != "0000-00-00"){
+                                    seriesStmt->Bind(7, content);
+                                }
+                            }else if(tag == "my_finish_date"){
+                                if(content != "0000-00-00"){
+                                    seriesStmt->Bind(8, content);
+                                }
+                            }else if(tag == "my_score"){
+                                if(content != "0")
+                                    seriesStmt->Bind(1, content);
+                            }else if(tag == "my_status"){
+                                auto result = allowedValsMap.find(content);
+                                if(result != allowedValsMap.end()){
+                                    seriesStmt->Bind(3, result->second);
+                                }else if(content == "Plan to Watch"){
+                                    recordEntry = false;
+                                }
+                            }else if(tag == "my_times_watched"){
+                                try{
+                                    fullRewatchCount = std::stoi(content);
+                                }catch(...) {/*if invalid, it just defaults to null anyway*/}
+                            }else if(tag == "my_rewatching"){
+                                try{
+                                    currentRewatchCount = std::stoi(content);
+                                }catch(...) {/*if invalid, it just defaults to null anyway*/}
+                            }
+                        }while((dataNode = dataNode->GetNext()));
+                        if(recordEntry){
+                            auto rewatchedCount = totalEpisodes * fullRewatchCount + currentRewatchCount;
+                            if(rewatchedCount != 0)
+                                seriesStmt->Bind(6, rewatchedCount);
+                            seriesStmt->GetResults()->NextRow();
+                            titleStmt->Bind(2, m_connection->GetLastInsertRowID());
+                            titleStmt->GetResults()->NextRow();
+                        }
+                    }catch(cppw::Sqlite3Exception& e){
+                        wxMessageBox(e.what());
+                        return;
+                    }
+                }
+            }while((child = child->GetNext()));
         }
     }
 }
