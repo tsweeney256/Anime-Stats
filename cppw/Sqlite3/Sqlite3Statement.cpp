@@ -48,7 +48,7 @@ void cppw::Sqlite3Statement::Bind(const int paramIdx, const double val)
 void cppw::Sqlite3Statement::Bind(const int paramIdx, const std::string& val)
 {
     int code;
-    if((code = sqlite3_bind_text(m_statement, paramIdx, val.c_str(), val.size(), nullptr)) != SQLITE_OK)
+    if((code = sqlite3_bind_text(m_statement, paramIdx, val.c_str(), val.size(), SQLITE_TRANSIENT)) != SQLITE_OK)
         throw Sqlite3Exception(code);
 }
 
@@ -56,7 +56,7 @@ void cppw::Sqlite3Statement::Bind(const int paramIdx, const std::string& val)
 void cppw::Sqlite3Statement::Bind(const int paramIdx, const char* val)
 {
     int code;
-    if((code = sqlite3_bind_text(m_statement, paramIdx, val, strlen(val), nullptr)) != SQLITE_OK)
+    if((code = sqlite3_bind_text(m_statement, paramIdx, val, strlen(val), SQLITE_TRANSIENT)) != SQLITE_OK)
             throw Sqlite3Exception(code);
 }
 
