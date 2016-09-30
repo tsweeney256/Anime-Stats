@@ -73,7 +73,7 @@ private:
     wxCheckBox* m_stalledCheck;
     wxCheckBox* m_droppedCheck;
     wxCheckBox* m_watchedStatusBlankCheck;
-    wxCheckBox* m_watchedStatusAllCheck;
+    wxCheckBox* m_toWatchCheck;
     wxCheckBox* m_tvCheck;
     wxCheckBox* m_ovaCheck;
     wxCheckBox* m_onaCheck;

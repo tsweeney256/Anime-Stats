@@ -30,6 +30,7 @@ struct BasicFilterInfo
     bool stalled = true;
     bool dropped = true;
     bool watchedBlank = true;
+    bool toWatch = true;
     std::string title;
 
 private:

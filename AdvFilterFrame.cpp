@@ -60,7 +60,7 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_stalledCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Stalled"));
     m_droppedCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Dropped"));
     m_watchedStatusBlankCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Blank"));
-    m_watchedStatusAllCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Enable All"));
+    m_toWatchCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("To Watch"));
     auto watchedStatusCheckAllBtn = new wxButton(m_mainPanel, ID_ADV_FILTER_CHECK_ALL_WATCHED_STATUS, _("Check All"));
     auto watchedStatusUncheckAllBtn = new wxButton(m_mainPanel, ID_ADV_FILTER_UNCHECK_ALL_WATCHED_STATUS, _("Uncheck All"));
     
@@ -169,8 +169,7 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_stalledCheck->SetValue(true);
     m_droppedCheck->SetValue(true);
     m_watchedStatusBlankCheck->SetValue(true);
-    m_watchedStatusAllCheck->SetValue(true);
-    m_watchedStatusAllCheck->Disable();
+    m_toWatchCheck->SetValue(true);
     m_tvCheck->SetValue(true);
     m_ovaCheck->SetValue(true);
     m_onaCheck->SetValue(true);
@@ -284,7 +283,7 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     watchedStatusSizerTop->Add(m_watchedStatusBlankCheck, paddingFlag);
     watchedStatusSizerTop->Add(m_watchingCheck, paddingFlag);
     watchedStatusSizerTop->Add(m_droppedCheck, paddingFlag);
-    watchedStatusSizerTop->Add(m_watchedStatusAllCheck, paddingFlag);
+    watchedStatusSizerTop->Add(m_toWatchCheck, paddingFlag);
     watchedStatusSizerBottom->Add(watchedStatusCheckAllBtn, paddingFlag.Expand());
     watchedStatusSizerBottom->Add(watchedStatusUncheckAllBtn, paddingFlag.Expand());
     watchedStatusSizer->Add(watchedStatusSizerTop, paddingFlag);
@@ -528,7 +527,7 @@ void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
     EnableAllReleaseType();
     EnableAllSeason();
 
-    m_watchedStatusAllCheck->SetValue(true);
+    m_toWatchCheck->SetValue(true);
 
     m_titleTextField->SetValue("");
     m_studioTextField->SetValue("");
@@ -624,6 +623,7 @@ void AdvFilterFrame::EnableAllWatchedStatus(bool val)
     m_stalledCheck->SetValue(val);
     m_droppedCheck->SetValue(val);
     m_watchedStatusBlankCheck->SetValue(val);
+    m_toWatchCheck->SetValue(val);
 }
 
 void AdvFilterFrame::EnableAllReleaseType(bool val)
@@ -656,6 +656,7 @@ void AdvFilterFrame::ApplyFilter()
     basic->stalled = m_stalledCheck->GetValue();
     basic->dropped = m_droppedCheck->GetValue();
     basic->watchedBlank = m_watchedStatusBlankCheck->GetValue();
+    basic->toWatch = m_toWatchCheck->GetValue();
 
     adv->studio = m_studioTextField->GetValue().utf8_str();
     

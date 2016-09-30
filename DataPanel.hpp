@@ -119,7 +119,7 @@ private:
     wxCheckBox* m_stalledCheck;
     wxCheckBox* m_droppedCheck;
     wxCheckBox* m_blankCheck;
-    wxCheckBox* m_allCheck;
+    wxCheckBox* m_toWatchCheck;
     wxButton* m_advFilterButton;
     wxButton* m_advSortButton;
     wxTextCtrl* m_titleFilterTextField;

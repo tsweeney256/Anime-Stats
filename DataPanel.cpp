@@ -81,7 +81,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     m_stalledCheck = new wxCheckBox(topBar, wxID_ANY, _("Stalled"));
     m_droppedCheck = new wxCheckBox(topBar, wxID_ANY, _("Dropped"));
     m_blankCheck = new wxCheckBox(topBar, wxID_ANY,  _("Blank"));
-    m_allCheck = new wxCheckBox(topBar, wxID_ANY, _("Enable All"));
+    m_toWatchCheck = new wxCheckBox(topBar, wxID_ANY, _("To Watch"));
     auto checkAllButton = new wxButton(topBar, ID_CHECK_ALL_BTN, _("Check All"));
     auto uncheckAllButton = new wxButton(topBar, ID_UNCHECK_ALL_BTN, _("Uncheck All"));
 
@@ -90,8 +90,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     m_stalledCheck->SetValue(true);
     m_droppedCheck->SetValue(true);
     m_blankCheck->SetValue(true);
-    m_allCheck->SetValue(true);
-    m_allCheck->Disable();
+    m_toWatchCheck->SetValue(true);
 
     //
     //buttons and textfield
@@ -125,7 +124,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     checkBoxSizer->Add(checkAllButton, checkBoxFlags);
     checkBoxSizer->Add(m_watchingCheck, checkBoxFlags);
     checkBoxSizer->Add(m_droppedCheck, checkBoxFlags);
-    checkBoxSizer->Add(m_allCheck, checkBoxFlags);
+    checkBoxSizer->Add(m_toWatchCheck, checkBoxFlags);
     checkBoxSizer->Add(uncheckAllButton, checkBoxFlags);
 
     titleFilterSizer->Add(m_titleFilterTextField, wxSizerFlags(1).Border(wxALL).Center());
@@ -237,6 +236,7 @@ void DataPanel::OnCheckAllBtn(wxCommandEvent& WXUNUSED(event))
     m_watchingCheck->SetValue(true);
     m_stalledCheck->SetValue(true);
     m_droppedCheck->SetValue(true);
+    m_toWatchCheck->SetValue(true);
     m_blankCheck->SetValue(true);
 }
 
@@ -246,6 +246,7 @@ void DataPanel::OnUncheckAllBtn(wxCommandEvent& WXUNUSED(event))
     m_watchingCheck->SetValue(false);
     m_stalledCheck->SetValue(false);
     m_droppedCheck->SetValue(false);
+    m_toWatchCheck->SetValue(false);
     m_blankCheck->SetValue(false);
 }
 
@@ -609,6 +610,8 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
             AppendStatusStr(statusStr, watchedStatus + "= 3 ", firstStatus);
         if(newBasicFilterInfo->dropped)
             AppendStatusStr(statusStr, watchedStatus + "= 4 ", firstStatus);
+        if(newBasicFilterInfo->toWatch)
+            AppendStatusStr(statusStr, watchedStatus + "= 5 ", firstStatus);
         if(newBasicFilterInfo->watchedBlank)
             AppendStatusStr(statusStr, watchedStatus + "= 0 ", firstStatus);
         if(!firstStatus)
@@ -719,15 +722,7 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         m_stalledCheck->SetValue(newBasicFilterInfo->stalled);
         m_droppedCheck->SetValue(newBasicFilterInfo->dropped);
         m_blankCheck->SetValue(newBasicFilterInfo->watchedBlank);
-        if(newBasicFilterInfo->watched && newBasicFilterInfo->watching && newBasicFilterInfo->stalled &&
-           newBasicFilterInfo->dropped && newBasicFilterInfo->watchedBlank){
-            m_allCheck->SetValue(true);
-            m_allCheck->Disable();
-        }
-        else{
-            m_allCheck->SetValue(false);
-            m_allCheck->Enable();
-        }
+        m_toWatchCheck->SetValue(newBasicFilterInfo->toWatch);
         m_titleFilterTextField->SetValue(wxString::FromUTF8(newBasicFilterInfo->title.c_str()));
     }catch(cppw::Sqlite3Exception& e){
         wxMessageBox(std::string("Error applying filter.\n") + e.what());
@@ -936,7 +931,7 @@ void DataPanel::ResetFilterGui()
     m_stalledCheck->SetValue(true);
     m_droppedCheck->SetValue(true);
     m_blankCheck->SetValue(true);
-    m_allCheck->Disable();
+    m_toWatchCheck->SetValue(true);
     m_titleFilterTextField->SetValue("");
 }
 

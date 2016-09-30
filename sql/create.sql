@@ -21,6 +21,7 @@ INSERT INTO `WatchedStatus` VALUES (1,'Watched');
 INSERT INTO `WatchedStatus` VALUES (2,'Watching');
 INSERT INTO `WatchedStatus` VALUES (3,'Stalled');
 INSERT INTO `WatchedStatus` VALUES (4,'Dropped');
+INSERT INTO `WatchedStatus` VALUES (5,'To Watch');
 CREATE TABLE "Title" (
 	`idName`	INTEGER,
 	`name`	TEXT NOT NULL,
