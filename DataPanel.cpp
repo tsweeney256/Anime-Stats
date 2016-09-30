@@ -42,13 +42,9 @@
 #include "SqlStrings.hpp"
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
-    EVT_CHECKBOX(ID_WATCHED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
-    EVT_CHECKBOX(ID_WATCHING_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
-    EVT_CHECKBOX(ID_STALLED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
-    EVT_CHECKBOX(ID_DROPPED_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
-    EVT_CHECKBOX(ID_BLANK_CB, DataPanel::OnGeneralWatchedStatusCheckbox)
-    EVT_CHECKBOX(ID_ALL_CB, DataPanel::OnEnableAllCheckbox)
     EVT_TEXT_ENTER(ID_TITLE_FILTER_FIELD, DataPanel::OnTextEnter)
+    EVT_BUTTON(ID_CHECK_ALL_BTN, DataPanel::OnCheckAllBtn)
+    EVT_BUTTON(ID_UNCHECK_ALL_BTN, DataPanel::OnUncheckAllBtn)
     EVT_BUTTON(ID_APPLY_FILTER_BTN, DataPanel::OnApplyFilter)
     EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
     EVT_BUTTON(ID_ADV_FILTER_BTN, DataPanel::OnAdvFilter)
@@ -80,12 +76,14 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     //
     //checkboxes
     //
-    m_watchedCheck = new wxCheckBox(topBar, ID_WATCHED_CB, _("Watched"));
-    m_watchingCheck = new wxCheckBox(topBar, ID_WATCHING_CB, _("Watching"));
-    m_stalledCheck = new wxCheckBox(topBar, ID_STALLED_CB, _("Stalled"));
-    m_droppedCheck = new wxCheckBox(topBar, ID_DROPPED_CB, _("Dropped"));
-    m_blankCheck = new wxCheckBox(topBar, ID_BLANK_CB,  _("Blank"));
-    m_allCheck = new wxCheckBox(topBar, ID_ALL_CB, _("Enable All"));
+    m_watchedCheck = new wxCheckBox(topBar, wxID_ANY, _("Watched"));
+    m_watchingCheck = new wxCheckBox(topBar, wxID_ANY, _("Watching"));
+    m_stalledCheck = new wxCheckBox(topBar, wxID_ANY, _("Stalled"));
+    m_droppedCheck = new wxCheckBox(topBar, wxID_ANY, _("Dropped"));
+    m_blankCheck = new wxCheckBox(topBar, wxID_ANY,  _("Blank"));
+    m_allCheck = new wxCheckBox(topBar, wxID_ANY, _("Enable All"));
+    auto checkAllButton = new wxButton(topBar, ID_CHECK_ALL_BTN, _("Check All"));
+    auto uncheckAllButton = new wxButton(topBar, ID_UNCHECK_ALL_BTN, _("Uncheck All"));
 
     m_watchedCheck->SetValue(true);
     m_watchingCheck->SetValue(true);
@@ -112,7 +110,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     //
     //top bar sizers
     //
-    auto checkBoxSizer = new wxGridSizer(3, 5, 5);
+    auto checkBoxSizer = new wxGridSizer(4, 5, 5);
     auto checkBoxSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Watched Status"));
     auto titleFilterSizer = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Title"));
     auto topControlBarSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -124,9 +122,11 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     checkBoxSizer->Add(m_watchedCheck, checkBoxFlags);
     checkBoxSizer->Add(m_stalledCheck, checkBoxFlags);
     checkBoxSizer->Add(m_blankCheck, checkBoxFlags);
+    checkBoxSizer->Add(checkAllButton, checkBoxFlags);
     checkBoxSizer->Add(m_watchingCheck, checkBoxFlags);
     checkBoxSizer->Add(m_droppedCheck, checkBoxFlags);
     checkBoxSizer->Add(m_allCheck, checkBoxFlags);
+    checkBoxSizer->Add(uncheckAllButton, checkBoxFlags);
 
     titleFilterSizer->Add(m_titleFilterTextField, wxSizerFlags(1).Border(wxALL).Center());
 
@@ -231,27 +231,22 @@ void DataPanel::SetAddedFilterRows(std::shared_ptr<std::vector<wxString> > chang
     m_changedRows = changedRows;
 }
 
-void DataPanel::OnGeneralWatchedStatusCheckbox(wxCommandEvent& WXUNUSED(event))
+void DataPanel::OnCheckAllBtn(wxCommandEvent& WXUNUSED(event))
 {
-    if(m_watchedCheck->GetValue() && m_watchingCheck->GetValue() && m_stalledCheck->GetValue()
-       && m_droppedCheck->GetValue() && m_blankCheck->GetValue()){
-        m_allCheck->SetValue(true);
-        m_allCheck->Disable();
-    }
-    else{
-        m_allCheck->SetValue(false);
-        m_allCheck->Enable();
-    }
-}
-
-void DataPanel::OnEnableAllCheckbox(wxCommandEvent& WXUNUSED(event))
-{
-    m_allCheck->Disable();
     m_watchedCheck->SetValue(true);
     m_watchingCheck->SetValue(true);
     m_stalledCheck->SetValue(true);
     m_droppedCheck->SetValue(true);
     m_blankCheck->SetValue(true);
+}
+
+void DataPanel::OnUncheckAllBtn(wxCommandEvent& WXUNUSED(event))
+{
+    m_watchedCheck->SetValue(false);
+    m_watchingCheck->SetValue(false);
+    m_stalledCheck->SetValue(false);
+    m_droppedCheck->SetValue(false);
+    m_blankCheck->SetValue(false);
 }
 
 void DataPanel::OnTextEnter(wxCommandEvent& WXUNUSED(event))

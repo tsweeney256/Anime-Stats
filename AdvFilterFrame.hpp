@@ -31,12 +31,12 @@ public:
 
 private:
     void OnClose(wxCloseEvent& event);
-    void OnWatchedStatusCheckBox(wxCommandEvent& event);
-    void OnWatchedStatusAllCheckBox(wxCommandEvent& event);
-    void OnReleaseTypeCheckBox(wxCommandEvent& event);
-    void OnReleaseTypeAllCheckBox(wxCommandEvent& event);
-    void OnSeasonCheckBox(wxCommandEvent& event);
-    void OnSeasonAllCheckBox(wxCommandEvent& event);
+    void OnWatchedStatusCheckAllBtn(wxCommandEvent& event);
+    void OnWatchedStatusUnCheckAllBtn(wxCommandEvent& event);
+    void OnReleaseTypeCheckAllBtn(wxCommandEvent& event);
+    void OnReleaseTypeUnCheckAllBtn(wxCommandEvent& event);
+    void OnSeasonCheckAllBtn(wxCommandEvent& event);
+    void OnSeasonUnCheckAllBtn(wxCommandEvent& event);
     void OnRatingEnableCheckBox(wxCommandEvent& event);
     void OnYearEnableCheckBox(wxCommandEvent& event);
     void OnEpsWatchedEnableCheckBox(wxCommandEvent& event);
@@ -51,9 +51,9 @@ private:
     void OnApply(wxCommandEvent& event);
 
     wxStaticText* getLabel(const wxString& text);
-    void EnableAllWatchedStatus();
-    void EnableAllReleaseType();
-    void EnableAllSeason();
+    void EnableAllWatchedStatus(bool val = true);
+    void EnableAllReleaseType(bool val = true);
+    void EnableAllSeason(bool val = true);
     void ApplyFilter();
 
     const int m_minNum    = 0;
@@ -80,13 +80,11 @@ private:
     wxCheckBox* m_movieCheck;
     wxCheckBox* m_tvSpecialCheck;
     wxCheckBox* m_releaseTypeBlankCheck;
-    wxCheckBox* m_releaseTypeAllCheck;
     wxCheckBox* m_winterCheck;
     wxCheckBox* m_springCheck;
     wxCheckBox* m_summerCheck;
     wxCheckBox* m_fallCheck;
     wxCheckBox* m_seasonBlankCheck;
-    wxCheckBox* m_seasonAllCheck;
 
     wxTextCtrl* m_titleTextField;
     wxTextCtrl* m_studioTextField;

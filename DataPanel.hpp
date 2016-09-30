@@ -64,8 +64,8 @@ public:
     const std::vector<wxString>* GetAllowedSeasonVals();
 
 private:
-    void OnGeneralWatchedStatusCheckbox(wxCommandEvent& event);
-    void OnEnableAllCheckbox(wxCommandEvent& event);
+    void OnCheckAllBtn(wxCommandEvent& event);
+    void OnUncheckAllBtn(wxCommandEvent& event);
     void OnTextEnter(wxCommandEvent& event);
     void OnApplyFilter(wxCommandEvent& event);
     void OnResetFilter(wxCommandEvent& event);
