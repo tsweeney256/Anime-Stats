@@ -338,6 +338,13 @@ void MainFrame::OnImportMAL(wxCommandEvent &event)
                             const auto content = std::string(dataNode->GetNodeContent().utf8_str());
                             //could probably just always assume a certain order, but I'm being paranoid
                             if(tag == "series_title"){
+                                auto dupeTitleCheckStmt = m_connection->PrepareStatement("select idName from Title where idLabel=? and name=?");
+                                dupeTitleCheckStmt->Bind(1, 1);
+                                dupeTitleCheckStmt->Bind(2, content);
+                                if(dupeTitleCheckStmt->GetResults()->NextRow()){
+                                    recordEntry = false;
+                                    break;
+                                }
                                 titleStmt->Bind(1, content.c_str());
                             }else if(tag == "series_type"){
                                 auto result = allowedValsMap.find(content);
@@ -369,6 +376,7 @@ void MainFrame::OnImportMAL(wxCommandEvent &event)
                                     seriesStmt->Bind(3, result->second);
                                 }else if(content == "Plan to Watch"){
                                     recordEntry = false;
+                                    break;
                                 }
                             }else if(tag == "my_times_watched"){
                                 try{
