@@ -317,7 +317,8 @@ void MainFrame::OnImportMAL(wxCommandEvent &event)
                 {"Watching",  2},
                 {"Completed", 1},
                 {"On-Hold",   3},
-                {"Dropped",   4}
+                {"Dropped",   4},
+                {"Plan to Watch", 5}
             };
             
             do{
@@ -374,9 +375,6 @@ void MainFrame::OnImportMAL(wxCommandEvent &event)
                                 auto result = allowedValsMap.find(content);
                                 if(result != allowedValsMap.end()){
                                     seriesStmt->Bind(3, result->second);
-                                }else if(content == "Plan to Watch"){
-                                    recordEntry = false;
-                                    break;
                                 }
                             }else if(tag == "my_times_watched"){
                                 try{
