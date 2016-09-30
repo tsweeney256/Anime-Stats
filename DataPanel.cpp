@@ -807,6 +807,7 @@ void DataPanel::NewBasicFilter()
     m_basicFilterInfo->stalled = m_stalledCheck->GetValue();
     m_basicFilterInfo->dropped = m_droppedCheck->GetValue();
     m_basicFilterInfo->watchedBlank = m_blankCheck->GetValue();
+    m_basicFilterInfo->toWatch = m_toWatchCheck->GetValue();
     NewFilter(m_basicFilterInfo, nullptr);
 }
 
