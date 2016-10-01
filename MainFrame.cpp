@@ -281,6 +281,13 @@ void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnImportMAL(wxCommandEvent &event)
 {
+    wxMessageDialog deleteCommandsDlg(this, _("This will clear your undo history.\n"
+                                               "Are you sure you wish to contunue?"),
+                                       wxMessageBoxCaptionStr, wxYES_NO|wxYES_DEFAULT|wxCENTER);
+    if(deleteCommandsDlg.ShowModal() == wxID_NO){
+        return;
+    }
+
     auto dir = wxStandardPaths::Get().GetDocumentsDir();
     wxFileDialog dlg(this, wxFileSelectorPromptStr, wxEmptyString, dir, "XML files (*.xml)|*.xml", wxFD_OPEN);
     auto status = dlg.ShowModal();
@@ -302,6 +309,8 @@ void MainFrame::OnImportMAL(wxCommandEvent &event)
                              "Unable to find child of root node.");
                 return;
             }
+            //Clear the undo history only after early detection of errors
+            m_dataPanel->ClearCommandHistory();
             auto seriesStmt = m_connection->PrepareStatement(
                 "INSERT INTO Series (rating, idReleaseType, idWatchedStatus, episodesWatched, totalEpisodes, "
                 "rewatchedEpisodes, dateStarted, dateFinished) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");

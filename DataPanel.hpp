@@ -43,6 +43,7 @@ public:
     void SetUnsavedChanges(bool);
     void Undo();
     void Redo();
+    void ClearCommandHistory();
     void ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                      std::shared_ptr<AdvFilterInfo> newAdvFilterInfo, std::vector<wxString>* changedRows = nullptr);
     void SetAddedFilterRows(std::shared_ptr<std::vector<wxString>> changedRows);

@@ -231,6 +231,12 @@ void DataPanel::Redo()
     }
 }
 
+void DataPanel::ClearCommandHistory()
+{
+    m_commands.clear();
+    m_commandLevel = 0;
+}
+
 void DataPanel::SetAddedFilterRows(std::shared_ptr<std::vector<wxString> > changedRows)
 {
     m_changedRows = changedRows;
