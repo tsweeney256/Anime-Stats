@@ -20,6 +20,7 @@
 #include <vector>
 #include <memory>
 #include <wx/dialog.h>
+#include "SqlTitleAliasCommand.hpp"
 
 namespace cppw { class Sqlite3Connection; }
 class wxListCtrl;

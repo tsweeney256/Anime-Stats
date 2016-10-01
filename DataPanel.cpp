@@ -342,9 +342,9 @@ void DataPanel::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
     else if(rows.size() == 0)
         wxMessageBox("Error: No row was selected.");
     else{
-        auto aliasDlg = new TitleAliasDialog(this, wxID_ANY, m_connection,
+        TitleAliasDialog aliasDlg(this, wxID_ANY, m_connection,
                                              wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)), m_grid->GetCellValue(rows[0], col::TITLE));
-        if(aliasDlg->ShowModal() == wxID_OK)
+        if(aliasDlg.ShowModal() == wxID_OK)
             SetUnsavedChanges(true);
     }
 }
