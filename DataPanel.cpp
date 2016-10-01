@@ -84,7 +84,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     m_toWatchCheck = new wxCheckBox(topBar, wxID_ANY, _("To Watch"));
     auto checkAllButton = new wxButton(topBar, ID_CHECK_ALL_BTN, _("Check All"));
     auto uncheckAllButton = new wxButton(topBar, ID_UNCHECK_ALL_BTN, _("Uncheck All"));
-
+    
     m_watchedCheck->SetValue(true);
     m_watchingCheck->SetValue(true);
     m_stalledCheck->SetValue(true);
@@ -109,7 +109,10 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     //
     //top bar sizers
     //
-    auto checkBoxSizer = new wxGridSizer(4, 5, 5);
+    auto checkBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto checkBoxSizerLeft = new wxGridSizer(3, wxSizerFlags::GetDefaultBorder(),
+                                             wxSizerFlags::GetDefaultBorder());
+    auto checkBoxSizerRight = new wxBoxSizer(wxVERTICAL);
     auto checkBoxSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Watched Status"));
     auto titleFilterSizer = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Title"));
     auto topControlBarSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -117,15 +120,18 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     auto btnSizer = new wxGridSizer(2, 4, 0, 0);
 
     auto checkBoxFlags = wxSizerFlags(1).Expand();
-    checkBoxSizerOutline->Add(checkBoxSizer, wxSizerFlags(1).Border(wxALL).Expand());
-    checkBoxSizer->Add(m_watchedCheck, checkBoxFlags);
-    checkBoxSizer->Add(m_stalledCheck, checkBoxFlags);
-    checkBoxSizer->Add(m_blankCheck, checkBoxFlags);
-    checkBoxSizer->Add(checkAllButton, checkBoxFlags);
-    checkBoxSizer->Add(m_watchingCheck, checkBoxFlags);
-    checkBoxSizer->Add(m_droppedCheck, checkBoxFlags);
-    checkBoxSizer->Add(m_toWatchCheck, checkBoxFlags);
-    checkBoxSizer->Add(uncheckAllButton, checkBoxFlags);
+    auto noExpand = wxSizerFlags(0);//.Border(wxALL);
+    checkBoxSizer->Add(checkBoxSizerLeft, noExpand.Border(wxLEFT).Center());
+    checkBoxSizer->Add(checkBoxSizerRight, noExpand.Border(wxLEFT).Center());
+    checkBoxSizerOutline->Add(checkBoxSizer, noExpand.Border(wxLEFT | wxRIGHT | wxBOTTOM));
+    checkBoxSizerLeft->Add(m_watchedCheck, checkBoxFlags);
+    checkBoxSizerLeft->Add(m_stalledCheck, checkBoxFlags);
+    checkBoxSizerLeft->Add(m_blankCheck, checkBoxFlags);
+    checkBoxSizerLeft->Add(m_watchingCheck, checkBoxFlags);
+    checkBoxSizerLeft->Add(m_droppedCheck, checkBoxFlags);
+    checkBoxSizerLeft->Add(m_toWatchCheck, checkBoxFlags);
+    checkBoxSizerRight->Add(checkAllButton, checkBoxFlags);
+    checkBoxSizerRight->Add(uncheckAllButton, checkBoxFlags);
 
     titleFilterSizer->Add(m_titleFilterTextField, wxSizerFlags(1).Border(wxALL).Center());
 
