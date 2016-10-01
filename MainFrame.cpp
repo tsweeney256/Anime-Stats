@@ -451,9 +451,9 @@ void MainFrame::DoDefaultDbPopup()
 
 int MainFrame::SaveChangesPopup()
 {
-    auto dlg = new wxMessageDialog(this, _("Save changes to database before closing?"),
-                                   wxMessageBoxCaptionStr, wxCANCEL|wxYES_NO|wxCANCEL_DEFAULT|wxCENTER);
-    auto status  = dlg->ShowModal();
+    wxMessageDialog dlg(this, _("Save changes to database before closing?"),
+                        wxMessageBoxCaptionStr, wxCANCEL|wxYES_NO|wxCANCEL_DEFAULT|wxCENTER);
+    auto status  = dlg.ShowModal();
     try{
         if(status == wxID_YES){
             m_connection->Commit();
