@@ -116,7 +116,7 @@ private:
     std::vector<std::vector<std::array<std::string, selectedTitleCols>>> m_titlesGroup; //multiple entries will each have multiple names
 
     const std::string seriesColNames = " idSeries, rating, idReleaseType, idWatchedStatus, year, idSeason, episodesWatched, "
-        "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished ";
+        "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished, studio ";
 };
 
 class UpdateCommand : public SqlGridCommand, public InsertableOrUpdatable
