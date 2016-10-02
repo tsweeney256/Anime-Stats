@@ -351,9 +351,9 @@ void DataPanel::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
 
 void DataPanel::OnGridColSort(wxGridEvent& event)
 {
-    int col = event.GetCol() + 1;
-    if(event.GetCol() == col::TITLE && m_sortByPronunciation)
-        col = col::PRONUNCIATION + 1;
+    int col = event.GetCol() + col::FIRST_VISIBLE_COL;
+    if(event.GetCol() == col::TITLE)
+        col = col::PRONUNCIATION + col::FIRST_VISIBLE_COL;
     m_curOrderCol = std::to_string(col) + " collate nocase ";
     if(m_curColSort == event.GetCol()){
         m_curOrderDir = (m_curSortAsc ? " desc " : " asc ");
@@ -766,7 +766,7 @@ void DataPanel::ApplyFullGrid()
 {
     try{
         auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.ToUTF8()) +
-                                                        "order by " + m_curOrderCombined);
+                                                        " order by " + m_curOrderCombined);
         statement->Bind(1, "%%");
         statement->Bind(2, "%%");
         auto results = statement->GetResults();
@@ -890,11 +890,6 @@ std::string DataPanel::GetAddedRowsSqlStr(std::vector<wxString>* changedRows)
         output += " rightSide.idSeries=" + std::string(changedRows->back().utf8_str()) + ")";
     }
     return output;
-}
-
-void DataPanel::SortByPronunciation(bool b)
-{
-    m_sortByPronunciation = b;
 }
 
 void DataPanel::WriteSizesToSettings()

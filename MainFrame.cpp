@@ -46,7 +46,6 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_UNDO, MainFrame::OnUndo)
     EVT_MENU(wxID_REDO, MainFrame::OnRedo)
     EVT_MENU(DEFAULT_DB_ASK, MainFrame::OnDefaultDbAsk)
-    EVT_MENU(SORT_BY_PRONUNCIATION, MainFrame::OnPreferencesSortByPronunciation)
     EVT_MENU(DEFAULT_DB, MainFrame::OnDefaultDb)
     EVT_MENU(COLOR_OPTIONS, MainFrame::OnColorOptions)
     EVT_MENU(wxID_NEW, MainFrame::OnNew)
@@ -118,11 +117,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     m_preferencesMenu->Append(DEFAULT_DB_ASK, _("Always ask to change default database"),
                               _("Toggle whether or not you get asked to change your default database when you open a new one."), wxITEM_CHECK);
     m_preferencesMenu->Check(DEFAULT_DB_ASK, m_settings->defaultDbAsk);
-    m_preferencesMenu->Append(SORT_BY_PRONUNCIATION, _("Sort title by pronunciation"),
-                              _("Sorts the title column by the user given pronunciation instead of by its Unicode values."
-                                "Useful for things like chinese characters."), wxITEM_CHECK);
     m_preferencesMenu->Append(COLOR_OPTIONS, _("Grid Colors"), _("Change what colors the grid uses."));
-    m_preferencesMenu->Check(SORT_BY_PRONUNCIATION, m_settings->sortingByPronunciation);
     editMenu->AppendSubMenu(m_preferencesMenu, _("Preferences"));
 
     auto helpMenu = new wxMenu;
@@ -146,7 +141,6 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     auto mainPanelSizer = new wxBoxSizer(wxVERTICAL);
     auto notebook = new wxNotebook(mainPanel, wxID_ANY);
     m_dataPanel = new DataPanel(m_connection.get(), notebook, this, m_settings.get());
-    m_dataPanel->SortByPronunciation(m_settings->sortingByPronunciation);
     notebook->AddPage(m_dataPanel, _("Data"));
     mainPanelSizer->Add(notebook, wxSizerFlags(1).Expand());
     mainPanel->SetSizerAndFit(mainPanelSizer);
@@ -222,12 +216,6 @@ void MainFrame::OnRedo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Redo(); }
 void MainFrame::OnDefaultDbAsk(wxCommandEvent& event)
 {
     m_settings->defaultDbAsk = event.IsChecked();
-}
-
-void MainFrame::OnPreferencesSortByPronunciation(wxCommandEvent& event)
-{
-    m_dataPanel->SortByPronunciation(event.IsChecked());
-    m_settings->sortingByPronunciation = event.IsChecked();
 }
 
 void MainFrame::OnDefaultDb(wxCommandEvent& event)

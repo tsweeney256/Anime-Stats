@@ -148,7 +148,6 @@ private:
     wxBoxSizer* m_panelSizer;
     std::shared_ptr<std::vector<wxString>> m_changedRows; //managed by the command classes
     wxArrayString m_colList;
-    bool m_sortByPronunciation = false;
     CellColorInfo m_cellColorInfo[col::NUM_COLS];
 
     DECLARE_EVENT_TABLE()

@@ -65,14 +65,6 @@ Settings::Settings(const wxString& fn)
                 defaultDbAsk = temp;
         }
 
-        //sort by pronunciation?
-        topNode = findChildWithValue(root, "sortingByPronunciation", topNode);
-        if(topNode){
-            long temp;
-            if(topNode->GetNodeContent().ToLong(&temp))
-                sortingByPronunciation = temp;
-        }
-
         //column sizes and colors
         topNode = findChildWithValue(root, "cols", topNode);
         if(topNode){
@@ -172,10 +164,6 @@ void Settings::Save(const wxString& fn)
             sizeNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", wxString::Format("%li", colSizes[i])));
         }
     }
-    //sortingByPronunciation
-    auto sortingByPronunciationNode = new wxXmlNode(rootNode, wxXML_ELEMENT_NODE, "sortingByPronunciation");
-    sortingByPronunciationNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "",
-                                                       wxString::Format("%i", sortingByPronunciation)));
     //defaultDbAsk
     auto defaultDbAskNode = new wxXmlNode(rootNode, wxXML_ELEMENT_NODE, "defaultDbAsk");
     defaultDbAskNode->AddChild(new wxXmlNode(wxXML_TEXT_NODE, "", wxString::Format("%i", defaultDbAsk)));

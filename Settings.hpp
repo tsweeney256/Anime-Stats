@@ -31,7 +31,6 @@ struct Settings
     static void InitCellColors(std::vector<long>& colColors, int col);
     std::string defaultDb;
     bool defaultDbAsk = true;
-    bool sortingByPronunciation = false;
     std::vector<long> colSizes;
     std::vector<std::vector<long>> cellColors;
 

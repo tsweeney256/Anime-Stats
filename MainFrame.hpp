@@ -37,7 +37,6 @@ private:
     void OnUndo(wxCommandEvent& event);
     void OnRedo(wxCommandEvent& event);
     void OnDefaultDbAsk(wxCommandEvent& event);
-    void OnPreferencesSortByPronunciation(wxCommandEvent& event);
     void OnDefaultDb(wxCommandEvent& event);
     void OnNew(wxCommandEvent& event);
     void OnOpen(wxCommandEvent& event);
