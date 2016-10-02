@@ -353,8 +353,9 @@ void DataPanel::OnGridColSort(wxGridEvent& event)
 {
     int col = event.GetCol() + col::FIRST_VISIBLE_COL;
     if(event.GetCol() == col::TITLE)
-        col = col::PRONUNCIATION + col::FIRST_VISIBLE_COL;
-    m_curOrderCol = std::to_string(col) + " collate nocase ";
+        m_curOrderCol = std::string("nameSort") + " collate nocase ";
+    else
+        m_curOrderCol = std::to_string(col) + " collate nocase ";
     if(m_curColSort == event.GetCol()){
         m_curOrderDir = (m_curSortAsc ? " desc " : " asc ");
         m_curSortAsc = !m_curSortAsc;
