@@ -68,8 +68,7 @@ private:
 
     enum
     {
-        SORT_BY_PRONUNCIATION = wxID_HIGHEST + 1,
-        DEFAULT_DB,
+        DEFAULT_DB = wxID_HIGHEST + 1,
         DEFAULT_DB_ASK,
         COLOR_OPTIONS,
         MAL_IMPORT
