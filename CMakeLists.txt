@@ -23,6 +23,8 @@ set(SOURCE_FILES
   AppIDs.cpp
   ColorOptionsDlg.cpp
   CustomGridCellEditors.cpp
+  AnalysisTextBox.cpp
+  AnalysisPanel.cpp
   DataPanel.cpp
   MainFrame.cpp
   Settings.cpp

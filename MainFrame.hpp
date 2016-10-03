@@ -20,9 +20,11 @@
 #include <memory>
 #include "cppw/Sqlite3.hpp"
 #include "Settings.hpp"
+#include "AnalysisPanel.hpp"
 
 class DataPanel;
 class wxMenu;
+class wxBookCtrlEvent;
 
 class MainFrame : public wxFrame
 {
@@ -42,6 +44,7 @@ private:
     void OnOpen(wxCommandEvent& event);
     void OnColorOptions(wxCommandEvent& event);
     void OnImportMAL(wxCommandEvent& event);
+    void OnTabChange(wxBookCtrlEvent& event);
     
     void SwitchToDataDir();
     void DoDefaultDbPopup();
@@ -59,6 +62,7 @@ private:
 
     std::unique_ptr<cppw::Sqlite3Connection> m_connection;
     DataPanel* m_dataPanel = nullptr;
+    AnalysisPanel* m_analysisPanel = nullptr;
     wxMenu* m_fileMenu;
     wxMenu* m_preferencesMenu;
     std::unique_ptr<Settings> m_settings = nullptr;

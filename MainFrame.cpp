@@ -51,6 +51,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_NEW, MainFrame::OnNew)
     EVT_MENU(wxID_OPEN, MainFrame::OnOpen)
     EVT_MENU(MAL_IMPORT, MainFrame::OnImportMAL)
+    EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, MainFrame::OnTabChange)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -141,7 +142,9 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     auto mainPanelSizer = new wxBoxSizer(wxVERTICAL);
     auto notebook = new wxNotebook(mainPanel, wxID_ANY);
     m_dataPanel = new DataPanel(m_connection.get(), notebook, this, m_settings.get());
+    m_analysisPanel = new AnalysisPanel(m_connection.get(), notebook, this);
     notebook->AddPage(m_dataPanel, _("Data"));
+    notebook->AddPage(m_analysisPanel, _("Analysis"));
     mainPanelSizer->Add(notebook, wxSizerFlags(1).Expand());
     mainPanel->SetSizerAndFit(mainPanelSizer);
 }
@@ -401,6 +404,13 @@ void MainFrame::OnImportMAL(wxCommandEvent &event)
             m_dataPanel->UpdateCellColorInfo();
             m_dataPanel->RefreshFilter();
         }
+    }
+}
+
+void MainFrame::OnTabChange(wxBookCtrlEvent& event)
+{
+    if(event.GetSelection() == 1){
+        m_analysisPanel->UpdateInfo();
     }
 }
 
