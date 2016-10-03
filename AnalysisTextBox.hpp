@@ -9,11 +9,13 @@
 #include "cppw/Sqlite3.hpp"
 
 class wxSizer;
+class wxCheckBox;
+class MainFrame;
 
 class AnalysisTextBox : public wxPanel
 {
 public:
-    AnalysisTextBox(cppw::Sqlite3Connection* connection, wxWindow* parent, wxString boxLabel,
+    AnalysisTextBox(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, wxString boxLabel,
                     std::vector<wxString> outputLabels, const std::string& sqlScript, const std::string& altSqlScript = "",
                     wxString checkBoxLabel = "", int numBinds = 0,
                     const std::vector<wxString>& comboVals = std::vector<wxString>());
@@ -25,12 +27,15 @@ private:
     };
 
     void OnCheckBox(wxCommandEvent& event);
-    
-    cppw::Sqlite3Connection* m_connection;
+
+    MainFrame* m_top;
     std::unique_ptr<cppw::Sqlite3Statement> m_statement;
     std::unique_ptr<cppw::Sqlite3Statement> m_altStatement;
     std::vector<wxString> m_outputLabels;
     std::vector<wxStaticText*> m_staticText;
+    wxCheckBox* m_checkBox;
     wxSizer* m_mainSizer;
     int m_numBinds;
+    
+    DECLARE_EVENT_TABLE()
 };

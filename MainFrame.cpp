@@ -410,7 +410,12 @@ void MainFrame::OnImportMAL(wxCommandEvent &event)
 void MainFrame::OnTabChange(wxBookCtrlEvent& event)
 {
     if(event.GetSelection() == 1){
-        m_analysisPanel->UpdateInfo();
+        try{
+            m_analysisPanel->UpdateInfo();
+        }catch(const cppw::Sqlite3Exception& e){
+            wxMessageBox(e.what());
+            Close();
+        }
     }
 }
 
