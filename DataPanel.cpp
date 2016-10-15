@@ -463,6 +463,11 @@ void DataPanel::OnGridCellChanged(wxGridEvent& event)
     else{
         UpdateCellColor(event.GetRow(), event.GetCol());
     }
+    if(col::isColLimitedValue(event.GetCol())){
+        //Because wxGridCellChoiceEditor::BeginEdit() makes an undocumented call to Combo->SetFocus()
+        //and never gives back the focus, like every other control, because wxWidgets is a well designed library.
+        m_grid->SetFocus();
+    }
     m_grid->Refresh(); //needed for Windows
 }
 
