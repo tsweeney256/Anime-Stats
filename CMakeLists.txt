@@ -45,7 +45,7 @@ if(SQLITE3_FOUND)
   target_link_libraries(AnimeStats ${SQLITE3_LIBRARIES})
 endif(SQLITE3_FOUND)
 
-find_package(wxWidgets REQUIRED)
+find_package(wxWidgets REQUIRED core base adv xml)
 if(wxWidgets_FOUND)
   include("${wxWidgets_USE_FILE}")
   target_link_libraries(AnimeStats ${wxWidgets_LIBRARIES})
