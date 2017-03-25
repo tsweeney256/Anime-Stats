@@ -30,6 +30,7 @@
 #include <wx/menu.h>
 #include <wx/utils.h>
 #include <wx/dcclient.h>
+#include <wx/stdpaths.h>
 #include "DataPanel.hpp"
 #include "AppIDs.hpp"
 #include "cppw/Sqlite3.hpp"
@@ -84,7 +85,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     m_toWatchCheck = new wxCheckBox(topBar, wxID_ANY, _("To Watch"));
     auto checkAllButton = new wxButton(topBar, ID_CHECK_ALL_BTN, _("Check All"));
     auto uncheckAllButton = new wxButton(topBar, ID_UNCHECK_ALL_BTN, _("Uncheck All"));
-    
+
     m_watchedCheck->SetValue(true);
     m_watchingCheck->SetValue(true);
     m_stalledCheck->SetValue(true);
@@ -161,17 +162,30 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     m_grid->CreateGrid(0,0);
 
     //get basic select statement from file and prepare it
-    wxString basicSelectFileName = "sql/basicSelect.sql";
+    wxString postfix = "/sql/basicSelect.sql";
+    wxString basicSelectFileName = wxStandardPaths::Get().GetResourcesDir() + postfix;
+    wxString basicSelectFileNameAlt = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath() + postfix;
     bool error = false;
     if(wxFileName::FileExists(basicSelectFileName)){
         wxFile selectFile(basicSelectFileName);
         if(!selectFile.ReadAll(&m_basicSelectString))
             error = true;
     }
+    else if(wxFileName::FileExists(basicSelectFileNameAlt)){
+        wxFile selectFile(basicSelectFileNameAlt);
+        if(!selectFile.ReadAll(&m_basicSelectString))
+            error = true;
+    }
     else
         error = true;
     if(error){
-        wxMessageBox("Error: Could not read from sql/basicSelect.sql.");
+        if(basicSelectFileName == basicSelectFileNameAlt){
+            wxMessageBox("Error: Could not read from " + basicSelectFileName + ".");
+        }
+        else{
+            wxMessageBox("Error: Could not read from " + basicSelectFileName
+                + " or " + basicSelectFileNameAlt) + ".";
+        }
         top->Close();
     }
     BuildAllowedValsMap(m_allowedWatchedVals, "select status from WatchedStatus order by idWatchedStatus");
@@ -642,7 +656,7 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
 	    firstStatus = true;
 	    if(newAdvFilterInfo->studio.size() > 0)
 		AppendStatusStr(statusStr, std::string("studio LIKE '%") + newAdvFilterInfo->studio + "%')", firstStatus);
-	    
+
             firstStatus = true;
             if(newAdvFilterInfo->tv)
                 AppendStatusStr(statusStr, releaseType + "= 1 ", firstStatus);

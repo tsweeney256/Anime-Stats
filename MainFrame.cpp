@@ -67,7 +67,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
         else{
             m_settings = std::make_unique<Settings>();
             m_settings->Save(settingsFileName);
-            
+
         }
     }catch(SettingsSaveException& e){
         auto status = wxMessageBox(wxString(e.what()) + "\nContinue Anyway?", "Error", wxYES_NO);
@@ -102,8 +102,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     m_fileMenu->Append(wxID_SAVE);
     auto importMenu = new wxMenu;
     m_fileMenu->AppendSubMenu(importMenu, "Import");
-    importMenu->Append(MAL_IMPORT, "MAL");  
-            
+    importMenu->Append(MAL_IMPORT, "MAL");
+
     m_fileMenu->Append(DEFAULT_DB, _("Default Database"),
                        _("Select or unselect this file as your default database."), wxITEM_CHECK);
     m_fileMenu->Check(DEFAULT_DB, !m_dbInMemory);
@@ -205,7 +205,7 @@ void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
     info.SetVersion("0.02");
     info.SetDescription(_("Helps keep track of anime stats"));
     info.SetCopyright("(C) 2015 Thomas Sweeney");
-    
+
     wxAboutBox(info);
 }
 
@@ -303,7 +303,7 @@ void MainFrame::OnImportMAL(wxCommandEvent &event)
                 "INSERT INTO Series (rating, idReleaseType, idWatchedStatus, episodesWatched, totalEpisodes, "
                 "rewatchedEpisodes, dateStarted, dateFinished) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             auto titleStmt = m_connection->PrepareStatement("INSERT INTO Title (name, idSeries, idLabel) VALUES (?, ?, 1)");
-            
+
             std::unordered_map<std::string, int> allowedValsMap
             {
                 {"TV",        1},
@@ -317,7 +317,7 @@ void MainFrame::OnImportMAL(wxCommandEvent &event)
                 {"Dropped",   4},
                 {"Plan to Watch", 5}
             };
-            
+
             do{
                 if(child->GetName() == "anime"){
                     auto dataNode = child->GetChildren();
@@ -487,10 +487,14 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
     if(!fileExists){
         auto error = false;
         wxString errorMsg;
-        wxString createFileName = "sql/create.sql";
+        wxString postfix = "/sql/create.sql";
+        wxString createFileName = wxStandardPaths::Get().GetResourcesDir() + postfix;
+        wxString createFileNameAlt = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath() + postfix;
+        wxString& createFileNameActual = wxFileName::FileExists(createFileName) ?
+            createFileName : createFileNameAlt;
         wxString createStr;
-        if(wxFileName::FileExists(createFileName)){
-            wxFile createFile(createFileName);
+        if(wxFileName::FileExists(createFileNameActual)){
+            wxFile createFile(createFileNameActual);
             if(createFile.ReadAll(&createStr)){
                 try{
                     auto sql = std::string(createStr.utf8_str());
@@ -500,18 +504,28 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
 
                 }catch(cppw::Sqlite3Exception& e){
                     error = true;
-                    errorMsg <<_("Error: Could not execute create command.\n sqlite3 error: ") << e.GetErrorCode() <<
-                        _(" ") << e.what();
+                    errorMsg <<_("Error: Could not execute create command.\n sqlite3 error: ")
+                        << e.GetErrorCode() << _(" ") << e.what();
                 }
             }
             else{
                 error = true;
-                errorMsg = "Error: Could not read from sql/create.sql.";
+                if(createFileName == createFileNameAlt){
+                    errorMsg = "Error: Could not read from " + createFileName + ".";
+                }
+                else{
+                    errorMsg = "Error: Could not read from " + createFileName + "or " + createFileNameAlt + ".";
+                }
             }
         }
         else{
             error = true;
-            errorMsg = "Error: " + createFileName + " could not be found.";
+            if(createFileName == createFileNameAlt){
+                errorMsg = "Error: " + createFileName + " could not be found.";
+            }
+            else{
+                errorMsg = "Error: " + createFileName + " nor " + createFileNameAlt + " could be found.";
+            }
         }
         if(error){
             connection->Rollback();
