@@ -50,3 +50,20 @@ if(wxWidgets_FOUND)
   include("${wxWidgets_USE_FILE}")
   target_link_libraries(AnimeStats ${wxWidgets_LIBRARIES})
 endif(wxWidgets_FOUND)
+
+file(COPY "${CMAKE_SOURCE_DIR}/sql"
+   DESTINATION .)
+
+set(INSTALL_PERMISSIONS_EXECUTE OWNER_READ OWNER_EXECUTE OWNER_WRITE
+                                GROUP_READ GROUP_EXECUTE
+                                WORLD_READ WORLD_EXECUTE)
+set(INSTALL_PERMISSIONS_NO_EXECUTE OWNER_READ OWNER_WRITE
+                                   GROUP_READ
+                                   WORLD_READ)
+install(TARGETS AnimeStats
+   DESTINATION bin
+   PERMISSIONS ${INSTALL_PERMISSIONS_EXECUTE})
+install(DIRECTORY sql
+   DESTINATION share/AnimeStats
+   FILE_PERMISSIONS ${INSTALL_PERMISSIONS_NO_EXECUTE}
+   DIRECTORY_PERMISSIONS ${INSTALL_PERMISSIONS_EXECUTE})
