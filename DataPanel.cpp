@@ -322,29 +322,31 @@ void DataPanel::OnAddRow(wxCommandEvent& WXUNUSED(event))
 void DataPanel::OnDeleteRow(wxCommandEvent& WXUNUSED(event))
 {
     auto rows = m_grid->GetSelectedRows();
-    std::vector<int64_t> idSeries(rows.GetCount());
-    for(unsigned int i = 0; i < rows.GetCount(); ++i){
-        auto idSeriesStr = m_grid->GetCellValue(rows.Item(i), col::ID_SERIES);
-        if(idSeriesStr.compare("")) //ignore the last row
-            idSeries[i] = strtoll(idSeriesStr, nullptr, 10);
-    }
-    try{
-        m_commands.push_back(std::make_unique<DeleteCommand>(m_connection, m_grid, idSeries));
+    if (rows.GetCount() > 0) {
+        std::vector<int64_t> idSeries(rows.GetCount());
+        for(unsigned int i = 0; i < rows.GetCount(); ++i){
+            auto idSeriesStr = m_grid->GetCellValue(rows.Item(i), col::ID_SERIES);
+            if(idSeriesStr.compare("")) //ignore the last row
+                idSeries[i] = strtoll(idSeriesStr, nullptr, 10);
+        }
+        try{
+            m_commands.push_back(std::make_unique<DeleteCommand>(m_connection, m_grid, idSeries));
 
-    }catch(cppw::Sqlite3Exception& e){
-        if(e.GetErrorCode() == SQLITE_BUSY){
-            ShowSqliteBusyErrorBox();
-            return;
+        }catch(cppw::Sqlite3Exception& e){
+            if(e.GetErrorCode() == SQLITE_BUSY){
+                ShowSqliteBusyErrorBox();
+                return;
+            }
+            else{
+                wxMessageBox(std::string("Error deleting row(s)\n") + e.what());
+                m_top->Close(true);
+                return;
+            }
         }
-        else{
-            wxMessageBox(std::string("Error deleting row(s)\n") + e.what());
-            m_top->Close(true);
-            return;
-        }
+        ++m_commandLevel;
+        HandleCommandChecking();
+        SetUnsavedChanges(true);
     }
-    ++m_commandLevel;
-    HandleCommandChecking();
-    SetUnsavedChanges(true);
 }
 
 void DataPanel::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
