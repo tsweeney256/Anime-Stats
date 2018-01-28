@@ -41,6 +41,7 @@
 #include "MainFrame.hpp"
 #include "Settings.hpp"
 #include "SqlStrings.hpp"
+#include "Helpers.hpp"
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_TEXT_ENTER(ID_TITLE_FILTER_FIELD, DataPanel::OnTextEnter)
@@ -161,33 +162,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     m_grid = new wxGrid(this, ID_DATA_GRID);
     m_grid->CreateGrid(0,0);
 
-    //get basic select statement from file and prepare it
-    wxString postfix = "/sql/basicSelect.sql";
-    wxString basicSelectFileName = wxStandardPaths::Get().GetResourcesDir() + postfix;
-    wxString basicSelectFileNameAlt = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath() + postfix;
-    bool error = false;
-    if(wxFileName::FileExists(basicSelectFileName)){
-        wxFile selectFile(basicSelectFileName);
-        if(!selectFile.ReadAll(&m_basicSelectString))
-            error = true;
-    }
-    else if(wxFileName::FileExists(basicSelectFileNameAlt)){
-        wxFile selectFile(basicSelectFileNameAlt);
-        if(!selectFile.ReadAll(&m_basicSelectString))
-            error = true;
-    }
-    else
-        error = true;
-    if(error){
-        if(basicSelectFileName == basicSelectFileNameAlt){
-            wxMessageBox("Error: Could not read from " + basicSelectFileName + ".");
-        }
-        else{
-            wxMessageBox("Error: Could not read from " + basicSelectFileName
-                + " or " + basicSelectFileNameAlt + ".");
-        }
-        top->Close();
-    }
+    readFileIntoString(m_basicSelectString, "basicSelect.sql", top);
     BuildAllowedValsMap(m_allowedWatchedVals, "select status from WatchedStatus order by idWatchedStatus");
     BuildAllowedValsMap(m_allowedReleaseVals, "select type from ReleaseType order by idReleaseType");
     BuildAllowedValsMap(m_allowedSeasonVals, "select season from Season order by idSeason");

@@ -33,6 +33,7 @@
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "ColorOptionsDlg.hpp"
+#include "Helpers.hpp"
 #include "cppw/Sqlite3.hpp"
 #ifndef NDEBUG
 #include <iostream>
@@ -487,46 +488,20 @@ std::unique_ptr<cppw::Sqlite3Connection> MainFrame::GetDbConnection(const wxStri
     if(!fileExists){
         auto error = false;
         wxString errorMsg;
-        wxString postfix = "/sql/create.sql";
-        wxString createFileName = wxStandardPaths::Get().GetResourcesDir() + postfix;
-        wxString createFileNameAlt = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath() + postfix;
-        wxString& createFileNameActual = wxFileName::FileExists(createFileName) ?
-            createFileName : createFileNameAlt;
         wxString createStr;
-        if(wxFileName::FileExists(createFileNameActual)){
-            wxFile createFile(createFileNameActual);
-            if(createFile.ReadAll(&createStr)){
-                try{
-                    auto sql = std::string(createStr.utf8_str());
-                    connection->ExecuteQuery(sql);
-                    connection->Commit();
-                    connection->Begin();
+        readFileIntoString(createStr, "create.sql", this);
+        try{
+            auto sql = std::string(createStr.utf8_str());
+            connection->ExecuteQuery(sql);
+            connection->Commit();
+            connection->Begin();
 
-                }catch(cppw::Sqlite3Exception& e){
-                    error = true;
-                    errorMsg <<_("Error: Could not execute create command.\n sqlite3 error: ")
-                        << e.GetErrorCode() << _(" ") << e.what();
-                }
-            }
-            else{
-                error = true;
-                if(createFileName == createFileNameAlt){
-                    errorMsg = "Error: Could not read from " + createFileName + ".";
-                }
-                else{
-                    errorMsg = "Error: Could not read from " + createFileName + "or " + createFileNameAlt + ".";
-                }
-            }
-        }
-        else{
+        }catch(cppw::Sqlite3Exception& e){
             error = true;
-            if(createFileName == createFileNameAlt){
-                errorMsg = "Error: " + createFileName + " could not be found.";
-            }
-            else{
-                errorMsg = "Error: " + createFileName + " nor " + createFileNameAlt + " could be found.";
-            }
+            errorMsg <<_("Error: Could not execute create command.\n sqlite3 error: ")
+                     << e.GetErrorCode() << _(" ") << e.what();
         }
+
         if(error){
             connection->Rollback();
             connection = nullptr;

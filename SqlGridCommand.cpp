@@ -25,6 +25,7 @@
 #include "SqlGridCommand.hpp"
 #include "AppIDs.hpp"
 #include "DataPanel.hpp"
+#include "Helpers.hpp"
 
 SqlGridCommand::SqlGridCommand(cppw::Sqlite3Connection* connection, wxGrid* grid)
     : m_connection(connection), m_grid(grid) {}
@@ -246,18 +247,8 @@ void DeleteCommand::ExecuteCommon()
 {
     //backup all series and titles associated with each series then delete them
     auto seriesSelectStmt = m_connection->PrepareStatement("select " + seriesColNames + " from Series where idSeries = ?");
-    wxString basicSelectFileName = "sql/basicSelect.sql";
-    bool error = false;
     wxString statementStr;
-    if(wxFileName::FileExists(basicSelectFileName)){
-        wxFile selectFile(basicSelectFileName);
-        if(!selectFile.ReadAll(&statementStr))
-            error = true;
-    }
-    else
-        error = true;
-    if(error)
-        throw std::string("just something stupid to crash the program");
+    readFileIntoString(statementStr, "basicSelect.sql", dynamic_cast<DataPanel*>(m_grid->GetParent())->GetTop());
 
     auto seriesViewSelectStmt = m_connection->PrepareStatement(std::string(statementStr.utf8_str()) +
                                                                " where rightSide.idSeries= ?");
