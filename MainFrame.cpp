@@ -268,7 +268,7 @@ void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void MainFrame::OnImportMAL(wxCommandEvent &event)
+void MainFrame::OnImportMAL(wxCommandEvent& WXUNUSED(event))
 {
     wxMessageDialog deleteCommandsDlg(this, _("This will clear your undo history.\n"
                                                "Are you sure you wish to contunue?"),

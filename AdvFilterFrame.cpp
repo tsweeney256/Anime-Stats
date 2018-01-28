@@ -54,7 +54,7 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
 
     m_titleTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
     m_studioTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
-    
+
     m_watchedCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Watched"));
     m_watchingCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Watching"));
     m_stalledCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Stalled"));
@@ -63,7 +63,7 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_toWatchCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("To Watch"));
     auto watchedStatusCheckAllBtn = new wxButton(m_mainPanel, ID_ADV_FILTER_CHECK_ALL_WATCHED_STATUS, _("Check All"));
     auto watchedStatusUncheckAllBtn = new wxButton(m_mainPanel, ID_ADV_FILTER_UNCHECK_ALL_WATCHED_STATUS, _("Uncheck All"));
-    
+
     m_tvCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("TV"));
     m_movieCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Movie"));
     m_ovaCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("OVA"));
@@ -72,7 +72,7 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_releaseTypeBlankCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Blank"));
     auto releaseTypeCheckAllBtn = new wxButton(m_mainPanel, ID_ADV_FILTER_CHECK_ALL_RELEASE_TYPE, _("Check All"));
     auto releaseTypeUncheckAllBtn = new wxButton(m_mainPanel, ID_ADV_FILTER_UNCHECK_ALL_RELEASE_TYPE, _("Uncheck All"));
-    
+
     m_winterCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Winter"));
     m_springCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Spring"));
     m_summerCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Summer"));
@@ -399,7 +399,7 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     leftSizer->Add(watchedStatusSizerOutline, expandFlag);
     leftSizer->Add(releaseTypeSizerOutline, expandFlag);
     leftSizer->Add(seasonSizerOutline, expandFlag);
-    
+
     midSizer->Add(ratingsSizerOutline, expandFlag);
     midSizer->Add(yearSizerOutline, expandFlag);
     midSizer->Add(epsWatchedSizerOutline, expandFlag);
@@ -435,32 +435,32 @@ void AdvFilterFrame::OnClose(wxCloseEvent& WXUNUSED(event))
     Destroy();
 }
 
-void AdvFilterFrame::OnWatchedStatusCheckAllBtn(wxCommandEvent& event)
+void AdvFilterFrame::OnWatchedStatusCheckAllBtn(wxCommandEvent& WXUNUSED(event))
 {
     EnableAllWatchedStatus();
 }
 
-void AdvFilterFrame::OnWatchedStatusUnCheckAllBtn(wxCommandEvent& event)
+void AdvFilterFrame::OnWatchedStatusUnCheckAllBtn(wxCommandEvent& WXUNUSED(event))
 {
     EnableAllWatchedStatus(false);
 }
 
-void AdvFilterFrame::OnReleaseTypeCheckAllBtn(wxCommandEvent& event)
+void AdvFilterFrame::OnReleaseTypeCheckAllBtn(wxCommandEvent& WXUNUSED(event))
 {
     EnableAllReleaseType();
 }
 
-void AdvFilterFrame::OnReleaseTypeUnCheckAllBtn(wxCommandEvent& event)
+void AdvFilterFrame::OnReleaseTypeUnCheckAllBtn(wxCommandEvent& WXUNUSED(event))
 {
     EnableAllReleaseType(false);
 }
 
-void AdvFilterFrame::OnSeasonCheckAllBtn(wxCommandEvent& event)
+void AdvFilterFrame::OnSeasonCheckAllBtn(wxCommandEvent& WXUNUSED(event))
 {
     EnableAllSeason();
 }
 
-void AdvFilterFrame::OnSeasonUnCheckAllBtn(wxCommandEvent& event)
+void AdvFilterFrame::OnSeasonUnCheckAllBtn(wxCommandEvent& WXUNUSED(event))
 {
     EnableAllSeason(false);
 }
@@ -659,7 +659,7 @@ void AdvFilterFrame::ApplyFilter()
     basic->toWatch = m_toWatchCheck->GetValue();
 
     adv->studio = m_studioTextField->GetValue().utf8_str();
-    
+
     adv->tv = m_tvCheck->GetValue();
     adv->ova = m_ovaCheck->GetValue();
     adv->ona = m_onaCheck->GetValue();
