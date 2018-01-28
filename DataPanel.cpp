@@ -184,7 +184,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
         }
         else{
             wxMessageBox("Error: Could not read from " + basicSelectFileName
-                + " or " + basicSelectFileNameAlt) + ".";
+                + " or " + basicSelectFileNameAlt + ".");
         }
         top->Close();
     }
