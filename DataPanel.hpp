@@ -63,6 +63,7 @@ public:
     const std::vector<wxString>* GetAllowedWatchedVals();
     const std::vector<wxString>* GetAllowedReleaseVals();
     const std::vector<wxString>* GetAllowedSeasonVals();
+    MainFrame* GetTop() const;
 
 private:
     void OnCheckAllBtn(wxCommandEvent& event);

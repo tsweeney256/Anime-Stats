@@ -990,6 +990,11 @@ const std::vector<wxString>* DataPanel::GetAllowedSeasonVals()
     return &m_allowedSeasonVals;
 }
 
+MainFrame* DataPanel::GetTop() const
+{
+    return m_top;
+}
+
 void DataPanel::UpdateCellColor(int row, int col)
 {
     if(col != col::ID_SERIES){
