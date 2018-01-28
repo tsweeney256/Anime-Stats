@@ -17,6 +17,8 @@
 #include <iomanip>
 #include <cstring>
 #include <cmath>
+#include <algorithm>
+#include <iterator>
 #include <wx/checkbox.h>
 #include <wx/button.h>
 #include <wx/textctrl.h>
@@ -58,7 +60,6 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
     EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
     EVT_GRID_CELL_CHANGED(DataPanel::OnGridCellChanged)
-    EVT_COMBOBOX_DROPDOWN(wxID_ANY, DataPanel::OnComboDropDown)
     EVT_WINDOW_DESTROY(DataPanel::OnAdvrFrameDestruction)
     EVT_GRID_LABEL_RIGHT_CLICK(DataPanel::OnLabelContextMenu)
     EVT_MENU_RANGE(ID_VIEW_COL_BEGIN, ID_VIEW_COL_END, DataPanel::OnLabelContextMenuItem)
@@ -397,13 +398,6 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
             std::vector<wxString>* map = nullptr;
             if(event.GetCol() == col::RELEASE_TYPE || event.GetCol() == col::SEASON ||
                event.GetCol() == col::WATCHED_STATUS){
-                auto editor = m_grid->GetCellEditor(event.GetRow(), event.GetCol());
-                auto control = dynamic_cast<wxComboBox*>(editor->GetControl());
-                wxASSERT(control);
-                int selectedIdx = control->GetCurrentSelection();
-                newVal = std::to_string(selectedIdx);
-                oldVal = m_oldCellComboIndex;
-                editor->DecRef();
                 if(event.GetCol() == col::RELEASE_TYPE)
                     map = &m_allowedReleaseVals;
                 else if(event.GetCol() == col::SEASON)
@@ -411,6 +405,11 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
                 else if(event.GetCol() == col::WATCHED_STATUS){
                     map = &m_allowedWatchedVals;
                 }
+                newVal = std::to_string(
+                    std::find(map->begin(), map->end(), event.GetString().utf8_str()) - map->begin());
+                oldVal = std::to_string(
+                    std::find(std::begin(*map), std::end(*map),
+                              m_grid->GetCellValue(event.GetRow(), event.GetCol()).utf8_str()) - map->begin());
             }
             else{
                 newVal = std::string(event.GetString().utf8_str());
@@ -460,13 +459,6 @@ void DataPanel::OnGridCellChanged(wxGridEvent& event)
         m_grid->SetFocus();
     }
     m_grid->Refresh(); //needed for Windows
-}
-
-void DataPanel::OnComboDropDown(wxCommandEvent& event)
-{
-    auto control = dynamic_cast<wxComboBox*>(event.GetEventObject());
-    wxASSERT(control);
-    m_oldCellComboIndex = std::to_string(control->GetCurrentSelection());
 }
 
 void DataPanel::OnAdvrFrameDestruction(wxWindowDestroyEvent& event)

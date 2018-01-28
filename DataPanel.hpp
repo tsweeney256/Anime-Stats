@@ -80,7 +80,6 @@ private:
     void OnGridColSort(wxGridEvent& event);
     void OnGridCellChanging(wxGridEvent& event);
     void OnGridCellChanged(wxGridEvent& event);
-    void OnComboDropDown(wxCommandEvent& event);
     void OnAdvrFrameDestruction(wxWindowDestroyEvent& event);
     void OnLabelContextMenu(wxGridEvent& event);
     void OnLabelContextMenuItem(wxCommandEvent& event);
@@ -131,7 +130,6 @@ private:
     std::string m_curOrderCol = " Title collate nocase ";
     std::string m_curOrderDir = " asc ";
     std::string m_curOrderCombined = m_curOrderCol + m_curOrderDir;
-    std::string m_oldCellComboIndex;
     std::vector<std::unique_ptr<SqlGridCommand>> m_commands;
     std::vector<wxString> m_allowedWatchedVals;
     std::vector<wxString> m_allowedReleaseVals;
