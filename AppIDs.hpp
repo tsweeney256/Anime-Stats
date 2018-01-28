@@ -31,7 +31,7 @@ namespace col
         RATING,
         WATCHED_STATUS,
         RELEASE_TYPE,
-	STUDIO,
+        STUDIO,
         YEAR,
         SEASON,
         EPISODES_WATCHED,
