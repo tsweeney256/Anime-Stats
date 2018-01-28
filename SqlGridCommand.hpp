@@ -131,9 +131,10 @@ public:
 
 private:
     void AbstractDummy() override {}
-    void ExecutionCommon(const std::string& newVal, const std::string& oldVal, int row);
+    void ExecutionCommon(const std::string& val);
     void CheckIfLegalPronunciation(const std::string& str);
     std::string GetIdName(const std::string& name);
+    std::string GetIdName();
 
     std::string m_newVal;
     std::string m_oldVal;

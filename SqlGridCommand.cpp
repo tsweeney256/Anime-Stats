@@ -177,7 +177,10 @@ void InsertCommand::UnExecute()
     deleteRowStmt->Bind(1, m_idSeries);
     auto results = deleteRowStmt->GetResults();
     results->NextRow();
-    m_grid->DeleteRows(GetRowWithIdSeries(m_idSeries));
+    auto rowId = GetRowWithIdSeries(m_idSeries);
+    if (rowId >= 0) {
+        m_grid->DeleteRows(rowId);
+    }
     RemoveRowIDFromFilterList();
 }
 
@@ -289,7 +292,10 @@ void DeleteCommand::ExecuteCommon()
         auto results = seriesDeleteStmt->GetResults();
         results->NextRow();
         wxGridUpdateLocker lock(m_grid);
-        m_grid->DeleteRows(GetRowWithIdSeries(m_idSeries[i]));
+        auto rowId = GetRowWithIdSeries(m_idSeries[i]);
+        if (rowId >= 0) {
+            m_grid->DeleteRows(rowId);
+        }
     }
 
 }
@@ -300,58 +306,61 @@ UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, 
     : SqlGridCommand(connection, grid), InsertableOrUpdatable(dataPanel, addedRowIDs, label, idSeries),
       m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol), m_map(map)
 {
-    int row = -1;
     if(m_col == col::TITLE)
         CheckIfLegalTitle(m_connection, m_newVal); //throws and cancels the construction if not a legal title
     if(m_col == col::PRONUNCIATION){
         CheckIfLegalPronunciation(m_newVal);
-        row = GetRowWithIdSeries(m_idSeries);
     }
-    ExecutionCommon(m_newVal, m_oldVal, row);
+    ExecutionCommon(m_newVal);
     AddRowIDToFilterList();
 }
 
 void UpdateCommand::Execute()
 {
     int row = GetRowWithIdSeries(m_idSeries);
-    ExecutionCommon(m_newVal, m_oldVal, row);
+    ExecutionCommon(m_newVal);
     AddRowIDToFilterList();
     m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
-    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_newVal)] : m_newVal));
-    m_grid->GoToCell(row, m_col);
-    m_grid->SelectBlock(row, m_col, row, m_col);
+    auto rowId = GetRowWithIdSeries(m_idSeries);
+    if (rowId >= 0) {
+        m_grid->SetCellValue(rowId, m_col, (m_map ? (*m_map)[std::stoi(m_newVal)] : m_newVal));
+        m_grid->GoToCell(row, m_col);
+        m_grid->SelectBlock(row, m_col, row, m_col);
+    }
 }
 
 void UpdateCommand::UnExecute()
 {
     int row = GetRowWithIdSeries(m_idSeries);
-    ExecutionCommon(m_oldVal, m_newVal, row);
+    ExecutionCommon(m_oldVal);
     RemoveRowIDFromFilterList();
-    m_grid->SetCellValue(GetRowWithIdSeries(m_idSeries), m_col, (m_map ? (*m_map)[std::stoi(m_oldVal)] : m_oldVal));
-    m_grid->GoToCell(row, m_col);
-    m_grid->SelectBlock(row, m_col, row, m_col);
+    auto rowId = GetRowWithIdSeries(m_idSeries);
+    if (rowId >= 0) {
+        m_grid->SetCellValue(row, m_col, (m_map ? (*m_map)[std::stoi(m_oldVal)] : m_oldVal));
+        m_grid->GoToCell(row, m_col);
+        m_grid->SelectBlock(row, m_col, row, m_col);
+    }
 }
 
-void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string& oldVal, int row)
+void UpdateCommand::ExecutionCommon(const std::string& val)
 {
     if(m_col == col::TITLE){
-        auto idName = GetIdName(oldVal);
+        auto idName = GetIdName();
         auto updateTitleStmt = m_connection->PrepareStatement("update Title set name=? where idName=?");
         updateTitleStmt->Reset();
         updateTitleStmt->ClearBindings();
-        updateTitleStmt->Bind(1, newVal);
+        updateTitleStmt->Bind(1, val);
         updateTitleStmt->Bind(2, idName);
         auto updateResult = updateTitleStmt->GetResults();
         updateResult->NextRow();
     }
     else if(m_col == col::PRONUNCIATION){
-        auto title = m_grid->GetCellValue(row, col::TITLE);
-        auto idName = GetIdName(std::string(title.utf8_str()));
+        auto idName = GetIdName();
         auto updatePronunciationStmt = m_connection->PrepareStatement("update Title set pronunciation=? where idName=?");
         updatePronunciationStmt->Reset();
         updatePronunciationStmt->ClearBindings();
-        if(!newVal.empty())
-            updatePronunciationStmt->Bind(1, newVal);
+        if(!val.empty())
+            updatePronunciationStmt->Bind(1, val);
         else
             updatePronunciationStmt->BindNull(1);
         updatePronunciationStmt->Bind(2, idName);
@@ -360,10 +369,10 @@ void UpdateCommand::ExecutionCommon(const std::string& newVal, const std::string
     }
     else{
         auto updateColStmt = m_connection->PrepareStatement("update Series set " + colViewName[m_col] + "=? where idSeries=?");
-        if(!newVal.compare(""))
+        if(!val.compare(""))
             updateColStmt->BindNull(1);
         else
-            updateColStmt->Bind(1, newVal);
+            updateColStmt->Bind(1, val);
         updateColStmt->Bind(2, m_idSeries);
         auto result = updateColStmt->GetResults();
         result->NextRow();
@@ -390,6 +399,19 @@ std::string UpdateCommand::GetIdName(const std::string& name)
     m_selectIdTitleStmt->Reset();
     m_selectIdTitleStmt->ClearBindings();
     m_selectIdTitleStmt->Bind(1, name);
+    auto result = m_selectIdTitleStmt->GetResults();
+    result->NextRow();
+    return result->GetString(0);
+}
+
+std::string UpdateCommand::GetIdName()
+{
+    //so that we only grab the main title's id
+    auto m_selectIdTitleStmt = m_connection->PrepareStatement("select idName from Title inner join Label "
+                                                              "on Title.idLabel = Label.idLabel where idSeries = ? and Main=1");
+    m_selectIdTitleStmt->Reset();
+    m_selectIdTitleStmt->ClearBindings();
+    m_selectIdTitleStmt->Bind(1, m_idSeries);
     auto result = m_selectIdTitleStmt->GetResults();
     result->NextRow();
     return result->GetString(0);
