@@ -160,10 +160,12 @@ void InsertCommand::Execute()
     //is to store every single cell value into memory upon every undoable action, which is absurd.
     wxGridUpdateLocker lock(m_grid);
     m_grid->InsertRows(m_grid->GetNumberRows()-1);
-    m_grid->SetCellValue(m_grid->GetNumberRows()-2, col::ID_SERIES, std::to_string(m_idSeries));
-    m_grid->SetCellValue(m_grid->GetNumberRows()-2, col::TITLE, wxString::FromUTF8(m_title.c_str()));
-    m_grid->GoToCell(m_grid->GetNumberRows()-2, col::TITLE);
-    m_grid->SelectRow(m_grid->GetNumberRows()-2);
+    auto row = m_grid->GetNumberRows() -2;
+    m_grid->SetRowLabelValue(row, wxString::Format("%i", row+1));
+    m_grid->SetCellValue(row, col::ID_SERIES, std::to_string(m_idSeries));
+    m_grid->SetCellValue(row, col::TITLE, wxString::FromUTF8(m_title.c_str()));
+    m_grid->GoToCell(row, col::TITLE);
+    m_grid->SelectRow(row);
 }
 
 void InsertCommand::UnExecute()
@@ -180,6 +182,7 @@ void InsertCommand::UnExecute()
     auto rowId = GetRowWithIdSeries(m_idSeries);
     if (rowId >= 0) {
         m_grid->DeleteRows(rowId);
+        m_grid->SetRowLabelValue(m_grid->GetNumberRows()-1, "*");
     }
     RemoveRowIDFromFilterList();
 }
@@ -222,6 +225,7 @@ void DeleteCommand::UnExecute()
     int insertLoc = m_grid->GetNumberRows()-1;
     m_grid->InsertRows(insertLoc, m_series.size());
     for(unsigned int i = 0; i < m_series.size(); ++i){
+        m_grid->SetRowLabelValue(i+insertLoc, wxString::Format("%i", i+insertLoc+1));
         //insert each series back in the db
         seriesInsertStmt->Reset();
         seriesInsertStmt->ClearBindings();
@@ -297,7 +301,7 @@ void DeleteCommand::ExecuteCommon()
             m_grid->DeleteRows(rowId);
         }
     }
-
+    m_grid->SetRowLabelValue(m_grid->GetNumberRows()-1, "*");
 }
 
 UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries,
