@@ -850,13 +850,15 @@ void DataPanel::HandleUndoRedoColorChange()
     }
     auto cells = m_grid->GetSelectionBlockTopLeft();
     if(cells.Count() == 1){ //there should never be more than one cell selected from undoing/redoing
-        int col = cells.Item(0).GetCol();
-        if(col::isColNumeric(col)){
-            UpdateNumericalCellColorInfo(col);
-            RefreshColColors(col);
+        int row = cells.Item(0).GetRow();
+        for (int i = col::FIRST_VISIBLE_COL; i < col::NUM_COLS; ++i){
+            if(col::isColNumeric(i)){
+                UpdateNumericalCellColorInfo(i);
+                RefreshColColors(i);
 
-        }else{
-            UpdateCellColor(cells.Item(0).GetRow(), cells.Item(0).GetCol());
+            }else{
+                UpdateCellColor(row, i);
+            }
         }
     }
     m_grid->Refresh();
