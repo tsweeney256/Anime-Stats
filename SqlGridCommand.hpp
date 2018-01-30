@@ -133,6 +133,7 @@ private:
     void AbstractDummy() override {}
     void ExecutionCommon(const std::string& val);
     void CheckIfLegalPronunciation(const std::string& str);
+    void MakeRowVisible();
     std::string GetIdName(const std::string& name);
     std::string GetIdName();
 

@@ -317,29 +317,33 @@ UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, 
 
 void UpdateCommand::Execute()
 {
-    int row = GetRowWithIdSeries(m_idSeries);
+    wxGridUpdateLocker lock(m_grid);
     ExecutionCommon(m_newVal);
     AddRowIDToFilterList();
     m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
-    auto rowId = GetRowWithIdSeries(m_idSeries);
-    if (rowId >= 0) {
-        m_grid->SetCellValue(rowId, m_col, (m_map ? (*m_map)[std::stoi(m_newVal)] : m_newVal));
-        m_grid->GoToCell(row, m_col);
-        m_grid->SelectBlock(row, m_col, row, m_col);
+    auto row = GetRowWithIdSeries(m_idSeries);
+    if (row < 0) {
+        MakeRowVisible();
+        row = m_grid->GetNumberRows() - 2;
     }
+    m_grid->SetCellValue(row, m_col, (m_map ? (*m_map)[std::stoi(m_newVal)] : m_newVal));
+    m_grid->GoToCell(row, m_col);
+    m_grid->SelectBlock(row, m_col, row, m_col);
 }
 
 void UpdateCommand::UnExecute()
 {
-    int row = GetRowWithIdSeries(m_idSeries);
+    wxGridUpdateLocker lock(m_grid);
     ExecutionCommon(m_oldVal);
     RemoveRowIDFromFilterList();
-    auto rowId = GetRowWithIdSeries(m_idSeries);
-    if (rowId >= 0) {
-        m_grid->SetCellValue(row, m_col, (m_map ? (*m_map)[std::stoi(m_oldVal)] : m_oldVal));
-        m_grid->GoToCell(row, m_col);
-        m_grid->SelectBlock(row, m_col, row, m_col);
+    auto row = GetRowWithIdSeries(m_idSeries);
+    if (row < 0) {
+        MakeRowVisible();
+        row = m_grid->GetNumberRows() - 2;
     }
+    m_grid->SetCellValue(row, m_col, (m_map ? (*m_map)[std::stoi(m_oldVal)] : m_oldVal));
+    m_grid->GoToCell(row, m_col);
+    m_grid->SelectBlock(row, m_col, row, m_col);
 }
 
 void UpdateCommand::ExecutionCommon(const std::string& val)
@@ -388,6 +392,27 @@ void UpdateCommand::CheckIfLegalPronunciation(const std::string& str)
                 isBlank = false;
         if(isBlank)
             throw BlankPronunciationException();
+    }
+}
+
+void UpdateCommand::MakeRowVisible() {
+    auto stmt = m_connection->PrepareStatement(
+        "select Series.idSeries, name, Pronunciation, rating, status, type, studio, year, season, episodesWatched, "
+        "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished from Series "
+        "inner join Title on Series.idSeries = Title.idSeries "
+        "inner join Label on Title.idLabel = Label.idLabel "
+        "inner join WatchedStatus on Series.idWatchedStatus = WatchedStatus.idWatchedStatus "
+        "inner join ReleaseType on Series.idReleaseType = ReleaseType.idReleaseType "
+        "inner join Season on Series.idSeason = Season.idSeason "
+        "where Series.idSeries = ? and Main = 1");
+    stmt->Bind(1, m_idSeries);
+    auto result = stmt->GetResults();
+    result->NextRow();
+    m_grid->InsertRows(m_grid->GetNumberRows() - 1);
+    auto row = m_grid->GetNumberRows() - 2;
+    m_grid->SetRowLabelValue(row, wxString::Format("%i", row+1));
+    for (int i = 0; i < result->GetColumnCount(); ++i) {
+        m_grid->SetCellValue(row, i, wxString::FromUTF8(result->GetString(i).c_str()));
     }
 }
 
