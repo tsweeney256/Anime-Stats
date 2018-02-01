@@ -83,8 +83,9 @@ EditTagDialog::EditTagDialog(wxWindow* parent, wxWindowID id,
                    wxSizerFlags(1).Border(0).Expand());
     mainSizer->Add(buttonSizer, wxSizerFlags(0).Border(wxALL).Expand());
     mainSizer->Add(m_grid, wxSizerFlags(1).Border(wxALL).Expand());
-    SetSizerAndFit(mainSizer);
+    SetSizer(mainSizer);
     SetSizeHints(wxSize(360, 270), wxSize(800, 600));
+    Fit();
 }
 
 void EditTagDialog::OnAddRowButton(wxCommandEvent& WXUNUSED(event))
