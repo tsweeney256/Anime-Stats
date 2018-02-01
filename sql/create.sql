@@ -83,5 +83,6 @@ CREATE TABLE "Tag" (
     `tag` TEXT NOT NULL,
     `val` TEXT NOT NULL DEFAULT '',
     PRIMARY KEY(`idTag`),
+    UNIQUE (idSeries, tag, val),
     FOREIGN KEY(`idSeries`) REFERENCES "Series" ( "idSeries" ) ON DELETE CASCADE ON UPDATE CASCADE
 );
