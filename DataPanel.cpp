@@ -290,7 +290,7 @@ void DataPanel::OnEditTags(wxCommandEvent& WXUNUSED(event))
     auto rows = m_grid->GetSelectedRows();
 
     if(rows.size() > 1)
-        wxMessageBox("Error: You may only set aliases to one title at a time.");
+        wxMessageBox("Error: You may only tag one series at a time.");
     else if(rows.size() == 0)
         wxMessageBox("Error: No row was selected.");
     else{
