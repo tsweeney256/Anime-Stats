@@ -48,8 +48,9 @@ END_EVENT_TABLE()
 EditTagDialog::EditTagDialog(wxWindow* parent, wxWindowID id,
                              cppw::Sqlite3Connection* connection,
                              int64_t idSeries, wxString title)
-    : wxDialog(parent, id, "Edit Tags - " + title), m_connection(connection),
-      m_idSeries(idSeries)
+: wxDialog(parent, id, "Edit Tags - " + title, wxDefaultPosition,
+           wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+    m_connection(connection), m_idSeries(idSeries)
 {
     m_grid = new wxGrid(this, wxID_ANY);
     m_grid->CreateGrid(0, NUM_COLS);
