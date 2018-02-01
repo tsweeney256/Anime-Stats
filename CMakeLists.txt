@@ -16,7 +16,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "Stat
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 endif(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "Static_Debug")
 
-set(SOURCE_FILES 
+set(SOURCE_FILES
   AdvFilterFrame.cpp
   AdvSortFrame.cpp
   App.cpp
@@ -24,6 +24,7 @@ set(SOURCE_FILES
   ColorOptionsDlg.cpp
   CustomGridCellEditors.cpp
   DataPanel.cpp
+  Helpers.cpp
   MainFrame.cpp
   Settings.cpp
   SqlGridCommand.cpp
