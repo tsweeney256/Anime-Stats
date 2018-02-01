@@ -18,6 +18,7 @@
 #include <wx/filename.h>
 #include <wx/msgdlg.h>
 #include <wx/stdpaths.h>
+#include <wx/grid.h>
 #include "MainFrame.hpp"
 #include "Helpers.hpp"
 
@@ -49,5 +50,29 @@ void readFileIntoString(wxString& dest, wxString src, MainFrame* top)
                 + " or " + pathAlt + ".");
         }
         top->Close();
+    }
+}
+
+void AppendWriteProtectedRow(wxGrid* grid, int startCol, int numCols,
+                             bool whiteOutPrevious)
+{
+    grid->AppendRows();
+    for(int i = 0; i < grid->GetNumberRows(); ++i){
+        grid->SetRowLabelValue(i, wxString::Format("%i", i+1));
+    }
+    for(int i = startCol; i < numCols; ++i){
+        if(grid->GetNumberRows() > 1 && whiteOutPrevious){
+            grid->SetReadOnly(grid->GetNumberRows()-2, i, false);
+            grid->SetCellBackgroundColour(
+                grid->GetNumberRows()-2, i, wxColour(255, 255, 255));
+            grid->SetRowLabelValue(
+                grid->GetNumberRows()-2,
+                wxString::Format("%i", grid->GetNumberRows()-1));
+        }
+
+        grid->SetReadOnly(grid->GetNumberRows()-1, i);
+        grid->SetCellBackgroundColour(grid->GetNumberRows()-1, i,
+                                      wxColour(220, 220, 220));
+        grid->SetRowLabelValue(grid->GetNumberRows()-1, "*");
     }
 }

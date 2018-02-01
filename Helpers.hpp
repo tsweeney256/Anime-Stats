@@ -18,5 +18,8 @@
 #include <wx/string.h>
 
 class MainFrame;
+class wxGrid;
 
 void readFileIntoString(wxString& dest, wxString src, MainFrame* top);
+void AppendWriteProtectedRow(wxGrid* grid, int startcol, int numCols,
+                             bool whiteOutPrevious);
