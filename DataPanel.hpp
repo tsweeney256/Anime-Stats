@@ -73,7 +73,7 @@ private:
     void OnResetFilter(wxCommandEvent& event);
     void OnAdvFilter(wxCommandEvent& event);
     void OnAdvSort(wxCommandEvent& event);
-    void OnRefresh(wxCommandEvent& event);
+    void OnEditTags(wxCommandEvent& event);
     void OnAddRow(wxCommandEvent& event);
     void OnDeleteRow(wxCommandEvent& event);
     void OnAliasTitle(wxCommandEvent& event);

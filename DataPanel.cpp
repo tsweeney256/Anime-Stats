@@ -40,6 +40,7 @@
 #include "AdvFilterFrame.hpp"
 #include "AdvSortFrame.hpp"
 #include "TitleAliasDialog.hpp"
+#include "EditTagDialog.hpp"
 #include "MainFrame.hpp"
 #include "Settings.hpp"
 #include "SqlStrings.hpp"
@@ -53,7 +54,7 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
     EVT_BUTTON(ID_ADV_FILTER_BTN, DataPanel::OnAdvFilter)
     EVT_BUTTON(ID_ADV_SORT_BTN, DataPanel::OnAdvSort)
-    EVT_BUTTON(ID_REFRESH_BTN, DataPanel::OnRefresh)
+    EVT_BUTTON(ID_EDIT_TAGS_BTN, DataPanel::OnEditTags)
     EVT_BUTTON(ID_ADD_ROW_BTN, DataPanel::OnAddRow)
     EVT_BUTTON(ID_DELETE_ROW_BTN, DataPanel::OnDeleteRow)
     EVT_BUTTON(ID_TITLE_ALIAS_BTN, DataPanel::OnAliasTitle)
@@ -107,7 +108,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     auto addRowButton = new wxButton(topBar, ID_ADD_ROW_BTN, "Add Row");
     auto deleteRowButton = new wxButton(topBar, ID_DELETE_ROW_BTN, "Delete Rows");
     auto titleAliasButton = new wxButton(topBar, ID_TITLE_ALIAS_BTN, "Alias Title");
-    auto refreshButton = new wxButton(topBar, ID_REFRESH_BTN, "Refresh");
+    auto refreshButton = new wxButton(topBar, ID_EDIT_TAGS_BTN, "Edit Tags");
 
     //
     //top bar sizers
@@ -284,9 +285,24 @@ void DataPanel::OnAdvSort(wxCommandEvent& WXUNUSED(event))
     m_advSortButton->Disable();
 }
 
-void DataPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
+void DataPanel::OnEditTags(wxCommandEvent& WXUNUSED(event))
 {
-    ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
+    auto rows = m_grid->GetSelectedRows();
+
+    if(rows.size() > 1)
+        wxMessageBox("Error: You may only set aliases to one title at a time.");
+    else if(rows.size() == 0)
+        wxMessageBox("Error: No row was selected.");
+    else{
+        EditTagDialog editTagDlg(
+            this, wxID_ANY, m_connection,
+            wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)),
+            m_grid->GetCellValue(rows[0], col::TITLE));
+        editTagDlg.ShowModal();
+        if (editTagDlg.MadeChanges()) {
+            SetUnsavedChanges(true);
+        }
+    }
 }
 
 void DataPanel::OnAddRow(wxCommandEvent& WXUNUSED(event))

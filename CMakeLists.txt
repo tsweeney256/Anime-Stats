@@ -24,6 +24,7 @@ set(SOURCE_FILES
   ColorOptionsDlg.cpp
   CustomGridCellEditors.cpp
   DataPanel.cpp
+  EditTagDialog.cpp
   Helpers.cpp
   MainFrame.cpp
   Settings.cpp
