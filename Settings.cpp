@@ -95,7 +95,7 @@ Settings::Settings(const wxString& fn)
                             }while((child = child->GetNext()));
                         }
                     }
-                        
+
                 }
             }
         }
@@ -122,7 +122,7 @@ void Settings::InitCellColors(std::vector<long>& colColors, int col)
     }else if(col == col::WATCHED_STATUS){
         colColors = {-0xFFFFFF, -0xFFFFFF, 0xFFC271, 0x94FF3B, 0x83B8F9, 0x7D7DFF, 0x7DFFFF};
 
-    } else if(col == col::TITLE || col == col::PRONUNCIATION || col == col::DATE_STARTED || col == col::DATE_FINISHED || col == col::STUDIO){
+    } else if(col == col::TITLE || col == col::PRONUNCIATION || col == col::DATE_STARTED || col == col::DATE_FINISHED){
         colColors = {-0xFFFFFF, -0xFFFFFF};
 
     }else if(col == col::YEAR || col == col::EPISODES_WATCHED || col == col::TOTAL_EPISODES ||

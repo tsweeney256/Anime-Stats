@@ -87,8 +87,7 @@ private:
     wxCheckBox* m_seasonBlankCheck;
 
     wxTextCtrl* m_titleTextField;
-    wxTextCtrl* m_studioTextField;
-    
+
     wxCheckBox* m_ratingsEnabled;
     wxCheckBox* m_yearEnabled;
     wxCheckBox* m_epsWatchedEnabled;

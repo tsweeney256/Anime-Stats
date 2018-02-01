@@ -12,16 +12,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-select rightSide.idSeries, name as Title, pronunciation as Pronunciation, rating as Rating, status as "Watched Status", 
-        type as "Release Type", studio as Studio, year as Year, season as Season, episodesWatched as "Episodes Watched", 
-        totalEpisodes as "Total Episodes", rewatchedEpisodes as "Rewatched Episodes" , episodeLength as "Episode Length", 
+select rightSide.idSeries, name as Title, pronunciation as Pronunciation, rating as Rating, status as "Watched Status",
+        type as "Release Type", year as Year, season as Season, episodesWatched as "Episodes Watched",
+        totalEpisodes as "Total Episodes", rewatchedEpisodes as "Rewatched Episodes" , episodeLength as "Episode Length",
         dateStarted as "Date Started", dateFinished as "Date Finished"
 from (select distinct LeftTitle.idSeries
 from (select * from Title inner join Label on Title.idLabel = Label.idLabel) as LeftTitle
 left join (select name, idSeries from Title inner join Label on Title.idLabel = Label.idLabel) as RightTitle
 on LeftTitle.idSeries = RightTitle.idSeries
 where LeftTitle.name like ? or RightTitle.name like ?) as LeftSide
-inner join 
+inner join
 (
         select *
         from (select * from Title inner join Label on Title.idLabel = Label.idLabel where Main = 1) as pTitle
@@ -33,7 +33,7 @@ inner join
         on series.idSeason = Season.idSeason
         left join WatchedStatus
         on series.idWatchedStatus = WatchedStatus.idWatchedStatus
-        inner join 
+        inner join
         (
                 SELECT idName, nameSort
                 FROM

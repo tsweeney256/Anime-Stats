@@ -44,8 +44,6 @@ struct AdvFilterInfo
     static std::shared_ptr<AdvFilterInfo> MakeShared()
         { return std::shared_ptr<AdvFilterInfo>(new AdvFilterInfo()); }
 
-    std::string studio;
-    
     bool tv = true;
     bool movie = true;
     bool ova = true;

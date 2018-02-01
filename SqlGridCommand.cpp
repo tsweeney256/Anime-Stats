@@ -401,7 +401,7 @@ void UpdateCommand::CheckIfLegalPronunciation(const std::string& str)
 
 void UpdateCommand::MakeRowVisible() {
     auto stmt = m_connection->PrepareStatement(
-        "select Series.idSeries, name, Pronunciation, rating, status, type, studio, year, season, episodesWatched, "
+        "select Series.idSeries, name, Pronunciation, rating, status, type, year, season, episodesWatched, "
         "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished from Series "
         "inner join Title on Series.idSeries = Title.idSeries "
         "inner join Label on Title.idLabel = Label.idLabel "

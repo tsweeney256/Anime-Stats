@@ -2,7 +2,7 @@
 
 bool col::isColText(int col)
 {
-    return col == TITLE || col == PRONUNCIATION || col == STUDIO || col == DATE_FINISHED || col == DATE_STARTED;
+    return col == TITLE || col == PRONUNCIATION || col == DATE_FINISHED || col == DATE_STARTED;
 }
 
 bool col::isColNumeric(int col)

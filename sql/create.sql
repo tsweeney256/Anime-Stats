@@ -45,7 +45,6 @@ CREATE TABLE "Series" (
 	`episodeLength`	INTEGER DEFAULT NULL,
 	`dateStarted`	TEXT DEFAULT NULL,
 	`dateFinished`	TEXT DEFAULT NULL,
-	`studio`	TEXT DEFAULT NULL,
 	PRIMARY KEY(idSeries),
 	FOREIGN KEY(`idReleaseType`) REFERENCES "ReleaseType" ( "idReleaseType" ) ON DELETE NO ACTION ON UPDATE NO ACTION,
 	FOREIGN KEY(`idWatchedStatus`) REFERENCES "WatchedStatus" ( "idWatchedStatus" ) ON DELETE NO ACTION ON UPDATE NO ACTION,

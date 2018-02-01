@@ -53,7 +53,6 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_mainPanel->SetScrollRate(10, 10);
 
     m_titleTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
-    m_studioTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
 
     m_watchedCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Watched"));
     m_watchingCheck = new wxCheckBox(m_mainPanel, wxID_ANY, _("Watching"));
@@ -238,7 +237,6 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     auto releaseTypeSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Release Type"));
     auto seasonSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Season"));
     auto titleFieldSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Title"));
-    auto studioFieldSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, m_mainPanel, _("Studio"));
     auto ratingsSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Rating"));
     auto yearSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Year Released"));
     auto epsWatchedSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Episodes Watched"));
@@ -370,7 +368,6 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     releaseTypeSizerOutline->Add(releaseTypeSizer, paddingFlag);
     seasonSizerOutline->Add(seasonSizer, paddingFlag);
     titleFieldSizerOutline->Add(m_titleTextField, wxSizerFlags(1).Border(wxALL).Expand());
-    studioFieldSizerOutline->Add(m_studioTextField, wxSizerFlags(1).Border(wxALL).Expand());
 
     ratingsSizerOutline->Add(ratingsTopSizer, paddingFlag);
     yearSizerOutline->Add(yearTopSizer, paddingFlag);
@@ -395,7 +392,6 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     dateFinishedSizerOutline->Add(dateFinishedHighSizer, paddingFlag);
 
     leftSizer->Add(titleFieldSizerOutline, expandFlag);
-    leftSizer->Add(studioFieldSizerOutline, expandFlag);
     leftSizer->Add(watchedStatusSizerOutline, expandFlag);
     leftSizer->Add(releaseTypeSizerOutline, expandFlag);
     leftSizer->Add(seasonSizerOutline, expandFlag);
@@ -530,7 +526,6 @@ void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
     m_toWatchCheck->SetValue(true);
 
     m_titleTextField->SetValue("");
-    m_studioTextField->SetValue("");
 
     m_ratingsSpinLow->SetValue(m_minNum);
     m_ratingsSpinHigh->SetValue(m_maxNum);
@@ -657,8 +652,6 @@ void AdvFilterFrame::ApplyFilter()
     basic->dropped = m_droppedCheck->GetValue();
     basic->watchedBlank = m_watchedStatusBlankCheck->GetValue();
     basic->toWatch = m_toWatchCheck->GetValue();
-
-    adv->studio = m_studioTextField->GetValue().utf8_str();
 
     adv->tv = m_tvCheck->GetValue();
     adv->ova = m_ovaCheck->GetValue();

@@ -31,7 +31,6 @@ namespace col
         RATING,
         WATCHED_STATUS,
         RELEASE_TYPE,
-        STUDIO,
         YEAR,
         SEASON,
         EPISODES_WATCHED,
@@ -74,7 +73,6 @@ enum
     ID_ADV_FILTER_CHECK_ALL_SEASON,
     ID_ADV_FILTER_UNCHECK_ALL_SEASON,
     ID_ADV_FILTER_RATING_ENABLE,
-    ID_ADV_FILTER_STUDIO_ENABLE,
     ID_ADV_FILTER_YEAR_ENABLE,
     ID_ADV_FILTER_EPS_WATCHED_ENABLE,
     ID_ADV_FILTER_EPS_REWATCHED_ENABLE,
@@ -92,9 +90,9 @@ enum
 };
 
 const int numTitleCols = 5;
-const int numSeriesCols = 13;
-const int numViewCols = 15; //including the hidden 1
-const std::vector<std::string> colViewName {"idSeries", "name", "pronunciation", "rating", "idWatchedStatus", "idReleaseType", "studio",
+const int numSeriesCols = 12;
+const int numViewCols = col::NUM_COLS; //including the hidden 1
+const std::vector<std::string> colViewName {"idSeries", "name", "pronunciation", "rating", "idWatchedStatus", "idReleaseType",
 	"year", "idSeason", "episodesWatched", "totalEpisodes", "rewatchedEpisodes", "episodeLength", "dateStarted", "dateFinished"};
 const std::vector<size_t> numericCols {col::RATING, col::YEAR, col::EPISODES_WATCHED, col::TOTAL_EPISODES,
         col::REWATCHED_EPISODES, col::EPISODE_LENGTH};
