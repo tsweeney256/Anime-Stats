@@ -77,3 +77,11 @@ CREATE TABLE "Label" (
 );
 INSERT INTO `Label` VALUES (0,'No Label',0);
 INSERT INTO `Label` VALUES (1,'Default',1);
+CREATE TABLE "Tag" (
+    `idTag` INTEGER,
+    `idSeries` INTEGER NOT NULL,
+    `tag` TEXT NOT NULL,
+    `val` TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY(`idTag`),
+    FOREIGN KEY(`idSeries`) REFERENCES "Series" ( "idSeries" ) ON DELETE CASCADE ON UPDATE CASCADE
+);
