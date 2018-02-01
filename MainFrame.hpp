@@ -42,13 +42,15 @@ private:
     void OnOpen(wxCommandEvent& event);
     void OnColorOptions(wxCommandEvent& event);
     void OnImportMAL(wxCommandEvent& event);
-    
+
     void SwitchToDataDir();
     void DoDefaultDbPopup();
     int SaveChangesPopup();
     void NewOpenCommon(int style);
     void SetDbFlags(cppw::Sqlite3Connection* connection);
     bool WriteMemoryDbToFile();
+    bool UpdateDb();
+    void DbUpdateNotify();
     //also handles creation of new DB if needed
     //will destroy the window the window if there is an unrecoverable error
     //else it will return nullptr if the error is recoverable

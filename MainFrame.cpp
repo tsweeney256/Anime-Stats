@@ -132,8 +132,15 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     //database
     //
     m_connection = GetDbConnection(m_dbFile);
+    bool dbUpdated = false;
     if(!m_connection)
         return; //GetDbConnection calls Destroy, but since this is the constructor, it wont run until the construction is finished
+    try {
+        dbUpdated = UpdateDb();
+    } catch (cppw::Sqlite3Exception e) {
+        wxMessageBox(e.what());
+        Close(true);
+    }
 
     //
     //noteBook
@@ -145,6 +152,9 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     notebook->AddPage(m_dataPanel, _("Data"));
     mainPanelSizer->Add(notebook, wxSizerFlags(1).Expand());
     mainPanel->SetSizerAndFit(mainPanelSizer);
+    if (dbUpdated) {
+        DbUpdateNotify();
+    }
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)
@@ -263,7 +273,11 @@ void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
                 m_fileMenu->Enable(DEFAULT_DB, true);
                 m_fileMenu->Check(DEFAULT_DB, true);
             }
+            bool updatedDb = UpdateDb();
             m_dataPanel->ResetPanel(m_connection.get());
+            if (updatedDb) {
+                DbUpdateNotify();
+            }
         }
     }
 }
@@ -552,6 +566,79 @@ bool MainFrame::WriteMemoryDbToFile()
         }
     }while(status == wxID_OK && error);
     return dbIsNowFile;
+}
+
+bool MainFrame::UpdateDb()
+{
+    bool ret = false;
+    auto stmt = m_connection->PrepareStatement(
+        "select name from sqlite_master where type='table' and name='Tag'");
+    auto results = stmt->GetResults();
+    if (!results->NextRow()) {
+        m_connection->ExecuteQuery(
+            "create table Tag("
+            "idTag integer primary key autoincrement, "
+            "idSeries integer not null, "
+            "tag text not null, "
+            "val text not null default '',"
+            "unique (idSeries, tag, val), "
+            "foreign key (idSeries) references Series (idSeries) on delete cascade on update cascade)");
+        auto select_stmt = m_connection->PrepareStatement("select idSeries, studio from Series");
+        auto select_results = select_stmt->GetResults();
+        auto insert_stmt = m_connection->PrepareStatement(
+            "insert into Tag (idSeries, tag, val) values (?, ?, ?)");
+        while (select_results->NextRow()) {
+            auto idSeries = select_results->GetInt(0);
+            auto studio = select_results->GetString(1);
+            size_t begin = 0;
+            size_t end = studio.find(',', begin);
+            auto pos = end;
+            do {
+                std::string tok;
+                if (end != std::string::npos) {
+                    tok = studio.substr(begin, end-begin);
+                } else {
+                    tok = studio.substr(begin, studio.size()-begin);
+                }
+                auto first_not_space = tok.find_first_not_of(" \t");
+                auto last_not_space = tok.find_last_not_of(" \t");
+                if (first_not_space == std::string::npos) {
+                    tok = "";
+                } else if (last_not_space != std::string::npos) {
+                    tok = tok.substr(first_not_space, last_not_space-first_not_space+1);
+                } else {
+                    tok = tok.substr(first_not_space, tok.size() - first_not_space);
+                }
+                if (!tok.empty()) {
+                    insert_stmt->Bind(1, idSeries);
+                    insert_stmt->Bind(2, "Studio");
+                    insert_stmt->Bind(3, tok);
+                    auto insert_results = insert_stmt->GetResults();
+                    try {
+                        insert_results->NextRow();
+                    } catch (cppw::Sqlite3Exception e) {
+                        if (e.GetErrorCode() != SQLITE_CONSTRAINT) {
+                            throw;
+                        }
+                    }
+                    insert_stmt->Reset();
+                    insert_stmt->ClearBindings();
+                }
+                pos = end;
+                begin = end+1;
+                end = studio.find(',', begin);
+            } while (pos != std::string::npos);
+        }
+        ret = true;
+    }
+    return ret;
+}
+
+void MainFrame::DbUpdateNotify() {
+    m_dataPanel->SetUnsavedChanges(true);
+    wxMessageBox("Your database has been updated to the newest version.\n"
+                 "If you do not wish to have your database structure modified, please close the application and do not save.\n"
+                 "For details about the changes, please consult the changelog.");
 }
 
 void MainFrame::OnColorOptions(wxCommandEvent& WXUNUSED(event))
