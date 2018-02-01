@@ -128,9 +128,9 @@ std::string cppw::Sqlite3Result::GetColumnName(const int colIdx)
     return reinterpret_cast<const char*>(sqlite3_column_name(m_statement, colIdx));
 }
 
-void cppw::Sqlite3Result::Reset()
+void cppw::Sqlite3Result::Reset(bool throws)
 {
-    int code;
-    if((code = sqlite3_reset(m_statement)) != SQLITE_OK)
+    int code = sqlite3_reset(m_statement);
+    if(throws && code != SQLITE_OK)
         throw Sqlite3Exception(code);
 }

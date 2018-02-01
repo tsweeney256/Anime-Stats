@@ -38,7 +38,7 @@ namespace cppw
 		void Bind(const int paramIdx, const bool val);
 		void BindNull(const int paramIdx);
 		void ClearBindings();
-		void Reset();
+		void Reset(bool throws=false);
 		void Finalize(); //Optional. Throws. Will be done upon object destruction if it has not been done already.
 		int GetParamCount();
 		std::unique_ptr<Sqlite3Result> GetResults();

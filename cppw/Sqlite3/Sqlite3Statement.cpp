@@ -81,10 +81,10 @@ void cppw::Sqlite3Statement::ClearBindings()
         throw Sqlite3Exception(code);
 }
 
-void cppw::Sqlite3Statement::Reset()
+void cppw::Sqlite3Statement::Reset(bool throws)
 {
-    int code;
-    if((code = sqlite3_reset(m_statement)) != SQLITE_OK)
+    int code = sqlite3_reset(m_statement);
+    if(throws && code != SQLITE_OK)
         throw Sqlite3Exception(code);
 }
 
