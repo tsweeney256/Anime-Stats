@@ -53,9 +53,13 @@ public:
 protected:
     static const int selectedTitleCols = numTitleCols-2;
 
+    using TagVal = std::array<std::string, 2>;
+    using TagArray = std::vector<TagVal>;
     std::vector<std::array<std::string, selectedTitleCols>> getTitlesOfSeries(int64_t idSeries);
     void InsertIntoTitle(const std::vector<std::array<std::string, selectedTitleCols>>& titles,
                          const std::string& idSeries);
+    TagArray GetTagsOfSeries(int64_t idSeries);
+    void InsertIntoTag(const TagArray& tags, const std::string& idSeries);
 };
 
 //various functions and data common to both insert and update commands
@@ -96,6 +100,7 @@ private:
     //vector of strings instead of vector of tuples to avoid string conversions, even if it takes a bit more memory
     //numTitleCols-2 because we're not going to save idTitle and idSeries
     std::vector<std::array<std::string, selectedTitleCols>> m_titles;
+    TagArray m_tags;
 };
 
 class DeleteCommand : public InsertDeleteCommand
@@ -114,6 +119,7 @@ private:
     std::vector<std::array<std::string, numSeriesCols>> m_series;
     std::vector<std::array<std::string, numViewCols>> m_seriesView;
     std::vector<std::vector<std::array<std::string, selectedTitleCols>>> m_titlesGroup; //multiple entries will each have multiple names
+    std::vector<TagArray> m_tagsGroup;
 
     const std::string seriesColNames = " idSeries, rating, idReleaseType, idWatchedStatus, year, idSeason, episodesWatched, "
         "totalEpisodes, rewatchedEpisodes, episodeLength, dateStarted, dateFinished ";

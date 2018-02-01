@@ -88,6 +88,37 @@ void InsertDeleteCommand::InsertIntoTitle(const std::vector<std::array<std::stri
     }
 }
 
+InsertDeleteCommand::TagArray InsertDeleteCommand::
+GetTagsOfSeries(int64_t idSeries)
+{
+    TagArray ret;
+    auto stmt = m_connection->PrepareStatement(
+        "select tag, val from Tag where idSeries = ?");
+    stmt->Bind(1, idSeries);
+    auto results = stmt->GetResults();
+    while (results->NextRow()) {
+        TagVal row = {{results->GetString(0), results->GetString(1)}};
+        ret.push_back(row);
+    }
+    return ret;
+}
+
+void InsertDeleteCommand::
+InsertIntoTag(const TagArray& tags, const std::string& idSeries)
+{
+    auto stmt = m_connection->PrepareStatement(
+        "insert into Tag (idSeries, tag, val) values (?, ?, ?)");
+    for (const auto& row : tags) {
+        stmt->Reset();
+        stmt->ClearBindings();
+        stmt->Bind(1, idSeries);
+        stmt->Bind(2, row[0]);
+        stmt->Bind(3, row[1]);
+        auto results = stmt->GetResults();
+        results->NextRow();
+    }
+}
+
 InsertableOrUpdatable::InsertableOrUpdatable(DataPanel* dataPanel,
                                              std::shared_ptr<std::vector<wxString> > addedRowIDs, int label, int64_t idSeries)
     : m_idLabel(label), m_idSeries(idSeries), m_dataPanel(dataPanel), m_addedRowIDs(addedRowIDs) {}
@@ -172,6 +203,7 @@ void InsertCommand::UnExecute()
 {
     //backup all titles associated with the series
     m_titles = getTitlesOfSeries(m_idSeries);
+    m_tags = GetTagsOfSeries(m_idSeries);
     //deletes all associated entries in Title too because of cascading foreign keys
     auto deleteRowStmt = m_connection->PrepareStatement("delete from Series where idSeries=?");
     deleteRowStmt->Reset();
@@ -196,6 +228,7 @@ void InsertCommand::ExecuteCommon()
     result->NextRow();
     m_idSeries = m_connection->GetLastInsertRowID();
     InsertIntoTitle(m_titles, std::to_string(m_idSeries));
+    InsertIntoTag(m_tags, std::to_string(m_idSeries));
     AddRowIDToFilterList();
     m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
 }
@@ -243,6 +276,7 @@ void DeleteCommand::UnExecute()
         }
         //insert back all titles associated with each series in the db
         InsertIntoTitle(m_titlesGroup[i], std::to_string(m_idSeries[i]));
+        InsertIntoTag(m_tagsGroup[i], std::to_string(m_idSeries[i]));
     }
     m_grid->GoToCell(insertLoc, col::TITLE);
     for(unsigned int i = 0; i < m_series.size(); ++i){
@@ -289,6 +323,7 @@ void DeleteCommand::ExecuteCommon()
         }
         auto titles = getTitlesOfSeries(m_idSeries[i]);
         m_titlesGroup.push_back(titles);
+        m_tagsGroup.emplace_back(GetTagsOfSeries(m_idSeries[i]));
         auto seriesDeleteStmt = m_connection->PrepareStatement("delete from Series where idSeries=?");
         seriesDeleteStmt->Reset();
         seriesDeleteStmt->ClearBindings();
