@@ -293,6 +293,9 @@ void DataPanel::OnEditTags(wxCommandEvent& WXUNUSED(event))
         wxMessageBox("Error: You may only tag one series at a time.");
     else if(rows.size() == 0)
         wxMessageBox("Error: No row was selected.");
+    else if(rows[0] == m_grid->GetNumberRows()-1) {
+        wxMessageBox("Error: Invalid row");
+    }
     else{
         EditTagDialog editTagDlg(
             this, wxID_ANY, m_connection,
@@ -315,11 +318,11 @@ void DataPanel::OnDeleteRow(wxCommandEvent& WXUNUSED(event))
 {
     auto rows = m_grid->GetSelectedRows();
     if (rows.GetCount() > 0) {
-        std::vector<int64_t> idSeries(rows.GetCount());
+        std::vector<int64_t> idSeries;
         for(unsigned int i = 0; i < rows.GetCount(); ++i){
             auto idSeriesStr = m_grid->GetCellValue(rows.Item(i), col::ID_SERIES);
             if(idSeriesStr.compare("")) //ignore the last row
-                idSeries[i] = strtoll(idSeriesStr, nullptr, 10);
+                idSeries.push_back(strtoll(idSeriesStr, nullptr, 10));
         }
         try{
             m_commands.push_back(std::make_unique<DeleteCommand>(m_connection, m_grid, idSeries));
@@ -349,6 +352,9 @@ void DataPanel::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
         wxMessageBox("Error: You may only set aliases to one title at a time.");
     else if(rows.size() == 0)
         wxMessageBox("Error: No row was selected.");
+    else if(rows[0] == m_grid->GetNumberRows()-1) {
+        wxMessageBox("Error: Invalid row");
+    }
     else{
         TitleAliasDialog aliasDlg(this, wxID_ANY, m_connection,
                                              wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)), m_grid->GetCellValue(rows[0], col::TITLE));
