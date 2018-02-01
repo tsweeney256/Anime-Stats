@@ -370,7 +370,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
         try{
             m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_grid, this, std::string(event.GetString().utf8_str()), 1,
                                                                  m_changedRows));
-            AppendLastGridRow(true);
+            AppendWriteProtectedRow(m_grid, col::TITLE+1, numViewCols, true);
 
         }catch(cppw::Sqlite3Exception& e){
             if(e.GetErrorCode() == SQLITE_BUSY){
@@ -557,7 +557,7 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
     }
     //user shouldn't see idSeries key
     m_grid->HideCol(col::ID_SERIES);
-    AppendLastGridRow(false);
+    AppendWriteProtectedRow(m_grid, col::TITLE+1, numViewCols, false);
     if(m_firstDraw){
         m_firstDraw = false;
         if(m_settings->colSizes.size()){
@@ -766,25 +766,6 @@ void DataPanel::ApplyFullGrid()
         wxMessageBox(std::string("Error preparing basic select statement.\n") + e.what());
         m_top->Close(true);
         return;
-    }
-}
-
-void DataPanel::AppendLastGridRow(bool whiteOutPrevious)
-{
-    m_grid->AppendRows();
-    for(int i = 0; i < m_grid->GetNumberRows(); ++i){
-        m_grid->SetRowLabelValue(i, wxString::Format("%i", i+1));
-    }
-    for(int i = col::TITLE + 1; i < numViewCols; ++i){ //want to only allow the user to edit the name field of the new entry line at first
-        if(m_grid->GetNumberRows() > 1 && whiteOutPrevious){
-            m_grid->SetReadOnly(m_grid->GetNumberRows()-2, i, false);
-            m_grid->SetCellBackgroundColour(m_grid->GetNumberRows()-2, i, wxColour(255, 255, 255)); //make greyed out cells white again
-            m_grid->SetRowLabelValue(m_grid->GetNumberRows()-2, wxString::Format("%i", m_grid->GetNumberRows()-1));
-        }
-
-        m_grid->SetReadOnly(m_grid->GetNumberRows()-1, i);
-        m_grid->SetCellBackgroundColour(m_grid->GetNumberRows()-1, i, wxColour(220, 220, 220)); //grey as a sign that the cells are read only
-        m_grid->SetRowLabelValue(m_grid->GetNumberRows()-1, "*");
     }
 }
 
