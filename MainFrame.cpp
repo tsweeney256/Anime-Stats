@@ -13,6 +13,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
+#include <algorithm>
 #include <string>
 #include <unordered_map>
 #include <memory>
@@ -590,6 +591,9 @@ bool MainFrame::UpdateDb()
         while (select_results->NextRow()) {
             auto idSeries = select_results->GetInt(0);
             auto studio = select_results->GetString(1);
+            std::replace(studio.begin(), studio.end(), '/', ',');
+            std::replace(studio.begin(), studio.end(), '\\', ',');
+            std::replace(studio.begin(), studio.end(), '|', ',');
             size_t begin = 0;
             size_t end = studio.find(',', begin);
             auto pos = end;
