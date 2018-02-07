@@ -108,7 +108,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     auto addRowButton = new wxButton(topBar, ID_ADD_ROW_BTN, "Add Row");
     auto deleteRowButton = new wxButton(topBar, ID_DELETE_ROW_BTN, "Delete Rows");
     auto titleAliasButton = new wxButton(topBar, ID_TITLE_ALIAS_BTN, "Alias Title");
-    auto refreshButton = new wxButton(topBar, ID_EDIT_TAGS_BTN, "Edit Tags");
+    auto editTagsButton = new wxButton(topBar, ID_EDIT_TAGS_BTN, "Edit Tags");
 
     //
     //top bar sizers
@@ -149,7 +149,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     btnSizer->Add(resetFilterButton, btnFlags);
     btnSizer->Add(m_advSortButton, btnFlags);
     btnSizer->Add(deleteRowButton, btnFlags);
-    btnSizer->Add(refreshButton, btnFlags);
+    btnSizer->Add(editTagsButton, btnFlags);
 
     auto topControlBarFlags = wxSizerFlags(0).Bottom().Expand().Border(wxALL);
     topControlBarSizer->Add(checkBoxSizerOutline, topControlBarFlags);
