@@ -30,7 +30,7 @@
 namespace cppw { class Sqlite3Connection; }
 class MainFrame;
 class wxMenu;
-class Settings;
+struct Settings;
 
 //the panel that holds all the components that will make up the Data page
 class DataPanel : public wxPanel
