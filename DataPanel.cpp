@@ -48,8 +48,6 @@
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_TEXT_ENTER(ID_TITLE_FILTER_FIELD, DataPanel::OnTextEnter)
-    EVT_BUTTON(ID_CHECK_ALL_BTN, DataPanel::OnCheckAllBtn)
-    EVT_BUTTON(ID_UNCHECK_ALL_BTN, DataPanel::OnUncheckAllBtn)
     EVT_BUTTON(ID_APPLY_FILTER_BTN, DataPanel::OnApplyFilter)
     EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
     EVT_BUTTON(ID_ADV_FILTER_BTN, DataPanel::OnAdvFilter)
@@ -78,23 +76,17 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     topBar->SetScrollRate(10, 10);
 
     //
-    //checkboxes
+    //quick filter
     //
-    m_watchedCheck = new wxCheckBox(topBar, wxID_ANY, _("Watched"));
-    m_watchingCheck = new wxCheckBox(topBar, wxID_ANY, _("Watching"));
-    m_stalledCheck = new wxCheckBox(topBar, wxID_ANY, _("Stalled"));
-    m_droppedCheck = new wxCheckBox(topBar, wxID_ANY, _("Dropped"));
-    m_blankCheck = new wxCheckBox(topBar, wxID_ANY,  _("Blank"));
-    m_toWatchCheck = new wxCheckBox(topBar, wxID_ANY, _("To Watch"));
-    auto checkAllButton = new wxButton(topBar, ID_CHECK_ALL_BTN, _("Check All"));
-    auto uncheckAllButton = new wxButton(topBar, ID_UNCHECK_ALL_BTN, _("Uncheck All"));
-
-    m_watchedCheck->SetValue(true);
-    m_watchingCheck->SetValue(true);
-    m_stalledCheck->SetValue(true);
-    m_droppedCheck->SetValue(true);
-    m_blankCheck->SetValue(true);
-    m_toWatchCheck->SetValue(true);
+    m_quickFilterCombo = new wxComboBox(
+        topBar, ID_QUICK_FILTER_COMBO, wxEmptyString, wxDefaultPosition,
+        wxDefaultSize, 0, nullptr, wxCB_READONLY);
+    auto quickFilterNewButton = new wxButton(
+        topBar, ID_QUICK_FILTER_NEW, "New");
+    auto quickFilterOverwriteButton = new wxButton(
+        topBar, ID_QUICK_FILTER_OVERWRITE, "Overwrite");
+    auto quickFilterDeleteButton = new wxButton(
+        topBar, ID_QUICK_FILTER_DELETE, "Delete");
 
     //
     //buttons and textfield
@@ -102,7 +94,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     m_titleFilterTextField = new wxTextCtrl(topBar, ID_TITLE_FILTER_FIELD, wxEmptyString,
                                             wxDefaultPosition, wxSize(250, -1), wxTE_PROCESS_ENTER);
     auto applyFilterButton = new wxButton(topBar, ID_APPLY_FILTER_BTN, "Apply Filter");
-    auto resetFilterButton = new wxButton(topBar, ID_RESET_FILTER_BTN, "Reset Filter");
+    auto resetFilterButton = new wxButton(topBar, ID_RESET_FILTER_BTN, "Default Filter");
     m_advFilterButton = new wxButton(topBar, ID_ADV_FILTER_BTN, "Adv. Filter");
     m_advSortButton = new wxButton(topBar, ID_ADV_SORT_BTN, "Adv. Sort");
     auto addRowButton = new wxButton(topBar, ID_ADD_ROW_BTN, "Add Row");
@@ -113,48 +105,41 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     //
     //top bar sizers
     //
-    auto checkBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto checkBoxSizerLeft = new wxGridSizer(3, wxSizerFlags::GetDefaultBorder(),
-                                             wxSizerFlags::GetDefaultBorder());
-    auto checkBoxSizerRight = new wxBoxSizer(wxVERTICAL);
-    auto checkBoxSizerOutline = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Watched Status"));
-    auto titleFilterSizer = new wxStaticBoxSizer(wxHORIZONTAL, topBar, _("Filter Title"));
-    auto topControlBarSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto quickFilterTypeSizer = new wxStaticBoxSizer(
+        wxHORIZONTAL, topBar, _("Quick Filter Type"));
+    auto quickFilterTitleSizer = new wxStaticBoxSizer(
+        wxHORIZONTAL, topBar, _("Quick Filter Title"));
+    auto quickFilterSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto btnSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto topControlBarSizer = new wxBoxSizer(wxVERTICAL);
     m_panelSizer = new wxBoxSizer(wxVERTICAL);
-    auto btnSizer = new wxGridSizer(2, 4, 0, 0);
 
-    auto checkBoxFlags = wxSizerFlags(1).Expand();
-    auto noExpand = wxSizerFlags(0);//.Border(wxALL);
-    checkBoxSizer->Add(checkBoxSizerLeft, noExpand.Border(wxLEFT).Center());
-    checkBoxSizer->Add(checkBoxSizerRight, noExpand.Border(wxLEFT).Center());
-    checkBoxSizerOutline->Add(checkBoxSizer, noExpand.Border(wxLEFT | wxRIGHT | wxBOTTOM));
-    checkBoxSizerLeft->Add(m_watchedCheck, checkBoxFlags);
-    checkBoxSizerLeft->Add(m_stalledCheck, checkBoxFlags);
-    checkBoxSizerLeft->Add(m_blankCheck, checkBoxFlags);
-    checkBoxSizerLeft->Add(m_watchingCheck, checkBoxFlags);
-    checkBoxSizerLeft->Add(m_droppedCheck, checkBoxFlags);
-    checkBoxSizerLeft->Add(m_toWatchCheck, checkBoxFlags);
-    checkBoxSizerRight->Add(checkAllButton, checkBoxFlags);
-    checkBoxSizerRight->Add(uncheckAllButton, checkBoxFlags);
-
-    titleFilterSizer->Add(m_titleFilterTextField, wxSizerFlags(1).Border(wxALL).Center());
+    quickFilterTypeSizer->Add(
+        m_quickFilterCombo, wxSizerFlags(3).Border(wxALL).Center().Expand());
+    auto qfButtonFlags = wxSizerFlags(1).Center();
+    quickFilterTypeSizer->Add(quickFilterNewButton, qfButtonFlags);
+    quickFilterTypeSizer->Add(quickFilterOverwriteButton, qfButtonFlags);
+    quickFilterTypeSizer->Add(
+        quickFilterDeleteButton, qfButtonFlags.Border(wxRIGHT));
+    quickFilterTitleSizer->Add(
+        m_titleFilterTextField, wxSizerFlags(1).Border(wxALL).Center());
+    quickFilterSizer->Add(quickFilterTypeSizer, wxSizerFlags(2).Border(wxRIGHT));
+    quickFilterSizer->Add(quickFilterTitleSizer, wxSizerFlags(1));
 
     auto btnFlags = wxSizerFlags(1).Expand();
-    //row 1
     btnSizer->Add(applyFilterButton, btnFlags);
-    btnSizer->Add(m_advFilterButton, btnFlags);
-    btnSizer->Add(addRowButton, btnFlags);
-    btnSizer->Add(titleAliasButton, btnFlags);
-    //row 2
     btnSizer->Add(resetFilterButton, btnFlags);
+    btnSizer->Add(m_advFilterButton, btnFlags);
     btnSizer->Add(m_advSortButton, btnFlags);
+    btnSizer->Add(addRowButton, btnFlags);
     btnSizer->Add(deleteRowButton, btnFlags);
+    btnSizer->Add(titleAliasButton, btnFlags);
     btnSizer->Add(editTagsButton, btnFlags);
 
-    auto topControlBarFlags = wxSizerFlags(0).Bottom().Expand().Border(wxALL);
-    topControlBarSizer->Add(checkBoxSizerOutline, topControlBarFlags);
-    topControlBarSizer->Add(titleFilterSizer, topControlBarFlags);
-    topControlBarSizer->Add(btnSizer, topControlBarFlags);
+    topControlBarSizer->Add(
+        quickFilterSizer, wxSizerFlags(0).Expand().Border(wxTOP | wxLEFT));
+    topControlBarSizer->Add(
+        btnSizer, wxSizerFlags(0).Expand().Border(wxALL ^ wxRIGHT ));
     topBar->SetSizerAndFit(topControlBarSizer);
 
     ////
@@ -231,26 +216,6 @@ void DataPanel::ClearCommandHistory()
 void DataPanel::SetAddedFilterRows(std::shared_ptr<std::vector<wxString> > changedRows)
 {
     m_changedRows = changedRows;
-}
-
-void DataPanel::OnCheckAllBtn(wxCommandEvent& WXUNUSED(event))
-{
-    m_watchedCheck->SetValue(true);
-    m_watchingCheck->SetValue(true);
-    m_stalledCheck->SetValue(true);
-    m_droppedCheck->SetValue(true);
-    m_toWatchCheck->SetValue(true);
-    m_blankCheck->SetValue(true);
-}
-
-void DataPanel::OnUncheckAllBtn(wxCommandEvent& WXUNUSED(event))
-{
-    m_watchedCheck->SetValue(false);
-    m_watchingCheck->SetValue(false);
-    m_stalledCheck->SetValue(false);
-    m_droppedCheck->SetValue(false);
-    m_toWatchCheck->SetValue(false);
-    m_blankCheck->SetValue(false);
 }
 
 void DataPanel::OnTextEnter(wxCommandEvent& WXUNUSED(event))
@@ -739,12 +704,6 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         statement->Bind(2, bindStr);
         auto results = statement->GetResults();
         ResetTable(results);
-        m_watchedCheck->SetValue(newBasicFilterInfo->watched);
-        m_watchingCheck->SetValue(newBasicFilterInfo->watching);
-        m_stalledCheck->SetValue(newBasicFilterInfo->stalled);
-        m_droppedCheck->SetValue(newBasicFilterInfo->dropped);
-        m_blankCheck->SetValue(newBasicFilterInfo->watchedBlank);
-        m_toWatchCheck->SetValue(newBasicFilterInfo->toWatch);
         m_titleFilterTextField->SetValue(wxString::FromUTF8(newBasicFilterInfo->title.c_str()));
     }catch(cppw::Sqlite3Exception& e){
         wxMessageBox(std::string("Error applying filter.\n") + e.what());
@@ -805,12 +764,6 @@ void DataPanel::NewBasicFilter()
 {
     m_basicFilterInfo = BasicFilterInfo::MakeShared();
     m_basicFilterInfo->title = std::string(m_titleFilterTextField->GetValue().utf8_str());
-    m_basicFilterInfo->watched = m_watchedCheck->GetValue();
-    m_basicFilterInfo->watching = m_watchingCheck->GetValue();
-    m_basicFilterInfo->stalled = m_stalledCheck->GetValue();
-    m_basicFilterInfo->dropped = m_droppedCheck->GetValue();
-    m_basicFilterInfo->watchedBlank = m_blankCheck->GetValue();
-    m_basicFilterInfo->toWatch = m_toWatchCheck->GetValue();
     NewFilter(m_basicFilterInfo, nullptr);
 }
 
@@ -927,12 +880,6 @@ void DataPanel::ResetPanel(cppw::Sqlite3Connection* connection)
 
 void DataPanel::ResetFilterGui()
 {
-    m_watchedCheck->SetValue(true);
-    m_watchingCheck->SetValue(true);
-    m_stalledCheck->SetValue(true);
-    m_droppedCheck->SetValue(true);
-    m_blankCheck->SetValue(true);
-    m_toWatchCheck->SetValue(true);
     m_titleFilterTextField->SetValue("");
 }
 

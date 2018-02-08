@@ -66,8 +66,6 @@ public:
     MainFrame* GetTop() const;
 
 private:
-    void OnCheckAllBtn(wxCommandEvent& event);
-    void OnUncheckAllBtn(wxCommandEvent& event);
     void OnTextEnter(wxCommandEvent& event);
     void OnApplyFilter(wxCommandEvent& event);
     void OnResetFilter(wxCommandEvent& event);
@@ -114,12 +112,7 @@ private:
     MainFrame* m_top;
     wxGrid* m_grid;
     Settings* m_settings;
-    wxCheckBox* m_watchedCheck;
-    wxCheckBox* m_watchingCheck;
-    wxCheckBox* m_stalledCheck;
-    wxCheckBox* m_droppedCheck;
-    wxCheckBox* m_blankCheck;
-    wxCheckBox* m_toWatchCheck;
+    wxComboBox* m_quickFilterCombo;
     wxButton* m_advFilterButton;
     wxButton* m_advSortButton;
     wxTextCtrl* m_titleFilterTextField;
