@@ -65,7 +65,8 @@ EditTagDialog::EditTagDialog(wxWindow* parent, wxWindowID id,
         m_grid->AppendRows();
         for (int i = 0; i < result->GetColumnCount(); ++i) {
             m_grid->SetCellValue(
-                m_grid->GetNumberRows()-1, i, result->GetString(i));
+                m_grid->GetNumberRows()-1, i,
+                wxString::FromUTF8(result->GetString(i).c_str()));
         }
     }
     AppendWriteProtectedRow(m_grid, VAL_COL, NUM_COLS, false);
