@@ -40,7 +40,7 @@
 #include <iostream>
 #endif
 
-static const int current_db_version = 0;
+static const int current_db_version = 1;
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_CLOSE(MainFrame::OnClose)
@@ -545,13 +545,24 @@ bool MainFrame::WriteMemoryDbToFile()
 
 int MainFrame::GetDbVersion()
 {
+    //-1 and 0 logic are because I was a bad boy and was not using versioned DBs
     auto neg_one_stmt = m_connection->PrepareStatement(
         "select name from sqlite_master where type='table' and name='Tag'");
     auto neg_one_results = neg_one_stmt->GetResults();
     if (!neg_one_results->NextRow()) {
         return -1;
     }
-    return current_db_version;
+    auto zero_stmt = m_connection->PrepareStatement(
+        "select name from sqlite_master where type='table' and name='Version'");
+    auto zero_results = zero_stmt->GetResults();
+    if (!zero_results->NextRow()) {
+        return 0;
+    }
+    auto version_stmt = m_connection->PrepareStatement(
+        "select version from Version");
+    auto version_results = version_stmt->GetResults();
+    version_results->NextRow();
+    return version_results->GetInt(0);
 }
 
 bool MainFrame::UpdateDb(int version)
@@ -559,6 +570,15 @@ bool MainFrame::UpdateDb(int version)
     bool updated = false;
     if (version == -1) {
         UpdateNegOneDb();
+        updated = true;
+    }
+    for (int i = version; i < current_db_version; ++i) {
+        wxString fileStr;
+        readFileIntoString(
+            fileStr,
+            std::string("create_p") + std::to_string(i + 1) + ".sql",
+            this);
+        m_connection->ExecuteQuery(std::string(fileStr.utf8_str()));
         updated = true;
     }
     return updated;
