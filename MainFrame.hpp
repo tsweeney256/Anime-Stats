@@ -43,19 +43,18 @@ private:
     void OnColorOptions(wxCommandEvent& event);
     void OnImportMAL(wxCommandEvent& event);
 
+    bool CreateMemoryDb();
+    bool OpenDb(const wxString& file);
     void SwitchToDataDir();
     void DoDefaultDbPopup();
     int SaveChangesPopup();
     void NewOpenCommon(int style);
     void SetDbFlags(cppw::Sqlite3Connection* connection);
     bool WriteMemoryDbToFile();
-    bool UpdateDb();
+    int GetDbVersion();
+    bool UpdateDb(int version);
     void DbUpdateNotify();
-    //also handles creation of new DB if needed
-    //will destroy the window the window if there is an unrecoverable error
-    //else it will return nullptr if the error is recoverable
-    //the only recoverable error should be if it fails to create a new db file
-    std::unique_ptr<cppw::Sqlite3Connection> GetDbConnection(const wxString& file, bool eraseIfAlreadyExists = false);
+    void UpdateNegOneDb();
 
     wxDECLARE_EVENT_TABLE();
 
@@ -66,6 +65,7 @@ private:
     std::unique_ptr<Settings> m_settings = nullptr;
     wxString m_dbFile;
     bool m_dbInMemory = false;
+    bool m_needUpdateNotify = false;
     const char* const settingsFileName = "settings.xml";
 
     enum
