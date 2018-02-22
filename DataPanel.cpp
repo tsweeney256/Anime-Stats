@@ -79,8 +79,8 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     //quick filter
     //
     m_quickFilterCombo = new wxComboBox(
-        topBar, ID_QUICK_FILTER_COMBO, wxEmptyString, wxDefaultPosition,
-        wxDefaultSize, 0, nullptr, wxCB_READONLY);
+        topBar, ID_QUICK_FILTER_COMBO, m_defaultFilter, wxDefaultPosition,
+        wxDefaultSize, GetFilterNames(), wxCB_READONLY);
     auto quickFilterNewButton = new wxButton(
         topBar, ID_QUICK_FILTER_NEW, "New");
     auto quickFilterOverwriteButton = new wxButton(
@@ -1080,4 +1080,24 @@ void DataPanel::RefreshFilter()
 void DataPanel::ShowSqliteBusyErrorBox()
 {
     wxMessageBox("Error applying change.\nThe database is locked because its in use by another program.");
+}
+
+wxArrayString DataPanel::GetFilterNames() {
+    wxArrayString ret;
+    try {
+        auto qfStmt = m_connection->PrepareStatement(
+            "select name, `default` from SavedFilter "
+            "order by name asc");
+        auto qfResult = qfStmt->GetResults();
+        while (qfResult->NextRow()) {
+            ret.Add(qfResult->GetString(0));
+            if (qfResult->GetBool(1)) {
+                m_defaultFilter = qfResult->GetString(0);
+            }
+        }
+    } catch (const cppw::Sqlite3Exception& e) {
+        wxMessageBox(wxString("Error: ") + e.what());
+        m_top->Close(true);
+    }
+    return ret;
 }

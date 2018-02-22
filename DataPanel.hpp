@@ -98,6 +98,7 @@ private:
     int GetColMedian(const std::string& colName);
     void RefreshColColors(int col);
     void ShowSqliteBusyErrorBox();
+    wxArrayString GetFilterNames();
 
     class CellColorInfo{
     public:
@@ -140,6 +141,7 @@ private:
     std::shared_ptr<std::vector<wxString>> m_changedRows; //managed by the command classes
     wxArrayString m_colList;
     CellColorInfo m_cellColorInfo[col::NUM_COLS];
+    wxString m_defaultFilter;
 
     DECLARE_EVENT_TABLE()
 };
