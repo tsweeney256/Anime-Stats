@@ -53,7 +53,7 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_BUTTON(ID_QUICK_FILTER_OVERWRITE, DataPanel::OnQuickFilterOverwrite)
     EVT_BUTTON(ID_QUICK_FILTER_DELETE, DataPanel::OnQuickFilterDelete)
     EVT_BUTTON(ID_APPLY_FILTER_BTN, DataPanel::OnApplyFilter)
-    EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
+    EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnDefaultFilter)
     EVT_BUTTON(ID_ADV_FILTER_BTN, DataPanel::OnAdvFilter)
     EVT_BUTTON(ID_ADV_SORT_BTN, DataPanel::OnAdvSort)
     EVT_BUTTON(ID_EDIT_TAGS_BTN, DataPanel::OnEditTags)
@@ -331,9 +331,9 @@ void DataPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
     ApplyQuickFilter();
 }
 
-void DataPanel::OnResetFilter(wxCommandEvent& WXUNUSED(event))
+void DataPanel::OnDefaultFilter(wxCommandEvent& WXUNUSED(event))
 {
-    ResetFilterGui();
+    m_quickFilterCombo->ChangeValue(m_defaultFilter);
     ApplyQuickFilter();
 }
 

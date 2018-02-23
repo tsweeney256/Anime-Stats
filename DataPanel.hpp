@@ -71,7 +71,7 @@ private:
     void OnQuickFilterOverwrite(wxCommandEvent& event);
     void OnQuickFilterDelete(wxCommandEvent& event);
     void OnApplyFilter(wxCommandEvent& event);
-    void OnResetFilter(wxCommandEvent& event);
+    void OnDefaultFilter(wxCommandEvent& event);
     void OnAdvFilter(wxCommandEvent& event);
     void OnAdvSort(wxCommandEvent& event);
     void OnEditTags(wxCommandEvent& event);
