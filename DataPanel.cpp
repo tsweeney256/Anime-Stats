@@ -84,7 +84,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     //
     m_quickFilterCombo = new wxComboBox(
         topBar, ID_QUICK_FILTER_COMBO, m_defaultFilter, wxDefaultPosition,
-        wxDefaultSize, GetFilterNames(), wxCB_READONLY);
+        wxDefaultSize, 0, nullptr, wxCB_READONLY);
     auto quickFilterNewButton = new wxButton(
         topBar, ID_QUICK_FILTER_NEW, "New");
     auto quickFilterOverwriteButton = new wxButton(
@@ -157,7 +157,6 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     BuildAllowedValsMap(m_allowedWatchedVals, "select status from WatchedStatus order by idWatchedStatus");
     BuildAllowedValsMap(m_allowedReleaseVals, "select type from ReleaseType order by idReleaseType");
     BuildAllowedValsMap(m_allowedSeasonVals, "select season from Season order by idSeason");
-    ApplyFullGrid();
     //
     //panel sizer
     //
@@ -168,7 +167,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     //
     //Misc initializations
     //
-    ApplyQuickFilter();
+    ResetPanel(m_connection);
 }
 
 bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
@@ -834,23 +833,6 @@ void DataPanel::AppendStatusStr(std::stringstream& statusStr, std::string toAppe
     statusStr << toAppend;
 }
 
-void DataPanel::ApplyFullGrid()
-{
-    try{
-        auto statement = m_connection->PrepareStatement(std::string(m_basicSelectString.ToUTF8()) +
-                                                        " order by " + m_curOrderCombined);
-        statement->Bind(1, "%%");
-        statement->Bind(2, "%%");
-        auto results = statement->GetResults();
-        ResetTable(results);
-
-    }catch(cppw::Sqlite3Exception& e){
-        wxMessageBox(std::string("Error preparing basic select statement.\n") + e.what());
-        m_top->Close(true);
-        return;
-    }
-}
-
 void DataPanel::NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                           std::shared_ptr<AdvFilterInfo> newAdvFilterInfo)
 {
@@ -952,7 +934,7 @@ void DataPanel::SetSqlite3Connection(cppw::Sqlite3Connection* connection)
 void DataPanel::ResetPanel(cppw::Sqlite3Connection* connection)
 {
 
-    ResetFilterGui();
+    m_titleFilterTextField->SetValue("");
     m_commands = std::vector<std::unique_ptr<SqlGridCommand>>();
     m_commandLevel = 0;
     m_changedRows = nullptr;
@@ -965,18 +947,17 @@ void DataPanel::ResetPanel(cppw::Sqlite3Connection* connection)
     m_curColSort = col::TITLE;
     m_curSortAsc = true;
 
-    m_basicFilterInfo = BasicFilterInfo::MakeShared();
-    m_oldBasicFilterInfo = BasicFilterInfo::MakeShared();
+    m_basicFilterInfo = nullptr;
+    m_oldBasicFilterInfo = nullptr;
     m_oldBasicFilterInfo = nullptr;
     m_oldAdvFilterInfo = nullptr;
+    m_defaultFilter = "";
+    m_quickFilterCombo->Clear();
+    m_quickFilterCombo->Append(GetFilterNames());
+    m_quickFilterCombo->ChangeValue(m_defaultFilter);
 
     UpdateCellColorInfo();
-    ApplyFullGrid();
-}
-
-void DataPanel::ResetFilterGui()
-{
-    m_titleFilterTextField->SetValue("");
+    ApplyQuickFilter();
 }
 
 wxArrayString DataPanel::GetColNames()

@@ -87,13 +87,11 @@ private:
 
     void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
     void AppendStatusStr(std::stringstream& statusStr, std::string toAppend, bool& firstStatus);
-    void ApplyFullGrid();
     void HandleCommandChecking();
     void BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr);
     void HandleUndoRedoColorChange();
     void UpdateOldFilterData();
     std::string GetAddedRowsSqlStr(std::vector<wxString>* changedRows);
-    void ResetFilterGui();
     void UpdateCellColor(int row, int col);
     void UpdateNumericalCellColorInfo(int col);
     int GetColAggregate(std::string colName, std::string function);
