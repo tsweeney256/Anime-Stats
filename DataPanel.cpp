@@ -33,6 +33,7 @@
 #include <wx/utils.h>
 #include <wx/dcclient.h>
 #include <wx/stdpaths.h>
+#include <wx/dialog.h>
 #include "DataPanel.hpp"
 #include "AppIDs.hpp"
 #include "cppw/Sqlite3.hpp"
@@ -48,6 +49,7 @@
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_TEXT_ENTER(ID_TITLE_FILTER_FIELD, DataPanel::OnTextEnter)
+    EVT_BUTTON(ID_QUICK_FILTER_NEW, DataPanel::OnQuickFilterNew)
     EVT_BUTTON(ID_APPLY_FILTER_BTN, DataPanel::OnApplyFilter)
     EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
     EVT_BUTTON(ID_ADV_FILTER_BTN, DataPanel::OnAdvFilter)
@@ -220,6 +222,55 @@ void DataPanel::SetAddedFilterRows(std::shared_ptr<std::vector<wxString> > chang
 void DataPanel::OnTextEnter(wxCommandEvent& WXUNUSED(event))
 {
     ApplyQuickFilter();
+}
+
+void DataPanel::OnQuickFilterNew(wxCommandEvent& WXUNUSED(event))
+{
+    wxDialog dlg(this, wxID_ANY, "New Quick Filter");
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+    auto topSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto buttonSizer = dlg.CreateButtonSizer(wxOK|wxCANCEL);
+    auto nameCtrl = new wxTextCtrl(&dlg, wxID_ANY);
+    auto defaultBtn = new wxCheckBox(&dlg, wxID_ANY, "Default Filter");
+    topSizer->Add(nameCtrl, wxSizerFlags(2).Border(wxALL));
+    topSizer->Add(defaultBtn, wxSizerFlags(1).Border(wxALL ^ wxLEFT));
+    mainSizer->Add(topSizer);
+    mainSizer->Add(buttonSizer, wxSizerFlags(0).Border(wxALL ^ wxTOP).Right());
+    dlg.SetSizerAndFit(mainSizer);
+    if (dlg.ShowModal() == wxID_OK) {
+        if (nameCtrl->GetValue() == "") {
+            wxMessageBox("Error: Empty filter names are not allowed");
+            return;
+        }
+        try {
+            auto isNewDefaultFilter = defaultBtn->GetValue();
+            InsertFiltersToDb(m_connection,
+                              nameCtrl->GetValue(),
+                              isNewDefaultFilter,
+                              m_basicFilterInfo.get(),
+                              m_advFilterInfo.get());
+            if (isNewDefaultFilter) {
+                auto stmt = m_connection->PrepareStatement(
+                    "update `SavedFilter` set `default` = 0 "
+                    "where `name` <> ?");
+                stmt->Bind(1, nameCtrl->GetValue().utf8_str());
+                auto result = stmt->GetResults();
+                result->NextRow();
+            }
+            //cheeky way of alphabetizing the combobox entries
+            m_quickFilterCombo->Clear();
+            m_quickFilterCombo->Append(GetFilterNames());
+            m_quickFilterCombo->ChangeValue(nameCtrl->GetValue());
+            SetUnsavedChanges(true);
+        } catch (const cppw::Sqlite3Exception& e) {
+            if (e.GetErrorCode() == SQLITE_CONSTRAINT) {
+                wxMessageBox("Error: Filter with this name already exists");
+            } else {
+                wxMessageBox(wxString("Error: ") + e.what());
+                m_top->Close(true);
+            }
+        }
+    }
 }
 
 void DataPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
