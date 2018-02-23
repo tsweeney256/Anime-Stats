@@ -51,6 +51,7 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_TEXT_ENTER(ID_TITLE_FILTER_FIELD, DataPanel::OnTextEnter)
     EVT_BUTTON(ID_QUICK_FILTER_NEW, DataPanel::OnQuickFilterNew)
     EVT_BUTTON(ID_QUICK_FILTER_OVERWRITE, DataPanel::OnQuickFilterOverwrite)
+    EVT_BUTTON(ID_QUICK_FILTER_DELETE, DataPanel::OnQuickFilterDelete)
     EVT_BUTTON(ID_APPLY_FILTER_BTN, DataPanel::OnApplyFilter)
     EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
     EVT_BUTTON(ID_ADV_FILTER_BTN, DataPanel::OnAdvFilter)
@@ -292,6 +293,31 @@ void DataPanel::OnQuickFilterOverwrite(wxCommandEvent& WXUNUSED(event))
             InsertFiltersToDb(m_connection, curFilter, isDefault,
                               m_basicFilterInfo.get(), m_advFilterInfo.get());
             m_quickFilterCombo->RemoveSelection();
+            SetUnsavedChanges(true);
+        }
+    } catch (const cppw::Sqlite3Exception& e) {
+        wxMessageBox(wxString("Error: ") + e.what());
+        m_top->Close(true);
+    }
+}
+
+void DataPanel::OnQuickFilterDelete(wxCommandEvent& WXUNUSED(event))
+{
+    auto curFilter = std::string(m_quickFilterCombo->GetValue().utf8_str());
+    if (curFilter == "") {
+        wxMessageBox("Error: No filter selected. Can not Delete");
+        return;
+    }
+    try {
+        wxMessageDialog dlg(
+            this, "Are you sure you want to delete the " + curFilter +
+            "filter?", wxMessageBoxCaptionStr, wxOK|wxCANCEL|wxRIGHT);
+        if (dlg.ShowModal() == wxID_OK) {
+            DeleteFilterFromDb();
+            //reuse old functions instead of risking bugs
+            m_quickFilterCombo->Clear();
+            m_quickFilterCombo->Append(GetFilterNames());
+            m_quickFilterCombo->ChangeValue("");
             SetUnsavedChanges(true);
         }
     } catch (const cppw::Sqlite3Exception& e) {
