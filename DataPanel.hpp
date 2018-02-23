@@ -100,6 +100,7 @@ private:
     void ShowSqliteBusyErrorBox();
     wxArrayString GetFilterNames();
     void ApplyQuickFilter();
+    void DeleteFilterFromDb();
 
     class CellColorInfo{
     public:

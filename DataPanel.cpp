@@ -1158,3 +1158,12 @@ void DataPanel::ApplyQuickFilter()
     }
     NewFilter(std::get<0>(filters), std::get<1>(filters));
 }
+
+void DataPanel::DeleteFilterFromDb()
+{
+    auto stmt = m_connection->PrepareStatement(
+        "delete from `SavedFilter` where `name` = ?");
+    stmt->Bind(1, m_quickFilterCombo->GetValue().utf8_str());
+    auto result = stmt->GetResults();
+    result->NextRow();
+}
