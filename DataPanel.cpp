@@ -50,6 +50,7 @@
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_TEXT_ENTER(ID_TITLE_FILTER_FIELD, DataPanel::OnTextEnter)
     EVT_BUTTON(ID_QUICK_FILTER_NEW, DataPanel::OnQuickFilterNew)
+    EVT_BUTTON(ID_QUICK_FILTER_OVERWRITE, DataPanel::OnQuickFilterOverwrite)
     EVT_BUTTON(ID_APPLY_FILTER_BTN, DataPanel::OnApplyFilter)
     EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnResetFilter)
     EVT_BUTTON(ID_ADV_FILTER_BTN, DataPanel::OnAdvFilter)
@@ -270,6 +271,32 @@ void DataPanel::OnQuickFilterNew(wxCommandEvent& WXUNUSED(event))
                 m_top->Close(true);
             }
         }
+    }
+}
+
+void DataPanel::OnQuickFilterOverwrite(wxCommandEvent& WXUNUSED(event))
+{
+    auto curFilter = std::string(m_quickFilterCombo->GetValue().utf8_str());
+    if (curFilter == "") {
+        wxMessageBox("Error: No filter selected. Can not overwrite");
+        return;
+    }
+    try {
+        wxMessageDialog dlg(
+            this, "Are you sure you want to overwrite the " +
+            curFilter + "filter with the current filter settings?",
+            wxMessageBoxCaptionStr, wxOK|wxCANCEL|wxRIGHT);
+        if (dlg.ShowModal() == wxID_OK) {
+            auto isDefault = m_defaultFilter == curFilter;
+            DeleteFilterFromDb();
+            InsertFiltersToDb(m_connection, curFilter, isDefault,
+                              m_basicFilterInfo.get(), m_advFilterInfo.get());
+            m_quickFilterCombo->RemoveSelection();
+            SetUnsavedChanges(true);
+        }
+    } catch (const cppw::Sqlite3Exception& e) {
+        wxMessageBox(wxString("Error: ") + e.what());
+        m_top->Close(true);
     }
 }
 

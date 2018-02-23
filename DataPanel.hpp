@@ -68,6 +68,7 @@ public:
 private:
     void OnTextEnter(wxCommandEvent& event);
     void OnQuickFilterNew(wxCommandEvent& event);
+    void OnQuickFilterOverwrite(wxCommandEvent& event);
     void OnApplyFilter(wxCommandEvent& event);
     void OnResetFilter(wxCommandEvent& event);
     void OnAdvFilter(wxCommandEvent& event);
