@@ -432,21 +432,19 @@ void DataPanel::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
 
 void DataPanel::OnGridColSort(wxGridEvent& event)
 {
-    int col = event.GetCol() + col::FIRST_VISIBLE_COL;
-    if(event.GetCol() == col::TITLE)
-        m_curOrderCol = std::string("nameSort") + " collate nocase ";
-    else
-        m_curOrderCol = std::to_string(col) + " collate nocase ";
-    if(m_curColSort == event.GetCol()){
-        m_curOrderDir = (m_curSortAsc ? " desc " : " asc ");
-        m_curSortAsc = !m_curSortAsc;
+    int col = event.GetCol();
+    std::string name;
+    if(event.GetCol() == col::TITLE) {
+        name = "nameSort";
+    } else {
+        name = colViewName[col];
     }
-    else{
-        m_curOrderDir = " asc ";
-        m_curSortAsc = true;
+    if (m_sortingRules.size() == 1 && m_sortingRules[0].name == name) {
+        m_sortingRules[0].asc = !m_sortingRules[0].asc;
+    } else {
+        m_sortingRules.clear();
+        m_sortingRules.emplace_back(name, true);
     }
-    m_curOrderCombined = m_curOrderCol + m_curOrderDir;
-    m_curColSort = event.GetCol();
     ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
 }
 
@@ -679,11 +677,11 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                             std::shared_ptr<AdvFilterInfo> newAdvFilterInfo, std::vector<wxString>* changedRows)
 //don't ever free changedRows
 {
-    try{
-        UpdateOldFilterData();
-        m_basicFilterInfo = newBasicFilterInfo;
-        m_advFilterInfo = newAdvFilterInfo;
+    UpdateOldFilterData();
+    m_basicFilterInfo = newBasicFilterInfo;
+    m_advFilterInfo = newAdvFilterInfo;
 
+    try{
         //setting up the where part of the sql statement to filter by watched statuses
         std::string watchedStatus = "idWatchedStatus";
         std::string releaseType = "idReleaseType";
@@ -799,7 +797,7 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         auto sqlStr = std::string(m_basicSelectString.utf8_str()) +
             " where 1=1 " + //just a dumb hack so I don't have to worry about when to start using 'and's and 'or's
             (showNothing ? " and 1 <> 1 " : statusStr.str()) + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") +
-            " order by " + m_curOrderCombined;
+            " order by " + CreateSortStr();
         auto statement = m_connection->PrepareStatement(sqlStr);
         std::string bindStr = "%" + newBasicFilterInfo->title + "%";
         statement->Bind(1, bindStr);
@@ -814,14 +812,6 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
     }
 }
 
-void DataPanel::SetSort(std::string sqlSortStr)
-{
-    m_curColSort = -1; //reset the current sorting column for the main view
-    m_curSortAsc = false; //reset the current sorting direction
-    m_curOrderCombined = sqlSortStr;
-    ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
-}
-
 void DataPanel::AppendStatusStr(std::stringstream& statusStr, std::string toAppend, bool& firstStatus)
 {
     if(!firstStatus)
@@ -831,6 +821,17 @@ void DataPanel::AppendStatusStr(std::stringstream& statusStr, std::string toAppe
         firstStatus = false;
     }
     statusStr << toAppend;
+}
+
+std::string DataPanel::CreateSortStr()
+{
+    std::string sortStr;
+    for(size_t i = 0; i < m_sortingRules.size(); ++i) {
+        sortStr += "`" + m_sortingRules[i].name + "` collate nocase " +
+            (m_sortingRules[i].asc ? "asc " : "desc ") +
+            (i + 1 == m_sortingRules.size() ? "" : ", ");
+    }
+    return sortStr;
 }
 
 void DataPanel::NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
@@ -843,6 +844,12 @@ void DataPanel::NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
     UpdateOldFilterData();
     ++m_commandLevel;
     HandleCommandChecking();
+}
+
+void DataPanel::SetSort(std::vector<colSort> sortingRules)
+{
+    m_sortingRules = sortingRules;
+    ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
 }
 
 void DataPanel::HandleCommandChecking()
@@ -941,11 +948,8 @@ void DataPanel::ResetPanel(cppw::Sqlite3Connection* connection)
     m_connection = connection;
     SetUnsavedChanges(false);
 
-    m_curOrderCol = " Title collate nocase ";
-    m_curOrderDir = " asc ";
-    m_curOrderCombined = m_curOrderCol + m_curOrderDir;
-    m_curColSort = col::TITLE;
-    m_curSortAsc = true;
+    m_sortingRules.clear();
+    m_sortingRules.emplace_back("nameSort", true);
 
     m_basicFilterInfo = nullptr;
     m_oldBasicFilterInfo = nullptr;

@@ -26,6 +26,7 @@
 #include "AppIDs.hpp"
 #include "SqlGridCommand.hpp"
 #include "FilterStructs.hpp"
+#include "SortStruct.hpp"
 
 namespace cppw { class Sqlite3Connection; }
 class MainFrame;
@@ -49,7 +50,7 @@ public:
     void SetAddedFilterRows(std::shared_ptr<std::vector<wxString>> changedRows);
     void NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                    std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
-    void SetSort(std::string  sqlSortStr);
+    void SetSort(std::vector<colSort> sortingRules);
     void SortByPronunciation(bool b);
 
     //This can't be done in the destructor for some reason or else it gets screwed up
@@ -87,6 +88,7 @@ private:
 
     void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
     void AppendStatusStr(std::stringstream& statusStr, std::string toAppend, bool& firstStatus);
+    std::string CreateSortStr();
     void HandleCommandChecking();
     void BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr);
     void HandleUndoRedoColorChange();
@@ -122,17 +124,13 @@ private:
     wxMenu* m_labelContextMenu = nullptr;
     wxString m_basicSelectString;
     cppw::Sqlite3Connection* m_connection;
-    std::string m_curOrderCol = " Title collate nocase ";
-    std::string m_curOrderDir = " asc ";
-    std::string m_curOrderCombined = m_curOrderCol + m_curOrderDir;
     std::vector<std::unique_ptr<SqlGridCommand>> m_commands;
     std::vector<wxString> m_allowedWatchedVals;
     std::vector<wxString> m_allowedReleaseVals;
     std::vector<wxString> m_allowedSeasonVals;
     int m_commandLevel = 0;
     bool m_colsCreated = false;
-    int m_curColSort = col::TITLE;
-    bool m_curSortAsc = true;
+    std::vector<colSort> m_sortingRules;
     bool m_unsavedChanges = false;
     bool m_firstDraw = true;
     std::shared_ptr<BasicFilterInfo> m_basicFilterInfo;

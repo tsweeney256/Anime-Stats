@@ -111,7 +111,9 @@ void AdvSortFrame::OnClose(wxCloseEvent& WXUNUSED(event))
 void AdvSortFrame::OnLeft(wxCommandEvent& WXUNUSED(event))
 {
     if(m_dontList->GetSelection() != wxNOT_FOUND){
-        m_toSort.emplace_back(m_dontList->GetString(m_dontList->GetSelection()), m_ascBtnRight->GetValue());
+        auto selectedName = m_dontList->GetString(m_dontList->GetSelection());
+        auto sortName = selectedName == "Title" ? "nameSort" : selectedName;
+        m_toSort.emplace_back(sortName, m_ascBtnRight->GetValue());
         auto nameStr = m_dontList->GetString((m_dontList->GetSelection()));
         auto ascStr = wxString((m_ascBtnRight->GetValue() ? "ASC" : "DESC"));
         wxString str = nameStr + "   " + ascStr;
@@ -123,7 +125,9 @@ void AdvSortFrame::OnLeft(wxCommandEvent& WXUNUSED(event))
 void AdvSortFrame::OnRight(wxCommandEvent& WXUNUSED(event))
 {
     if(m_sortList->GetSelection() != wxNOT_FOUND){
-        m_dontList->InsertItems(1, &(m_toSort[m_sortList->GetSelection()].name), m_dontList->GetCount());
+        auto toSortName = m_toSort[m_sortList->GetSelection()].name;
+        auto displayName = toSortName == "nameSort" ? "Title" : toSortName;
+        m_dontList->InsertItems(1, &displayName, m_dontList->GetCount());
         m_toSort.erase(m_toSort.begin() + m_sortList->GetSelection());
         m_sortList->Delete(m_sortList->GetSelection());
     }
@@ -192,14 +196,5 @@ void AdvSortFrame::UpDownCommon(int direction)
 
 void AdvSortFrame::ApplyOkCommon()
 {
-    if(m_sortList->GetCount()){
-        std::string sortStr;
-        for(unsigned int i = 0; i < m_sortList->GetCount(); ++i)
-            if(m_toSort[i].name == "Title")
-                sortStr += std::string("`nameSort` collate nocase ");
-            else
-                sortStr += std::string(std::string("`") + m_toSort[i].name.utf8_str()) + "` collate nocase " +
-                (m_toSort[i].asc ? " asc " : " desc ") + (i + 1 == m_sortList->GetCount() ? "" : ", ");
-        m_dataPanel->SetSort(sortStr);
-    }
+    m_dataPanel->SetSort(m_toSort);
 }
