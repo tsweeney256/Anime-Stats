@@ -44,6 +44,14 @@ public:
     void SetUnsavedChanges(bool);
     void Undo();
     void Redo();
+    void AddRow();
+    void DeleteRows();
+    void AliasTitle();
+    void EditTags();
+    void ApplyFilter();
+    void DefaultFilter();
+    void AdvFilter();
+    void AdvSort();
     void ClearCommandHistory();
     void ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                      std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
@@ -62,6 +70,8 @@ public:
     const std::vector<wxString>* GetAllowedReleaseVals();
     const std::vector<wxString>* GetAllowedSeasonVals();
     MainFrame* GetTop() const;
+    wxString GetSelectedFilterName();
+    void SetDefaultFilter(wxString name);
 
 private:
     void OnTextEnter(wxCommandEvent& event);
