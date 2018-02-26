@@ -163,7 +163,7 @@ using FilterTuple = std::tuple<std::shared_ptr<BasicFilterInfo>,
 FilterTuple GetFiltersFromDb(cppw::Sqlite3Connection* connection,
                  const wxString& filterName, const wxString& title);
 
-void InsertFiltersToDb(cppw::Sqlite3Connection* connection,
+int InsertFiltersToDb(cppw::Sqlite3Connection* connection,
                        const wxString& filterName,
                        bool defaultFilter,
                        BasicFilterInfo* basicFilterInfo,

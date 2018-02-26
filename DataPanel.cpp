@@ -245,11 +245,13 @@ void DataPanel::OnQuickFilterNew(wxCommandEvent& WXUNUSED(event))
         }
         try {
             auto isNewDefaultFilter = defaultBtn->GetValue();
-            InsertFiltersToDb(m_connection,
-                              nameCtrl->GetValue(),
-                              isNewDefaultFilter,
-                              m_basicFilterInfo.get(),
-                              m_advFilterInfo.get());
+            auto idSavedFilter= InsertFiltersToDb(
+                m_connection,
+                nameCtrl->GetValue(),
+                isNewDefaultFilter,
+                m_basicFilterInfo.get(),
+                m_advFilterInfo.get());
+            SaveSortToDb(m_connection, idSavedFilter, m_sortingRules);
             if (isNewDefaultFilter) {
                 auto stmt = m_connection->PrepareStatement(
                     "update `SavedFilter` set `default` = 0 "
@@ -289,8 +291,10 @@ void DataPanel::OnQuickFilterOverwrite(wxCommandEvent& WXUNUSED(event))
         if (dlg.ShowModal() == wxID_OK) {
             auto isDefault = m_defaultFilter == curFilter;
             DeleteFilterFromDb();
-            InsertFiltersToDb(m_connection, curFilter, isDefault,
-                              m_basicFilterInfo.get(), m_advFilterInfo.get());
+            auto idSavedFilter = InsertFiltersToDb(
+                m_connection, curFilter, isDefault,
+                m_basicFilterInfo.get(), m_advFilterInfo.get());
+            SaveSortToDb(m_connection, idSavedFilter, m_sortingRules);
             m_quickFilterCombo->RemoveSelection();
             SetUnsavedChanges(true);
         }

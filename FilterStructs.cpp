@@ -208,7 +208,7 @@ static void InsertFilterArg(cppw::Sqlite3Statement* stmt,
     result->NextRow();
 }
 
-void InsertFiltersToDb(cppw::Sqlite3Connection* connection,
+int InsertFiltersToDb(cppw::Sqlite3Connection* connection,
                        const wxString& filterName,
                        bool defaultFilter,
                        BasicFilterInfo* basicFilterInfo,
@@ -386,4 +386,5 @@ void InsertFiltersToDb(cppw::Sqlite3Connection* connection,
             InsertFilterArg(arg_stmt.get(), 48, a.dayFinishedHigh);
         }
     }
+    return idSavedFilter;
 }

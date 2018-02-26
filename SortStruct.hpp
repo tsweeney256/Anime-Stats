@@ -15,9 +15,19 @@
 
 #pragma once
 
+#include <vector>
+#include <wx/string.h>
+
+namespace cppw {
+    class Sqlite3Connection;
+}
+
 struct colSort
 {
     colSort(wxString name, bool asc) : name(name), asc(asc) {}
     wxString name;
     bool asc = true;
 };
+
+void SaveSortToDb(cppw::Sqlite3Connection* connection,
+                  int idSavedFilter, std::vector<colSort> sortingRules);

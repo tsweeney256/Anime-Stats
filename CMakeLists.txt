@@ -29,6 +29,7 @@ set(SOURCE_FILES
   Helpers.cpp
   MainFrame.cpp
   Settings.cpp
+  SortStruct.cpp
   SqlGridCommand.cpp
   SqlTitleAliasCommand.cpp
   TitleAliasDialog.cpp
