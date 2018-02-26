@@ -660,6 +660,7 @@ bool MainFrame::UpdateDb(int version)
     if (version == -1) {
         UpdateNegOneDb();
         updated = true;
+        version++;
     }
     for (int i = version; i < current_db_version; ++i) {
         wxString fileStr;
