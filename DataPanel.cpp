@@ -385,8 +385,8 @@ void DataPanel::OnQuickFilterOverwrite(wxCommandEvent& WXUNUSED(event))
     }
     try {
         wxMessageDialog dlg(
-            this, "Are you sure you want to overwrite the " +
-            curFilter + "filter with the current filter settings?",
+            this, "Are you sure you want to overwrite the \"" +
+            curFilter + "\" filter with the current filter settings?",
             wxMessageBoxCaptionStr, wxOK|wxCANCEL|wxRIGHT);
         if (dlg.ShowModal() == wxID_OK) {
             auto isDefault = m_defaultFilter == curFilter;
