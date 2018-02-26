@@ -31,3 +31,5 @@ struct colSort
 
 void SaveSortToDb(cppw::Sqlite3Connection* connection,
                   int idSavedFilter, std::vector<colSort> sortingRules);
+std::vector<colSort> LoadSortFromDb(cppw::Sqlite3Connection* connection,
+                                    int idSavedFilter);

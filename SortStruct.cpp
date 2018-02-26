@@ -53,3 +53,27 @@ void SaveSortToDb(cppw::Sqlite3Connection* connection,
         SaveSortEntryToDb(rule);
     }
 }
+
+static std::unique_ptr<cppw::Sqlite3Statement> selectStmt = nullptr;
+
+std::vector<colSort> LoadSortFromDb(cppw::Sqlite3Connection* connection,
+                                    int idSavedFilter)
+{
+    if (!selectStmt) {
+        selectStmt = connection->PrepareStatement(
+            "select `name`, `asc` from SavedFilterSort "
+            "inner join SavedFilterSortName "
+            "on SavedFilterSortName.idSavedFilterSortName = "
+            "SavedFilterSort.idSavedFilterSortName "
+            "where idSavedFilter = ? "
+            "order by idSavedFilterSort asc");
+    }
+    selectStmt->Reset();
+    selectStmt->Bind(1, idSavedFilter);
+    auto result = selectStmt->GetResults();
+    std::vector<colSort> ret;
+    while (result->NextRow()) {
+        ret.emplace_back(result->GetString(0), result->GetBool(1));
+    }
+    return ret;
+}

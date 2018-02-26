@@ -29,7 +29,9 @@ FilterTuple GetFiltersFromDb(cppw::Sqlite3Connection* connection,
     auto results = select_stmt->GetResults();
     //spooky scary ghosts ahead
     //were I a better person two years ago, I'd have used hash tables
+    int idFilter = 0;
     while (results->NextRow()) {
+        idFilter = results->GetInt(0);
         auto argId = results->GetInt(1);
         auto argVal = results->GetInt(2);
         if (results->IsNull(1)) {
@@ -189,7 +191,7 @@ FilterTuple GetFiltersFromDb(cppw::Sqlite3Connection* connection,
             break;
         }
     }
-    return FilterTuple(basicFilterInfo, advFilterInfo);
+    return FilterTuple(idFilter, basicFilterInfo, advFilterInfo);
 }
 
 static std::unique_ptr<cppw::Sqlite3Statement> filter_stmt = nullptr;

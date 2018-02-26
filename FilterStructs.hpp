@@ -157,7 +157,7 @@ private:
     AdvFilterInfo() {}
 };
 
-using FilterTuple = std::tuple<std::shared_ptr<BasicFilterInfo>,
+using FilterTuple = std::tuple<int, std::shared_ptr<BasicFilterInfo>,
                                std::shared_ptr<AdvFilterInfo>>;
 
 FilterTuple GetFiltersFromDb(cppw::Sqlite3Connection* connection,

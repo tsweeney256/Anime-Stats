@@ -1194,11 +1194,18 @@ void DataPanel::ApplyQuickFilter()
         filters = GetFiltersFromDb(m_connection,
                                    m_quickFilterCombo->GetValue(),
                                    m_titleFilterTextField->GetValue());
+        auto savedSort = LoadSortFromDb(m_connection,
+                                        std::get<0>(filters));
+        if (savedSort.size()) {
+            m_sortingRules = savedSort;
+        } else {
+            m_sortingRules = std::vector<colSort>(1, colSort("nameSort", true));
+        }
     } catch (const cppw::Sqlite3Exception& e) {
         wxMessageBox(e.what());
         m_top->Close(true);
     }
-    NewFilter(std::get<0>(filters), std::get<1>(filters));
+    NewFilter(std::get<1>(filters), std::get<2>(filters));
 }
 
 void DataPanel::DeleteFilterFromDb()
