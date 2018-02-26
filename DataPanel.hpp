@@ -46,10 +46,7 @@ public:
     void Redo();
     void ClearCommandHistory();
     void ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-                     std::shared_ptr<AdvFilterInfo> newAdvFilterInfo, std::vector<wxString>* changedRows = nullptr);
-    void SetAddedFilterRows(std::shared_ptr<std::vector<wxString>> changedRows);
-    void NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-                   std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
+                     std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
     void SetSort(std::vector<colSort> sortingRules);
     void SortByPronunciation(bool b);
 
@@ -93,7 +90,6 @@ private:
     void BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr);
     void HandleUndoRedoColorChange();
     void UpdateOldFilterData();
-    std::string GetAddedRowsSqlStr(std::vector<wxString>* changedRows);
     void UpdateCellColor(int row, int col);
     void UpdateNumericalCellColorInfo(int col);
     int GetColAggregate(std::string colName, std::string function);
@@ -135,10 +131,7 @@ private:
     bool m_firstDraw = true;
     std::shared_ptr<BasicFilterInfo> m_basicFilterInfo;
     std::shared_ptr<AdvFilterInfo> m_advFilterInfo;
-    std::shared_ptr<BasicFilterInfo> m_oldBasicFilterInfo;
-    std::shared_ptr<AdvFilterInfo> m_oldAdvFilterInfo;
     wxBoxSizer* m_panelSizer;
-    std::shared_ptr<std::vector<wxString>> m_changedRows; //managed by the command classes
     wxArrayString m_colList;
     CellColorInfo m_cellColorInfo[col::NUM_COLS];
     wxString m_defaultFilter;

@@ -215,11 +215,6 @@ void DataPanel::ClearCommandHistory()
     m_commandLevel = 0;
 }
 
-void DataPanel::SetAddedFilterRows(std::shared_ptr<std::vector<wxString> > changedRows)
-{
-    m_changedRows = changedRows;
-}
-
 void DataPanel::OnTextEnter(wxCommandEvent& WXUNUSED(event))
 {
     ApplyQuickFilter();
@@ -449,7 +444,7 @@ void DataPanel::OnGridColSort(wxGridEvent& event)
         m_sortingRules.clear();
         m_sortingRules.emplace_back(name, true);
     }
-    ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
+    ApplyFilter(m_basicFilterInfo, m_advFilterInfo);
 }
 
 void DataPanel::OnGridCellChanging(wxGridEvent& event)
@@ -459,8 +454,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
     //if adding a new entry
     if(event.GetRow() == m_grid->GetNumberRows()-1 && event.GetCol() == col::TITLE){
         try{
-            m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_grid, this, std::string(event.GetString().utf8_str()), 1,
-                                                                 m_changedRows));
+            m_commands.push_back(std::make_unique<InsertCommand>(m_connection, m_grid, this, std::string(event.GetString().utf8_str()), 1));
             AppendWriteProtectedRow(m_grid, col::TITLE+1, numViewCols, true);
 
         }catch(cppw::Sqlite3Exception& e){
@@ -508,7 +502,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
             }
 
             m_commands.push_back(std::make_unique<UpdateCommand>(m_connection, m_grid, this, idSeries, newVal, oldVal, col,
-                                                                 map, 1, m_changedRows));
+                                                                 map, 1));
 
         }catch(cppw::Sqlite3Exception& e){
             if(e.GetErrorCode() == SQLITE_BUSY){
@@ -678,13 +672,11 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 }
 
 void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-                            std::shared_ptr<AdvFilterInfo> newAdvFilterInfo, std::vector<wxString>* changedRows)
+                            std::shared_ptr<AdvFilterInfo> newAdvFilterInfo)
 //don't ever free changedRows
 {
-    UpdateOldFilterData();
     m_basicFilterInfo = newBasicFilterInfo;
     m_advFilterInfo = newAdvFilterInfo;
-
     try{
         //setting up the where part of the sql statement to filter by watched statuses
         std::string watchedStatus = "idWatchedStatus";
@@ -800,7 +792,7 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         }
         auto sqlStr = std::string(m_basicSelectString.utf8_str()) +
             " where 1=1 " + //just a dumb hack so I don't have to worry about when to start using 'and's and 'or's
-            (showNothing ? " and 1 <> 1 " : statusStr.str()) + (changedRows ? GetAddedRowsSqlStr(changedRows) : "") +
+            (showNothing ? " and 1 <> 1 " : statusStr.str()) +
             " order by " + CreateSortStr();
         auto statement = m_connection->PrepareStatement(sqlStr);
         std::string bindStr = "%" + newBasicFilterInfo->title + "%";
@@ -838,22 +830,10 @@ std::string DataPanel::CreateSortStr()
     return sortStr;
 }
 
-void DataPanel::NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-                          std::shared_ptr<AdvFilterInfo> newAdvFilterInfo)
-{
-    m_basicFilterInfo = newBasicFilterInfo;
-    m_advFilterInfo = newAdvFilterInfo;
-    m_commands.push_back(std::make_unique<FilterCommand>(this, m_basicFilterInfo, m_oldBasicFilterInfo,
-                                                         m_advFilterInfo, m_oldAdvFilterInfo, m_changedRows));
-    UpdateOldFilterData();
-    ++m_commandLevel;
-    HandleCommandChecking();
-}
-
 void DataPanel::SetSort(std::vector<colSort> sortingRules)
 {
     m_sortingRules = sortingRules;
-    ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
+    ApplyFilter(m_basicFilterInfo, m_advFilterInfo);
 }
 
 void DataPanel::HandleCommandChecking()
@@ -907,26 +887,6 @@ void DataPanel::HandleUndoRedoColorChange()
     m_grid->Refresh();
 }
 
-void DataPanel::UpdateOldFilterData()
-{
-    m_oldBasicFilterInfo = m_basicFilterInfo;
-    m_oldAdvFilterInfo = m_advFilterInfo;
-}
-
-std::string DataPanel::GetAddedRowsSqlStr(std::vector<wxString>* changedRows)
-{
-    std::string output;
-
-    if(changedRows && changedRows->size()){
-        output = " or (";
-        for(unsigned int i = 0; i < changedRows->size() - 1; ++i){
-            output += " rightSide.idSeries=" + std::string((*changedRows)[i].utf8_str()) + " or ";
-        }
-        output += " rightSide.idSeries=" + std::string(changedRows->back().utf8_str()) + ")";
-    }
-    return output;
-}
-
 void DataPanel::WriteSizesToSettings()
 {
     for(int i = 0; i < col::NUM_COLS - col::FIRST_VISIBLE_COL; ++i){
@@ -948,7 +908,6 @@ void DataPanel::ResetPanel(cppw::Sqlite3Connection* connection)
     m_titleFilterTextField->SetValue("");
     m_commands = std::vector<std::unique_ptr<SqlGridCommand>>();
     m_commandLevel = 0;
-    m_changedRows = nullptr;
     m_connection = connection;
     SetUnsavedChanges(false);
 
@@ -956,9 +915,7 @@ void DataPanel::ResetPanel(cppw::Sqlite3Connection* connection)
     m_sortingRules.emplace_back("nameSort", true);
 
     m_basicFilterInfo = nullptr;
-    m_oldBasicFilterInfo = nullptr;
-    m_oldBasicFilterInfo = nullptr;
-    m_oldAdvFilterInfo = nullptr;
+    m_advFilterInfo = nullptr;
     m_defaultFilter = "";
     m_quickFilterCombo->Clear();
     m_quickFilterCombo->Append(GetFilterNames());
@@ -1159,7 +1116,7 @@ void DataPanel::RefreshColColors(int col)
 
 void DataPanel::RefreshFilter()
 {
-    ApplyFilter(m_basicFilterInfo, m_advFilterInfo, m_changedRows.get());
+    ApplyFilter(m_basicFilterInfo, m_advFilterInfo);
 }
 
 void DataPanel::ShowSqliteBusyErrorBox()
@@ -1205,7 +1162,7 @@ void DataPanel::ApplyQuickFilter()
         wxMessageBox(e.what());
         m_top->Close(true);
     }
-    NewFilter(std::get<1>(filters), std::get<2>(filters));
+    ApplyFilter(std::get<1>(filters), std::get<2>(filters));
 }
 
 void DataPanel::DeleteFilterFromDb()
