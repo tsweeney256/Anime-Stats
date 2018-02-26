@@ -294,7 +294,7 @@ void DataPanel::ApplyFilter()
 
 void DataPanel::DefaultFilter()
 {
-    m_quickFilterCombo->ChangeValue(m_defaultFilter);
+    m_quickFilterCombo->SetValue(m_defaultFilter);
     ApplyQuickFilter();
 }
 
@@ -363,7 +363,7 @@ void DataPanel::OnQuickFilterNew(wxCommandEvent& WXUNUSED(event))
             //cheeky way of alphabetizing the combobox entries
             m_quickFilterCombo->Clear();
             m_quickFilterCombo->Append(GetFilterNames());
-            m_quickFilterCombo->ChangeValue(nameCtrl->GetValue());
+            m_quickFilterCombo->SetValue(nameCtrl->GetValue());
             SetUnsavedChanges(true);
         } catch (const cppw::Sqlite3Exception& e) {
             if (e.GetErrorCode() == SQLITE_CONSTRAINT) {
@@ -422,7 +422,7 @@ void DataPanel::OnQuickFilterDelete(wxCommandEvent& WXUNUSED(event))
             //reuse old functions instead of risking bugs
             m_quickFilterCombo->Clear();
             m_quickFilterCombo->Append(GetFilterNames());
-            m_quickFilterCombo->ChangeValue("");
+            m_quickFilterCombo->SetValue("");
             SetUnsavedChanges(true);
         }
     } catch (const cppw::Sqlite3Exception& e) {
@@ -970,7 +970,7 @@ void DataPanel::ResetPanel(cppw::Sqlite3Connection* connection)
     m_defaultFilter = "";
     m_quickFilterCombo->Clear();
     m_quickFilterCombo->Append(GetFilterNames());
-    m_quickFilterCombo->ChangeValue(m_defaultFilter);
+    m_quickFilterCombo->SetValue(m_defaultFilter);
 
     UpdateCellColorInfo();
     ApplyQuickFilter();
