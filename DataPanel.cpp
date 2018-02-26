@@ -1182,9 +1182,10 @@ wxArrayString DataPanel::GetFilterNames() {
             "order by name asc");
         auto qfResult = qfStmt->GetResults();
         while (qfResult->NextRow()) {
-            ret.Add(qfResult->GetString(0));
+            ret.Add(wxString::FromUTF8(qfResult->GetString(0).c_str()));
             if (qfResult->GetBool(1)) {
-                m_defaultFilter = qfResult->GetString(0);
+                m_defaultFilter =
+                    wxString::FromUTF8(qfResult->GetString(0).c_str());
             }
         }
     } catch (const cppw::Sqlite3Exception& e) {
