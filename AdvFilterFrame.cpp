@@ -702,5 +702,5 @@ void AdvFilterFrame::ApplyFilter()
     adv->monthFinishedHigh = m_finishMonthHigh->GetValue();
     adv->dayFinishedHigh = m_finishDayHigh->GetValue();
 
-    m_parent->NewFilter(basic, adv);
+    m_parent->ApplyFilter(basic, adv);
 }

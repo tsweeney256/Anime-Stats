@@ -26,6 +26,7 @@
 #include "AppIDs.hpp"
 #include "SqlGridCommand.hpp"
 #include "FilterStructs.hpp"
+#include "SortStruct.hpp"
 
 namespace cppw { class Sqlite3Connection; }
 class MainFrame;
@@ -45,11 +46,8 @@ public:
     void Redo();
     void ClearCommandHistory();
     void ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-                     std::shared_ptr<AdvFilterInfo> newAdvFilterInfo, std::vector<wxString>* changedRows = nullptr);
-    void SetAddedFilterRows(std::shared_ptr<std::vector<wxString>> changedRows);
-    void NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-                   std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
-    void SetSort(std::string  sqlSortStr);
+                     std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
+    void SetSort(std::vector<colSort> sortingRules);
     void SortByPronunciation(bool b);
 
     //This can't be done in the destructor for some reason or else it gets screwed up
@@ -66,11 +64,12 @@ public:
     MainFrame* GetTop() const;
 
 private:
-    void OnCheckAllBtn(wxCommandEvent& event);
-    void OnUncheckAllBtn(wxCommandEvent& event);
     void OnTextEnter(wxCommandEvent& event);
+    void OnQuickFilterNew(wxCommandEvent& event);
+    void OnQuickFilterOverwrite(wxCommandEvent& event);
+    void OnQuickFilterDelete(wxCommandEvent& event);
     void OnApplyFilter(wxCommandEvent& event);
-    void OnResetFilter(wxCommandEvent& event);
+    void OnDefaultFilter(wxCommandEvent& event);
     void OnAdvFilter(wxCommandEvent& event);
     void OnAdvSort(wxCommandEvent& event);
     void OnEditTags(wxCommandEvent& event);
@@ -86,20 +85,20 @@ private:
 
     void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
     void AppendStatusStr(std::stringstream& statusStr, std::string toAppend, bool& firstStatus);
-    void ApplyFullGrid();
-    void NewBasicFilter();
+    std::string CreateSortStr();
     void HandleCommandChecking();
     void BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr);
     void HandleUndoRedoColorChange();
     void UpdateOldFilterData();
-    std::string GetAddedRowsSqlStr(std::vector<wxString>* changedRows);
-    void ResetFilterGui();
     void UpdateCellColor(int row, int col);
     void UpdateNumericalCellColorInfo(int col);
     int GetColAggregate(std::string colName, std::string function);
     int GetColMedian(const std::string& colName);
     void RefreshColColors(int col);
     void ShowSqliteBusyErrorBox();
+    wxArrayString GetFilterNames();
+    void ApplyQuickFilter();
+    void DeleteFilterFromDb();
 
     class CellColorInfo{
     public:
@@ -114,39 +113,28 @@ private:
     MainFrame* m_top;
     wxGrid* m_grid;
     Settings* m_settings;
-    wxCheckBox* m_watchedCheck;
-    wxCheckBox* m_watchingCheck;
-    wxCheckBox* m_stalledCheck;
-    wxCheckBox* m_droppedCheck;
-    wxCheckBox* m_blankCheck;
-    wxCheckBox* m_toWatchCheck;
+    wxComboBox* m_quickFilterCombo;
     wxButton* m_advFilterButton;
     wxButton* m_advSortButton;
     wxTextCtrl* m_titleFilterTextField;
     wxMenu* m_labelContextMenu = nullptr;
     wxString m_basicSelectString;
     cppw::Sqlite3Connection* m_connection;
-    std::string m_curOrderCol = " Title collate nocase ";
-    std::string m_curOrderDir = " asc ";
-    std::string m_curOrderCombined = m_curOrderCol + m_curOrderDir;
     std::vector<std::unique_ptr<SqlGridCommand>> m_commands;
     std::vector<wxString> m_allowedWatchedVals;
     std::vector<wxString> m_allowedReleaseVals;
     std::vector<wxString> m_allowedSeasonVals;
     int m_commandLevel = 0;
     bool m_colsCreated = false;
-    int m_curColSort = col::TITLE;
-    bool m_curSortAsc = true;
+    std::vector<colSort> m_sortingRules;
     bool m_unsavedChanges = false;
     bool m_firstDraw = true;
     std::shared_ptr<BasicFilterInfo> m_basicFilterInfo;
     std::shared_ptr<AdvFilterInfo> m_advFilterInfo;
-    std::shared_ptr<BasicFilterInfo> m_oldBasicFilterInfo;
-    std::shared_ptr<AdvFilterInfo> m_oldAdvFilterInfo;
     wxBoxSizer* m_panelSizer;
-    std::shared_ptr<std::vector<wxString>> m_changedRows; //managed by the command classes
     wxArrayString m_colList;
     CellColorInfo m_cellColorInfo[col::NUM_COLS];
+    wxString m_defaultFilter;
 
     DECLARE_EVENT_TABLE()
 };

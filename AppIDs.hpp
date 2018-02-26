@@ -54,8 +54,10 @@ enum
     //this way we ensure we never collide with whatever IDs the library itself makes
     ID_DATA_GRID = wxID_HIGHEST + 1,
     ID_NOTEBOOK,
-    ID_CHECK_ALL_BTN,
-    ID_UNCHECK_ALL_BTN,
+    ID_QUICK_FILTER_COMBO,
+    ID_QUICK_FILTER_NEW,
+    ID_QUICK_FILTER_OVERWRITE,
+    ID_QUICK_FILTER_DELETE,
     ID_APPLY_FILTER_BTN,
     ID_RESET_FILTER_BTN,
     ID_ADV_FILTER_BTN,

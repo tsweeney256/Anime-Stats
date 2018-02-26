@@ -20,6 +20,7 @@
 #include <wx/frame.h>
 #include <wx/listbox.h>
 #include <wx/radiobut.h>
+#include "SortStruct.hpp"
 
 class AdvSortFrame : public wxFrame
 {
@@ -40,13 +41,6 @@ private:
 
     void UpDownCommon(int direction); //direction being positive or negative 1
     void ApplyOkCommon();
-
-    struct colSort
-    {
-        colSort(wxString name, bool asc) : name(name), asc(asc) {}
-        wxString name;
-        bool asc = true;
-    };
 
     DataPanel* m_dataPanel;
     wxListBox* m_sortList;

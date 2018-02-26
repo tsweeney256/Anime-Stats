@@ -119,28 +119,9 @@ InsertIntoTag(const TagArray& tags, const std::string& idSeries)
     }
 }
 
-InsertableOrUpdatable::InsertableOrUpdatable(DataPanel* dataPanel,
-                                             std::shared_ptr<std::vector<wxString> > addedRowIDs, int label, int64_t idSeries)
-    : m_idLabel(label), m_idSeries(idSeries), m_dataPanel(dataPanel), m_addedRowIDs(addedRowIDs) {}
-
-void InsertableOrUpdatable::AddRowIDToFilterList()
-{
-    //this will only be null on the starting screen which should show every entry anyway
-    if(m_addedRowIDs){
-        wxString temp;
-        temp << m_idSeries;
-        m_addedRowIDs->push_back(temp);
-    }
-}
-
-void InsertableOrUpdatable::RemoveRowIDFromFilterList()
-{
-    if(m_addedRowIDs){
-        wxString temp;
-        temp << m_idSeries;
-        std::remove(m_addedRowIDs->begin(), m_addedRowIDs->end(), temp);
-    }
-}
+InsertableOrUpdatable::InsertableOrUpdatable(
+    DataPanel* dataPanel, int label, int64_t idSeries)
+    : m_idLabel(label), m_idSeries(idSeries), m_dataPanel(dataPanel) {}
 
 void InsertableOrUpdatable::CheckIfLegalTitle(cppw::Sqlite3Connection* connection, const std::string& title)
 {
@@ -170,9 +151,10 @@ void InsertableOrUpdatable::CheckIfLegalTitle(cppw::Sqlite3Connection* connectio
     //return true
 }
 
-InsertCommand::InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, std::string title,
-                             int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs)
-    : InsertDeleteCommand(connection, grid), InsertableOrUpdatable(dataPanel, addedRowIDs, idLabel), m_title(title)
+InsertCommand::InsertCommand(
+    cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel,
+    std::string title, int idLabel)
+    : InsertDeleteCommand(connection, grid), InsertableOrUpdatable(dataPanel, idLabel), m_title(title)
 {
     CheckIfLegalTitle(m_connection, title); //throws and cancels the construction if not legal
     //ExecuteCommon uses the m_titles vector, not the singular m_title
@@ -216,7 +198,6 @@ void InsertCommand::UnExecute()
         m_grid->DeleteRows(rowId);
         m_grid->SetRowLabelValue(m_grid->GetNumberRows()-1, "*");
     }
-    RemoveRowIDFromFilterList();
 }
 
 void InsertCommand::ExecuteCommon()
@@ -229,8 +210,6 @@ void InsertCommand::ExecuteCommon()
     m_idSeries = m_connection->GetLastInsertRowID();
     InsertIntoTitle(m_titles, std::to_string(m_idSeries));
     InsertIntoTag(m_tags, std::to_string(m_idSeries));
-    AddRowIDToFilterList();
-    m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
 }
 
 DeleteCommand::DeleteCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, std::vector<int64_t> idSeries)
@@ -340,9 +319,8 @@ void DeleteCommand::ExecuteCommon()
 }
 
 UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries,
-                             std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map, int label,
-                             std::shared_ptr<std::vector<wxString>> addedRowIDs)
-    : SqlGridCommand(connection, grid), InsertableOrUpdatable(dataPanel, addedRowIDs, label, idSeries),
+                             std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map, int label)
+    : SqlGridCommand(connection, grid), InsertableOrUpdatable(dataPanel, label, idSeries),
       m_newVal(newVal), m_oldVal(oldVal), m_col(wxGridCol), m_map(map)
 {
     if(m_col == col::TITLE)
@@ -351,15 +329,12 @@ UpdateCommand::UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, 
         CheckIfLegalPronunciation(m_newVal);
     }
     ExecutionCommon(m_newVal);
-    AddRowIDToFilterList();
 }
 
 void UpdateCommand::Execute()
 {
     wxGridUpdateLocker lock(m_grid);
     ExecutionCommon(m_newVal);
-    AddRowIDToFilterList();
-    m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
     auto row = GetRowWithIdSeries(m_idSeries);
     if (row < 0) {
         MakeRowVisible();
@@ -374,7 +349,6 @@ void UpdateCommand::UnExecute()
 {
     wxGridUpdateLocker lock(m_grid);
     ExecutionCommon(m_oldVal);
-    RemoveRowIDFromFilterList();
     auto row = GetRowWithIdSeries(m_idSeries);
     if (row < 0) {
         MakeRowVisible();
@@ -479,26 +453,4 @@ std::string UpdateCommand::GetIdName()
     auto result = m_selectIdTitleStmt->GetResults();
     result->NextRow();
     return result->GetString(0);
-}
-
-FilterCommand::FilterCommand(DataPanel* dataPanel, std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-                             std::shared_ptr<BasicFilterInfo> oldBasicFilterInfo, std::shared_ptr<AdvFilterInfo> newAdvFilterInfo,
-                             std::shared_ptr<AdvFilterInfo> oldAdvFilterInfo, std::shared_ptr<std::vector<wxString>> addedRowIDs)
-    : SqlGridCommand(nullptr, nullptr), m_dataPanel(dataPanel), m_newBasicFilterInfo(newBasicFilterInfo),
-      m_oldBasicFilterInfo(oldBasicFilterInfo), m_newAdvFilterInfo(newAdvFilterInfo),
-      m_oldAdvFilterInfo(oldAdvFilterInfo), m_addedRowIDs(addedRowIDs)
-{
-    Execute();
-}
-
-void FilterCommand::Execute()
-{
-    m_dataPanel->ApplyFilter(m_newBasicFilterInfo, m_newAdvFilterInfo);
-    m_dataPanel->SetAddedFilterRows(std::make_shared<std::vector<wxString>>());
-}
-
-void FilterCommand::UnExecute()
-{
-    m_dataPanel->ApplyFilter(m_oldBasicFilterInfo, m_oldAdvFilterInfo, m_addedRowIDs.get());
-    m_dataPanel->SetAddedFilterRows(m_addedRowIDs);
 }

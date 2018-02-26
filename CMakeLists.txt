@@ -25,9 +25,11 @@ set(SOURCE_FILES
   CustomGridCellEditors.cpp
   DataPanel.cpp
   EditTagDialog.cpp
+  FilterStructs.cpp
   Helpers.cpp
   MainFrame.cpp
   Settings.cpp
+  SortStruct.cpp
   SqlGridCommand.cpp
   SqlTitleAliasCommand.cpp
   TitleAliasDialog.cpp

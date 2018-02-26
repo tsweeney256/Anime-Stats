@@ -67,20 +67,17 @@ class InsertableOrUpdatable
 {
 public:
     InsertableOrUpdatable() = delete;
-    InsertableOrUpdatable(DataPanel* dataPanel,
-                          std::shared_ptr<std::vector<wxString>> addedRowIDs, int label, int64_t idSeries = -1);
+    InsertableOrUpdatable(
+        DataPanel* dataPanel, int label, int64_t idSeries = -1);
     virtual ~InsertableOrUpdatable() = default;
 
 protected:
     virtual void AbstractDummy() = 0; //just to keep the class abstract
-    void AddRowIDToFilterList();
-    void RemoveRowIDFromFilterList();
     void CheckIfLegalTitle(cppw::Sqlite3Connection* connection, const std::string& title);
 
     int m_idLabel;
     int64_t m_idSeries;
     DataPanel* m_dataPanel;
-    std::shared_ptr<std::vector<wxString>> m_addedRowIDs;
 };
 
 class InsertCommand : public InsertDeleteCommand, public InsertableOrUpdatable
@@ -88,7 +85,7 @@ class InsertCommand : public InsertDeleteCommand, public InsertableOrUpdatable
 public:
     InsertCommand() = delete;
     InsertCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, std::string title,
-                  int idLabel, std::shared_ptr<std::vector<wxString>> addedRowIDs); //updates the database upon construction
+                  int idLabel); //updates the database upon construction
     void Execute() override;
     void UnExecute() override;
 
@@ -130,8 +127,7 @@ class UpdateCommand : public SqlGridCommand, public InsertableOrUpdatable
 public:
     UpdateCommand() = delete;
     UpdateCommand(cppw::Sqlite3Connection* connection, wxGrid* grid, DataPanel* dataPanel, int64_t idSeries,
-                  std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map, int label,
-                  std::shared_ptr<std::vector<wxString>> addedRowIDs);
+                  std::string newVal, std::string oldVal, int wxGridCol, const std::vector<wxString>* map, int label);
     void Execute() override;
     void UnExecute() override;
 
@@ -147,25 +143,6 @@ private:
     std::string m_oldVal;
     int m_col;
     const std::vector<wxString>* m_map;
-};
-
-class FilterCommand : public SqlGridCommand
-{
-public:
-    FilterCommand() = delete;
-    FilterCommand(DataPanel* dataPanel, std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-                  std::shared_ptr<BasicFilterInfo> oldBasicFilterInfo, std::shared_ptr<AdvFilterInfo> newAdvFilterInfo,
-                  std::shared_ptr<AdvFilterInfo> oldAdvFilterInfo, std::shared_ptr<std::vector<wxString>> addedRowIDs);
-    void Execute() override;
-    void UnExecute() override;
-
-private:
-    DataPanel* m_dataPanel;
-    std::shared_ptr<BasicFilterInfo> m_newBasicFilterInfo;
-    std::shared_ptr<BasicFilterInfo> m_oldBasicFilterInfo;
-    std::shared_ptr<AdvFilterInfo> m_newAdvFilterInfo;
-    std::shared_ptr<AdvFilterInfo> m_oldAdvFilterInfo;
-    std::shared_ptr<std::vector<wxString>> m_addedRowIDs;
 };
 
 class SqlGridCommandException : public std::exception { protected: virtual void AbstractDummy() = 0; };
