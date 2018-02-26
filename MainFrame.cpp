@@ -57,6 +57,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(DEFAULT_FILTER, MainFrame::OnDefaultFilter)
     EVT_MENU(ADV_FILTER, MainFrame::OnAdvFilter)
     EVT_MENU(ADV_SORT, MainFrame::OnAdvSort)
+    EVT_MENU(MAKE_DEFAULT_FILTER, MainFrame::OnMakeDefaultFilter)
     EVT_MENU(DEFAULT_DB_ASK, MainFrame::OnDefaultDbAsk)
     EVT_MENU(DEFAULT_DB, MainFrame::OnDefaultDb)
     EVT_MENU(COLOR_OPTIONS, MainFrame::OnColorOptions)
@@ -144,6 +145,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     filterMenu->Append(DEFAULT_FILTER, _("Default Filter\tCTRL+d"));
     filterMenu->Append(ADV_FILTER, _("Advanced Filter\tCTRL+SHIFT+f"));
     filterMenu->Append(ADV_SORT, _("Advanced Sort\tCTRL+SHIFT+s"));
+    filterMenu->Append(MAKE_DEFAULT_FILTER, _("Make Default Filter"),
+                       _("Will make the currently selected filter the default"));
 
     auto helpMenu = new wxMenu;
     helpMenu->Append(wxID_ABOUT);
@@ -273,6 +276,28 @@ void MainFrame::OnAdvFilter(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnAdvSort(wxCommandEvent& WXUNUSED(event))
 {
     m_dataPanel->AdvSort();
+}
+
+void MainFrame::OnMakeDefaultFilter(wxCommandEvent& WXUNUSED(event))
+{
+    try {
+        auto curFilter = m_dataPanel->GetSelectedFilterName();
+        if (curFilter == "") {
+            wxMessageBox("No filter selected");
+            return;
+        }
+        auto stmt = m_connection->PrepareStatement(
+            "update SavedFilter set `default` = 1 where `name` = ?");
+        stmt->Bind(1, curFilter.utf8_str());
+        auto result = stmt->GetResults();
+        result->NextRow();
+        m_dataPanel->SetUnsavedChanges(true);
+        m_dataPanel->SetDefaultFilter(curFilter);
+        wxMessageBox("The default filter is now \"" + curFilter + "\"");
+    } catch (const cppw::Sqlite3Exception& e) {
+        wxMessageBox(e.what());
+        Close(true);
+    }
 }
 
 void MainFrame::OnDefaultDbAsk(wxCommandEvent& event)

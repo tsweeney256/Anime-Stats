@@ -994,6 +994,16 @@ MainFrame* DataPanel::GetTop() const
     return m_top;
 }
 
+wxString DataPanel::GetSelectedFilterName()
+{
+    return m_quickFilterCombo->GetValue();
+}
+
+void DataPanel::SetDefaultFilter(wxString name)
+{
+    m_defaultFilter = name;
+}
+
 void DataPanel::UpdateCellColor(int row, int col)
 {
     if(col != col::ID_SERIES){

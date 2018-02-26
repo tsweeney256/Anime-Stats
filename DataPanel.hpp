@@ -70,6 +70,8 @@ public:
     const std::vector<wxString>* GetAllowedReleaseVals();
     const std::vector<wxString>* GetAllowedSeasonVals();
     MainFrame* GetTop() const;
+    wxString GetSelectedFilterName();
+    void SetDefaultFilter(wxString name);
 
 private:
     void OnTextEnter(wxCommandEvent& event);

@@ -44,6 +44,7 @@ private:
     void OnDefaultFilter(wxCommandEvent& event);
     void OnAdvFilter(wxCommandEvent& event);
     void OnAdvSort(wxCommandEvent& event);
+    void OnMakeDefaultFilter(wxCommandEvent& event);
     void OnDefaultDbAsk(wxCommandEvent& event);
     void OnDefaultDb(wxCommandEvent& event);
     void OnNew(wxCommandEvent& event);
@@ -89,7 +90,8 @@ private:
         APPLY_FILTER,
         DEFAULT_FILTER,
         ADV_FILTER,
-        ADV_SORT
+        ADV_SORT,
+        MAKE_DEFAULT_FILTER
     };
 };
 
