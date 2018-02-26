@@ -164,8 +164,7 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     //
     //Misc initializations
     //
-    m_basicFilterInfo = BasicFilterInfo::MakeShared(); //already initialized how we want it
-    m_oldBasicFilterInfo = BasicFilterInfo::MakeShared();
+    ApplyQuickFilter();
 }
 
 bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
@@ -220,18 +219,18 @@ void DataPanel::SetAddedFilterRows(std::shared_ptr<std::vector<wxString> > chang
 
 void DataPanel::OnTextEnter(wxCommandEvent& WXUNUSED(event))
 {
-    NewBasicFilter();
+    ApplyQuickFilter();
 }
 
 void DataPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
 {
-    NewBasicFilter();
+    ApplyQuickFilter();
 }
 
 void DataPanel::OnResetFilter(wxCommandEvent& WXUNUSED(event))
 {
     ResetFilterGui();
-    NewBasicFilter();
+    ApplyQuickFilter();
 }
 
 void DataPanel::OnAdvFilter(wxCommandEvent& WXUNUSED(event))
@@ -760,13 +759,6 @@ void DataPanel::NewFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
     HandleCommandChecking();
 }
 
-void DataPanel::NewBasicFilter()
-{
-    m_basicFilterInfo = BasicFilterInfo::MakeShared();
-    m_basicFilterInfo->title = std::string(m_titleFilterTextField->GetValue().utf8_str());
-    NewFilter(m_basicFilterInfo, nullptr);
-}
-
 void DataPanel::HandleCommandChecking()
 {
     if(m_commandLevel != static_cast<int>(m_commands.size())){
@@ -1100,4 +1092,18 @@ wxArrayString DataPanel::GetFilterNames() {
         m_top->Close(true);
     }
     return ret;
+}
+
+void DataPanel::ApplyQuickFilter()
+{
+    FilterTuple filters;
+    try {
+        filters = GetFiltersFromDb(m_connection,
+                                   m_quickFilterCombo->GetValue(),
+                                   m_titleFilterTextField->GetValue());
+    } catch (const cppw::Sqlite3Exception& e) {
+        wxMessageBox(e.what());
+        m_top->Close(true);
+    }
+    NewFilter(std::get<0>(filters), std::get<1>(filters));
 }
