@@ -491,6 +491,15 @@ void DataPanel::OnGridColSort(wxGridEvent& event)
 
 void DataPanel::OnGridCellChanging(wxGridEvent& event)
 {
+    //because wxGrid will select the first column upon presisng C-home
+    //even if it is hidden, because that is a very rational design choice.
+    //catching EVT_GRID_SELECT_CELL doesnt work for some reason ever after
+    //forcing it to select the TITLE cell. it just selects the ID_SERIES
+    //cell on the next row upon trying to edit the newly selected cell
+    if (event.GetCol() == col::ID_SERIES) {
+        event.Veto();
+        return;
+    }
     bool successfulEdit = true;
 
     //if adding a new entry
