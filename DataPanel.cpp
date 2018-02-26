@@ -385,8 +385,9 @@ void DataPanel::OnQuickFilterOverwrite(wxCommandEvent& WXUNUSED(event))
     }
     try {
         wxMessageDialog dlg(
-            this, "Are you sure you want to overwrite the " +
-            curFilter + "filter with the current filter settings?",
+            this, "Are you sure you want to overwrite the \"" +
+            wxString::FromUTF8(curFilter.c_str()) +
+            "\" filter with the current filter settings?",
             wxMessageBoxCaptionStr, wxOK|wxCANCEL|wxRIGHT);
         if (dlg.ShowModal() == wxID_OK) {
             auto isDefault = m_defaultFilter == curFilter;
@@ -413,8 +414,9 @@ void DataPanel::OnQuickFilterDelete(wxCommandEvent& WXUNUSED(event))
     }
     try {
         wxMessageDialog dlg(
-            this, "Are you sure you want to delete the " + curFilter +
-            "filter?", wxMessageBoxCaptionStr, wxOK|wxCANCEL|wxRIGHT);
+            this, "Are you sure you want to delete the \"" +
+            wxString::FromUTF8(curFilter.c_str()) +
+            "\" filter?", wxMessageBoxCaptionStr, wxOK|wxCANCEL|wxRIGHT);
         if (dlg.ShowModal() == wxID_OK) {
             DeleteFilterFromDb();
             //reuse old functions instead of risking bugs
@@ -489,6 +491,15 @@ void DataPanel::OnGridColSort(wxGridEvent& event)
 
 void DataPanel::OnGridCellChanging(wxGridEvent& event)
 {
+    //because wxGrid will select the first column upon presisng C-home
+    //even if it is hidden, because that is a very rational design choice.
+    //catching EVT_GRID_SELECT_CELL doesnt work for some reason ever after
+    //forcing it to select the TITLE cell. it just selects the ID_SERIES
+    //cell on the next row upon trying to edit the newly selected cell
+    if (event.GetCol() == col::ID_SERIES) {
+        event.Veto();
+        return;
+    }
     bool successfulEdit = true;
 
     //if adding a new entry
@@ -1182,9 +1193,10 @@ wxArrayString DataPanel::GetFilterNames() {
             "order by name asc");
         auto qfResult = qfStmt->GetResults();
         while (qfResult->NextRow()) {
-            ret.Add(qfResult->GetString(0));
+            ret.Add(wxString::FromUTF8(qfResult->GetString(0).c_str()));
             if (qfResult->GetBool(1)) {
-                m_defaultFilter = qfResult->GetString(0);
+                m_defaultFilter =
+                    wxString::FromUTF8(qfResult->GetString(0).c_str());
             }
         }
     } catch (const cppw::Sqlite3Exception& e) {
