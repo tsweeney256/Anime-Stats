@@ -49,6 +49,14 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
     EVT_MENU(wxID_UNDO, MainFrame::OnUndo)
     EVT_MENU(wxID_REDO, MainFrame::OnRedo)
+    EVT_MENU(ADD_ROW, MainFrame::OnAddRow)
+    EVT_MENU(DELETE_ROWS, MainFrame::OnDeleteRows)
+    EVT_MENU(ALIAS_TITLE, MainFrame::OnAliasTitle)
+    EVT_MENU(EDIT_TAGS, MainFrame::OnEditTags)
+    EVT_MENU(APPLY_FILTER, MainFrame::OnApplyFilter)
+    EVT_MENU(DEFAULT_FILTER, MainFrame::OnDefaultFilter)
+    EVT_MENU(ADV_FILTER, MainFrame::OnAdvFilter)
+    EVT_MENU(ADV_SORT, MainFrame::OnAdvSort)
     EVT_MENU(DEFAULT_DB_ASK, MainFrame::OnDefaultDbAsk)
     EVT_MENU(DEFAULT_DB, MainFrame::OnDefaultDb)
     EVT_MENU(COLOR_OPTIONS, MainFrame::OnColorOptions)
@@ -120,6 +128,10 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     auto editMenu = new wxMenu;
     editMenu->Append(wxID_UNDO);
     editMenu->Append(wxID_REDO);
+    editMenu->Append(ADD_ROW, _("Add Row\tCTRL+Enter"));
+    editMenu->Append(DELETE_ROWS, _("Delete Rows\tCTRL+Del"));
+    editMenu->Append(ALIAS_TITLE, _("Alias Title\tCTRL+t"));
+    editMenu->Append(EDIT_TAGS, _("Edit Tags\tCTRL+SHIFT+t"));
     m_preferencesMenu = new wxMenu;
     m_preferencesMenu->Append(DEFAULT_DB_ASK, _("Always ask to change default database"),
                               _("Toggle whether or not you get asked to change your default database when you open a new one."), wxITEM_CHECK);
@@ -127,11 +139,18 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     m_preferencesMenu->Append(COLOR_OPTIONS, _("Grid Colors"), _("Change what colors the grid uses."));
     editMenu->AppendSubMenu(m_preferencesMenu, _("Preferences"));
 
+    auto filterMenu = new wxMenu;
+    filterMenu->Append(APPLY_FILTER, _("Apply Filter\tCTRL+SHIFT+Enter"));
+    filterMenu->Append(DEFAULT_FILTER, _("Default Filter\tCTRL+d"));
+    filterMenu->Append(ADV_FILTER, _("Advanced Filter\tCTRL+SHIFT+f"));
+    filterMenu->Append(ADV_SORT, _("Advanced Sort\tCTRL+SHIFT+s"));
+
     auto helpMenu = new wxMenu;
     helpMenu->Append(wxID_ABOUT);
 
     menuBar->Append(m_fileMenu, _("&File"));
     menuBar->Append(editMenu, _("&Edit"));
+    menuBar->Append(filterMenu, _("Fi&lter"));
     menuBar->Append(helpMenu, _("&Help"));
 
     //
@@ -215,6 +234,46 @@ void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnUndo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Undo(); }
 
 void MainFrame::OnRedo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Redo(); }
+
+void MainFrame::OnAddRow(wxCommandEvent& WXUNUSED(event))
+{
+    m_dataPanel->AddRow();
+}
+
+void MainFrame::OnDeleteRows(wxCommandEvent& WXUNUSED(event))
+{
+    m_dataPanel->DeleteRows();
+}
+
+void MainFrame::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
+{
+    m_dataPanel->AliasTitle();
+}
+
+void MainFrame::OnEditTags(wxCommandEvent& WXUNUSED(event))
+{
+    m_dataPanel->EditTags();
+}
+
+void MainFrame::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
+{
+    m_dataPanel->ApplyFilter();
+}
+
+void MainFrame::OnDefaultFilter(wxCommandEvent& WXUNUSED(event))
+{
+    m_dataPanel->DefaultFilter();
+}
+
+void MainFrame::OnAdvFilter(wxCommandEvent& WXUNUSED(event))
+{
+    m_dataPanel->AdvFilter();
+}
+
+void MainFrame::OnAdvSort(wxCommandEvent& WXUNUSED(event))
+{
+    m_dataPanel->AdvSort();
+}
 
 void MainFrame::OnDefaultDbAsk(wxCommandEvent& event)
 {

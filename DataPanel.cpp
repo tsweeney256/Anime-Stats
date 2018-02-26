@@ -209,6 +209,111 @@ void DataPanel::Redo()
     }
 }
 
+void DataPanel::AddRow()
+{
+    m_grid->GoToCell(m_grid->GetNumberRows()-1, col::TITLE);
+    m_grid->EnableCellEditControl(true);
+}
+
+void DataPanel::DeleteRows()
+{
+    auto rows = m_grid->GetSelectedRows();
+    if (rows.GetCount() > 0) {
+        std::vector<int64_t> idSeries;
+        for(unsigned int i = 0; i < rows.GetCount(); ++i){
+            auto idSeriesStr = m_grid->GetCellValue(rows.Item(i), col::ID_SERIES);
+            if(idSeriesStr.compare("")) //ignore the last row
+                idSeries.push_back(strtoll(idSeriesStr, nullptr, 10));
+        }
+        try{
+            m_commands.push_back(std::make_unique<DeleteCommand>(m_connection, m_grid, idSeries));
+
+        }catch(cppw::Sqlite3Exception& e){
+            if(e.GetErrorCode() == SQLITE_BUSY){
+                ShowSqliteBusyErrorBox();
+                return;
+            }
+            else{
+                wxMessageBox(std::string("Error deleting row(s)\n") + e.what());
+                m_top->Close(true);
+                return;
+            }
+        }
+        ++m_commandLevel;
+        HandleCommandChecking();
+        SetUnsavedChanges(true);
+    }
+}
+
+void DataPanel::AliasTitle()
+{
+    auto rows = m_grid->GetSelectedRows();
+
+    if(rows.size() > 1)
+        wxMessageBox("Error: You may only set aliases to one title at a time.");
+    else if(rows.size() == 0)
+        wxMessageBox("Error: No row was selected.");
+    else if(rows[0] == m_grid->GetNumberRows()-1) {
+        wxMessageBox("Error: Invalid row");
+    }
+    else{
+        TitleAliasDialog aliasDlg(this, wxID_ANY, m_connection,
+                                             wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)), m_grid->GetCellValue(rows[0], col::TITLE));
+        if(aliasDlg.ShowModal() == wxID_OK)
+            SetUnsavedChanges(true);
+    }
+}
+
+void DataPanel::EditTags()
+{
+    auto rows = m_grid->GetSelectedRows();
+
+    if(rows.size() > 1)
+        wxMessageBox("Error: You may only tag one series at a time.");
+    else if(rows.size() == 0)
+        wxMessageBox("Error: No row was selected.");
+    else if(rows[0] == m_grid->GetNumberRows()-1) {
+        wxMessageBox("Error: Invalid row");
+    }
+    else{
+        EditTagDialog editTagDlg(
+            this, wxID_ANY, m_connection,
+            wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)),
+            m_grid->GetCellValue(rows[0], col::TITLE));
+        editTagDlg.ShowModal();
+        if (editTagDlg.MadeChanges()) {
+            SetUnsavedChanges(true);
+        }
+    }
+}
+
+void DataPanel::ApplyFilter()
+{
+    ApplyQuickFilter();
+}
+
+void DataPanel::DefaultFilter()
+{
+    m_quickFilterCombo->ChangeValue(m_defaultFilter);
+    ApplyQuickFilter();
+}
+
+void DataPanel::AdvFilter()
+{
+    //non-modal
+    auto frame = new AdvFilterFrame(this, "Advanced Filtering", wxDefaultPosition, wxDefaultSize);
+    frame->Show(true);
+    m_advFilterButton->Disable();
+}
+
+void DataPanel::AdvSort()
+{
+    //non-modal
+    auto frame = new AdvSortFrame(this, m_colList);
+    frame->Show(true);
+    m_advSortButton->Disable();
+}
+
 void DataPanel::ClearCommandHistory()
 {
     m_commands.clear();
@@ -326,107 +431,42 @@ void DataPanel::OnQuickFilterDelete(wxCommandEvent& WXUNUSED(event))
 
 void DataPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
 {
-    ApplyQuickFilter();
+    ApplyFilter();
 }
 
 void DataPanel::OnDefaultFilter(wxCommandEvent& WXUNUSED(event))
 {
-    m_quickFilterCombo->ChangeValue(m_defaultFilter);
-    ApplyQuickFilter();
+    DefaultFilter();
 }
 
 void DataPanel::OnAdvFilter(wxCommandEvent& WXUNUSED(event))
 {
-    //non-modal
-    auto frame = new AdvFilterFrame(this, "Advanced Filtering", wxDefaultPosition, wxDefaultSize);
-    frame->Show(true);
-    m_advFilterButton->Disable();
+    AdvFilter();
 }
 
 void DataPanel::OnAdvSort(wxCommandEvent& WXUNUSED(event))
 {
-    //non-modal
-    auto frame = new AdvSortFrame(this, m_colList);
-    frame->Show(true);
-    m_advSortButton->Disable();
-}
-
-void DataPanel::OnEditTags(wxCommandEvent& WXUNUSED(event))
-{
-    auto rows = m_grid->GetSelectedRows();
-
-    if(rows.size() > 1)
-        wxMessageBox("Error: You may only tag one series at a time.");
-    else if(rows.size() == 0)
-        wxMessageBox("Error: No row was selected.");
-    else if(rows[0] == m_grid->GetNumberRows()-1) {
-        wxMessageBox("Error: Invalid row");
-    }
-    else{
-        EditTagDialog editTagDlg(
-            this, wxID_ANY, m_connection,
-            wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)),
-            m_grid->GetCellValue(rows[0], col::TITLE));
-        editTagDlg.ShowModal();
-        if (editTagDlg.MadeChanges()) {
-            SetUnsavedChanges(true);
-        }
-    }
+    AdvSort();
 }
 
 void DataPanel::OnAddRow(wxCommandEvent& WXUNUSED(event))
 {
-    m_grid->GoToCell(m_grid->GetNumberRows()-1, col::TITLE);
-    m_grid->EnableCellEditControl(true);
+    AddRow();
 }
 
 void DataPanel::OnDeleteRow(wxCommandEvent& WXUNUSED(event))
 {
-    auto rows = m_grid->GetSelectedRows();
-    if (rows.GetCount() > 0) {
-        std::vector<int64_t> idSeries;
-        for(unsigned int i = 0; i < rows.GetCount(); ++i){
-            auto idSeriesStr = m_grid->GetCellValue(rows.Item(i), col::ID_SERIES);
-            if(idSeriesStr.compare("")) //ignore the last row
-                idSeries.push_back(strtoll(idSeriesStr, nullptr, 10));
-        }
-        try{
-            m_commands.push_back(std::make_unique<DeleteCommand>(m_connection, m_grid, idSeries));
-
-        }catch(cppw::Sqlite3Exception& e){
-            if(e.GetErrorCode() == SQLITE_BUSY){
-                ShowSqliteBusyErrorBox();
-                return;
-            }
-            else{
-                wxMessageBox(std::string("Error deleting row(s)\n") + e.what());
-                m_top->Close(true);
-                return;
-            }
-        }
-        ++m_commandLevel;
-        HandleCommandChecking();
-        SetUnsavedChanges(true);
-    }
+    DeleteRows();
 }
 
 void DataPanel::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
 {
-    auto rows = m_grid->GetSelectedRows();
+    AliasTitle();
+}
 
-    if(rows.size() > 1)
-        wxMessageBox("Error: You may only set aliases to one title at a time.");
-    else if(rows.size() == 0)
-        wxMessageBox("Error: No row was selected.");
-    else if(rows[0] == m_grid->GetNumberRows()-1) {
-        wxMessageBox("Error: Invalid row");
-    }
-    else{
-        TitleAliasDialog aliasDlg(this, wxID_ANY, m_connection,
-                                             wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)), m_grid->GetCellValue(rows[0], col::TITLE));
-        if(aliasDlg.ShowModal() == wxID_OK)
-            SetUnsavedChanges(true);
-    }
+void DataPanel::OnEditTags(wxCommandEvent& WXUNUSED(event))
+{
+    EditTags();
 }
 
 void DataPanel::OnGridColSort(wxGridEvent& event)

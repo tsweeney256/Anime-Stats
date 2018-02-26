@@ -36,6 +36,14 @@ private:
     void OnAbout(wxCommandEvent& event);
     void OnUndo(wxCommandEvent& event);
     void OnRedo(wxCommandEvent& event);
+    void OnAddRow(wxCommandEvent& event);
+    void OnDeleteRows(wxCommandEvent& event);
+    void OnAliasTitle(wxCommandEvent& event);
+    void OnEditTags(wxCommandEvent& event);
+    void OnApplyFilter(wxCommandEvent& event);
+    void OnDefaultFilter(wxCommandEvent& event);
+    void OnAdvFilter(wxCommandEvent& event);
+    void OnAdvSort(wxCommandEvent& event);
     void OnDefaultDbAsk(wxCommandEvent& event);
     void OnDefaultDb(wxCommandEvent& event);
     void OnNew(wxCommandEvent& event);
@@ -73,7 +81,15 @@ private:
         DEFAULT_DB = wxID_HIGHEST + 1,
         DEFAULT_DB_ASK,
         COLOR_OPTIONS,
-        MAL_IMPORT
+        MAL_IMPORT,
+        ADD_ROW,
+        DELETE_ROWS,
+        ALIAS_TITLE,
+        EDIT_TAGS,
+        APPLY_FILTER,
+        DEFAULT_FILTER,
+        ADV_FILTER,
+        ADV_SORT
     };
 };
 
