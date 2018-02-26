@@ -413,8 +413,8 @@ void DataPanel::OnQuickFilterDelete(wxCommandEvent& WXUNUSED(event))
     }
     try {
         wxMessageDialog dlg(
-            this, "Are you sure you want to delete the " + curFilter +
-            "filter?", wxMessageBoxCaptionStr, wxOK|wxCANCEL|wxRIGHT);
+            this, "Are you sure you want to delete the \"" + curFilter +
+            "\" filter?", wxMessageBoxCaptionStr, wxOK|wxCANCEL|wxRIGHT);
         if (dlg.ShowModal() == wxID_OK) {
             DeleteFilterFromDb();
             //reuse old functions instead of risking bugs
