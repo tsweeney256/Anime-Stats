@@ -386,7 +386,8 @@ void DataPanel::OnQuickFilterOverwrite(wxCommandEvent& WXUNUSED(event))
     try {
         wxMessageDialog dlg(
             this, "Are you sure you want to overwrite the \"" +
-            curFilter + "\" filter with the current filter settings?",
+            wxString::FromUTF8(curFilter.c_str()) +
+            "\" filter with the current filter settings?",
             wxMessageBoxCaptionStr, wxOK|wxCANCEL|wxRIGHT);
         if (dlg.ShowModal() == wxID_OK) {
             auto isDefault = m_defaultFilter == curFilter;
@@ -413,7 +414,8 @@ void DataPanel::OnQuickFilterDelete(wxCommandEvent& WXUNUSED(event))
     }
     try {
         wxMessageDialog dlg(
-            this, "Are you sure you want to delete the \"" + curFilter +
+            this, "Are you sure you want to delete the \"" +
+            wxString::FromUTF8(curFilter.c_str()) +
             "\" filter?", wxMessageBoxCaptionStr, wxOK|wxCANCEL|wxRIGHT);
         if (dlg.ShowModal() == wxID_OK) {
             DeleteFilterFromDb();
