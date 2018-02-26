@@ -291,6 +291,11 @@ void MainFrame::OnMakeDefaultFilter(wxCommandEvent& WXUNUSED(event))
         stmt->Bind(1, curFilter.utf8_str());
         auto result = stmt->GetResults();
         result->NextRow();
+        stmt = m_connection->PrepareStatement(
+            "update SavedFilter set `default` = 0 where `name` <> ?");
+        stmt->Bind(1, curFilter.utf8_str());
+        result = stmt->GetResults();
+        result->NextRow();
         m_dataPanel->SetUnsavedChanges(true);
         m_dataPanel->SetDefaultFilter(curFilter);
         wxMessageBox("The default filter is now \"" + curFilter + "\"");
