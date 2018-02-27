@@ -345,9 +345,6 @@ void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
                 if (!OpenDb(dlg.GetPath())) {
                     return;
                 }
-                if (m_needUpdateNotify) {
-                    DbUpdateNotify();
-                }
                 break;
             }
             else break;
@@ -360,6 +357,9 @@ void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
                 m_fileMenu->Check(DEFAULT_DB, true);
             }
             m_dataPanel->ResetPanel(m_connection.get());
+            if (m_needUpdateNotify) {
+                DbUpdateNotify();
+            }
         }
     }
 }
