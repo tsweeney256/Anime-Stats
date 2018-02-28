@@ -45,6 +45,8 @@ private:
     void OnLengthEnableCheckBox(wxCommandEvent& event);
     void OnDateStartedEnableCheckBox(wxCommandEvent& event);
     void OnDateFinishedEnableCheckBox(wxCommandEvent& event);
+    void OnTagKeyEnableCheckBox(wxCommandEvent& event);
+    void OnTagValEnableCheckBox(wxCommandEvent& event);
     void OnReset(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnOK(wxCommandEvent& event);
@@ -87,6 +89,8 @@ private:
     wxCheckBox* m_seasonBlankCheck;
 
     wxTextCtrl* m_titleTextField;
+    wxTextCtrl* m_tagKeyTextField;
+    wxTextCtrl* m_tagValTextField;
 
     wxCheckBox* m_ratingsEnabled;
     wxCheckBox* m_yearEnabled;
@@ -96,6 +100,8 @@ private:
     wxCheckBox* m_lengthEnabled;
     wxCheckBox* m_dateStartedEnabled;
     wxCheckBox* m_dateFinishedEnabled;
+    wxCheckBox* m_tagKeyEnabled;
+    wxCheckBox* m_tagValEnabled;
 
     wxSpinCtrl* m_ratingsSpinLow;
     wxSpinCtrl* m_ratingsSpinHigh;

@@ -755,6 +755,8 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
         else
             showNothing = true;
 
+        bool usingTagKey = false;
+        bool usingTagVal = false;
         if(newAdvFilterInfo){
 	    firstStatus = true;
 
@@ -840,6 +842,14 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                 statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->dayFinishedHigh;
                 statusStr << "')) ";
             }
+            if(newAdvFilterInfo->tagKeyEnabled) {
+                statusStr << " and tag like ? ";
+                usingTagKey = true;
+            }
+            if(newAdvFilterInfo->tagValEnabled) {
+                statusStr << " and val like ? ";
+                usingTagVal = true;
+            }
         }
         auto sqlStr = std::string(m_basicSelectString.utf8_str()) +
             " where 1=1 " + //just a dumb hack so I don't have to worry about when to start using 'and's and 'or's
@@ -847,8 +857,15 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
             " order by " + CreateSortStr();
         auto statement = m_connection->PrepareStatement(sqlStr);
         std::string bindStr = "%" + newBasicFilterInfo->title + "%";
-        statement->Bind(1, bindStr);
-        statement->Bind(2, bindStr);
+        int bindIdx = 1;
+        statement->Bind(bindIdx++, bindStr);
+        statement->Bind(bindIdx++, bindStr);
+        if (usingTagKey) {
+            statement->Bind(bindIdx++, newAdvFilterInfo->tagKey);
+        }
+        if (usingTagVal) {
+            statement->Bind(bindIdx++, newAdvFilterInfo->tagVal);
+        }
         auto results = statement->GetResults();
         ResetTable(results);
         m_titleFilterTextField->SetValue(wxString::FromUTF8(newBasicFilterInfo->title.c_str()));

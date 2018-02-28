@@ -38,6 +38,8 @@ BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
     EVT_CHECKBOX(ID_ADV_FILTER_LENGTH_ENABLE, AdvFilterFrame::OnLengthEnableCheckBox)
     EVT_CHECKBOX(ID_ADV_FILTER_DATE_STARTED_ENABLE, AdvFilterFrame::OnDateStartedEnableCheckBox)
     EVT_CHECKBOX(ID_ADV_FILTER_DATE_FINISHED_ENABLE, AdvFilterFrame::OnDateFinishedEnableCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_TAG_KEY_ENABLE, AdvFilterFrame::OnTagKeyEnableCheckBox)
+    EVT_CHECKBOX(ID_ADV_FILTER_TAG_VAL_ENABLE, AdvFilterFrame::OnTagValEnableCheckBox)
     EVT_BUTTON(wxID_HELP, AdvFilterFrame::OnReset)
     EVT_BUTTON(wxID_CANCEL, AdvFilterFrame::OnCancel)
     EVT_BUTTON(wxID_OK, AdvFilterFrame::OnOK)
@@ -163,6 +165,11 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_finishDayHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
                                      wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_maxDay);
 
+    m_tagKeyTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
+    m_tagKeyEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_TAG_KEY_ENABLE, _("Enable"));
+    m_tagValTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
+    m_tagValEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_TAG_VAL_ENABLE, _("Enable"));
+
     m_watchedCheck->SetValue(true);
     m_watchingCheck->SetValue(true);
     m_stalledCheck->SetValue(true);
@@ -206,6 +213,8 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     m_finishYearHigh->Disable();
     m_finishMonthHigh->Disable();
     m_finishDayHigh->Disable();
+    m_tagKeyTextField->Disable();
+    m_tagValTextField->Disable();
 
     auto okButton = new wxButton(m_mainPanel, wxID_OK, "OK");
     auto cancelButton = new wxButton(m_mainPanel, wxID_CANCEL, "Cancel");
@@ -245,6 +254,8 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     auto lengthSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Episode Length"));
     auto dateStartedSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Date Started (YYYY-MM-DD)"));
     auto dateFinishedSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Date Finished (YYYY-MM-DD)"));
+    auto tagKeySizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Tag"));
+    auto tagValSizerOutline = new wxStaticBoxSizer(wxVERTICAL, m_mainPanel, _("Tag Value"));
 
     auto watchedStatusSizer = new wxBoxSizer(wxVERTICAL);
     auto watchedStatusSizerTop = new wxGridSizer(3, 5, 5);
@@ -275,6 +286,10 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     auto dateFinishedMidSizer = new wxBoxSizer(wxHORIZONTAL);
     auto dateFinishedHighSizer = new wxBoxSizer(wxHORIZONTAL);
     auto dateFinishedTopSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto tagKeyTopSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto tagKeyBottomSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto tagValTopSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto tagValBottomSizer = new wxBoxSizer(wxHORIZONTAL);
 
     watchedStatusSizerTop->Add(m_watchedCheck, paddingFlag);
     watchedStatusSizerTop->Add(m_stalledCheck, paddingFlag);
@@ -391,6 +406,20 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     dateFinishedSizerOutline->Add(dateFinishedMidSizer, paddingCenterFlag);
     dateFinishedSizerOutline->Add(dateFinishedHighSizer, paddingFlag);
 
+    tagKeyTopSizer->Add(m_tagKeyEnabled, expandFlag);
+    tagKeyTopSizer->Add(m_tagKeyInverse, expandFlag);
+    tagKeyBottomSizer->Add(m_tagKeyTextField,
+                           wxSizerFlags(1).Border(wxALL).Expand());
+    tagKeySizerOutline->Add(tagKeyTopSizer, expandFlag);
+    tagKeySizerOutline->Add(tagKeyBottomSizer, expandFlag);
+
+    tagValTopSizer->Add(m_tagValEnabled, expandFlag);
+    tagValTopSizer->Add(m_tagValInverse, expandFlag);
+    tagValBottomSizer->Add(m_tagValTextField,
+                           wxSizerFlags(1).Border(wxALL).Expand());
+    tagValSizerOutline->Add(tagValTopSizer, expandFlag);
+    tagValSizerOutline->Add(tagValBottomSizer, expandFlag);
+
     leftSizer->Add(titleFieldSizerOutline, expandFlag);
     leftSizer->Add(watchedStatusSizerOutline, expandFlag);
     leftSizer->Add(releaseTypeSizerOutline, expandFlag);
@@ -405,6 +434,8 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     rightSizer->Add(lengthSizerOutline, expandFlag);
     rightSizer->Add(dateStartedSizerOutline, expandFlag);
     rightSizer->Add(dateFinishedSizerOutline, expandFlag);
+    rightSizer->Add(tagKeySizerOutline, expandFlag);
+    rightSizer->Add(tagValSizerOutline, expandFlag);
 
     contentSizer->Add(leftSizer, paddingFlag);
     contentSizer->Add(midSizer, paddingFlag);
@@ -517,6 +548,16 @@ void AdvFilterFrame::OnDateFinishedEnableCheckBox(wxCommandEvent& event)
     m_finishDayHigh->Enable(event.GetInt());
 }
 
+void AdvFilterFrame::OnTagKeyEnableCheckBox(wxCommandEvent& event)
+{
+    m_tagKeyTextField->Enable(event.GetInt());
+}
+
+void AdvFilterFrame::OnTagValEnableCheckBox(wxCommandEvent& event)
+{
+    m_tagValTextField->Enable(event.GetInt());
+}
+
 void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
 {
     EnableAllWatchedStatus();
@@ -588,6 +629,13 @@ void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
 
     m_dateStartedEnabled->SetValue(false);
     m_dateFinishedEnabled->SetValue(false);
+
+    m_tagKeyTextField->SetValue("");
+    m_tagValTextField->SetValue("");
+    m_tagKeyTextField->Disable();
+    m_tagValTextField->Disable();
+    m_tagKeyEnabled->SetValue(false);
+    m_tagValEnabled->SetValue(false);
 }
 
 void AdvFilterFrame::OnCancel(wxCommandEvent& WXUNUSED(event))
@@ -674,6 +722,8 @@ void AdvFilterFrame::ApplyFilter()
     adv->lengthEnabled = m_lengthEnabled->GetValue();
     adv->dateStartedEnabled = m_dateStartedEnabled->GetValue();
     adv->dateFinishedEnabled = m_dateFinishedEnabled->GetValue();
+    adv->tagKeyEnabled = m_tagKeyEnabled->GetValue();
+    adv->tagValEnabled = m_tagValEnabled->GetValue();
 
     adv->ratingLow = m_ratingsSpinLow->GetValue();
     adv->yearLow = m_yearSpinLow->GetValue();
@@ -701,6 +751,9 @@ void AdvFilterFrame::ApplyFilter()
     adv->yearFinishedHigh = m_finishYearHigh->GetValue();
     adv->monthFinishedHigh = m_finishMonthHigh->GetValue();
     adv->dayFinishedHigh = m_finishDayHigh->GetValue();
+
+    adv->tagKey = m_tagKeyTextField->GetValue().utf8_str();
+    adv->tagVal = m_tagValTextField->GetValue().utf8_str();
 
     m_parent->ApplyFilter(basic, adv);
 }

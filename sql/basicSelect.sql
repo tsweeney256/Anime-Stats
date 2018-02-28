@@ -12,7 +12,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-select rightSide.idSeries, name as Title, pronunciation as Pronunciation, rating as Rating, status as "Watched Status",
+select distinct rightSide.idSeries, name as Title, pronunciation as Pronunciation, rating as Rating, status as "Watched Status",
         type as "Release Type", year as Year, season as Season, episodesWatched as "Episodes Watched",
         totalEpisodes as "Total Episodes", rewatchedEpisodes as "Rewatched Episodes" , episodeLength as "Episode Length",
         dateStarted as "Date Started", dateFinished as "Date Finished"
@@ -33,6 +33,8 @@ inner join
         on series.idSeason = Season.idSeason
         left join WatchedStatus
         on series.idWatchedStatus = WatchedStatus.idWatchedStatus
+		left join Tag
+		on series.idSeries = Tag.idSeries
         inner join
         (
                 SELECT idName, nameSort

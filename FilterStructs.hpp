@@ -125,6 +125,8 @@ struct AdvFilterInfo
     bool lengthEnabled = false;
     bool dateStartedEnabled = false;
     bool dateFinishedEnabled = false;
+    bool tagKeyEnabled = false;
+    bool tagValEnabled = false;
 
     int ratingLow = 0;
     int ratingHigh = 0;
@@ -152,6 +154,9 @@ struct AdvFilterInfo
     int monthFinishedHigh = 1;
     int dayFinishedLow = 1;
     int dayFinishedHigh = 1;
+
+    std::string tagKey;
+    std::string tagVal;
 
 private:
     AdvFilterInfo() {}
