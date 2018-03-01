@@ -636,7 +636,6 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
         rowSize = m_grid->GetRowSize(0);
         m_grid->DeleteRows(0, m_grid->GetNumberRows());
     }
-    wxASSERT_MSG(results->GetColumnCount() == numViewCols, "Basic Select Results have wrong number of columns.");
     if(!m_colsCreated){
         m_colsCreated = true;
         m_grid->AppendCols(numViewCols);
@@ -842,29 +841,42 @@ void DataPanel::ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
                 statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->dayFinishedHigh;
                 statusStr << "')) ";
             }
-            if(newAdvFilterInfo->tagKeyEnabled) {
-                statusStr << " and tag like ? ";
+            if(newAdvFilterInfo->tagKeyEnabled &&
+               !newAdvFilterInfo->tagKeyInverse) {
                 usingTagKey = true;
+                statusStr << " and tag like ?2 ";
             }
-            if(newAdvFilterInfo->tagValEnabled) {
-                statusStr << " and val like ? ";
+            if(newAdvFilterInfo->tagValEnabled &&
+               !newAdvFilterInfo->tagValInverse) {
                 usingTagVal = true;
+                statusStr << " and val like ?3 ";
             }
         }
         auto sqlStr = std::string(m_basicSelectString.utf8_str()) +
             " where 1=1 " + //just a dumb hack so I don't have to worry about when to start using 'and's and 'or's
-            (showNothing ? " and 1 <> 1 " : statusStr.str()) +
-            " order by " + CreateSortStr();
+            (showNothing ? " and 1 <> 1 " : statusStr.str());
+        if (newAdvFilterInfo->tagKeyInverse || newAdvFilterInfo->tagValInverse) {
+            sqlStr += "\nexcept\n" + sqlStr;
+        }
+        if(newAdvFilterInfo->tagKeyEnabled &&
+           newAdvFilterInfo->tagKeyInverse) {
+            usingTagKey = true;
+            sqlStr += " and tag like ?2 ";
+        }
+        if(newAdvFilterInfo->tagValEnabled &&
+           newAdvFilterInfo->tagValInverse) {
+            usingTagVal = true;
+            sqlStr += " and val like ?3 ";
+        }
+        sqlStr += " order by " + CreateSortStr();
         auto statement = m_connection->PrepareStatement(sqlStr);
         std::string bindStr = "%" + newBasicFilterInfo->title + "%";
-        int bindIdx = 1;
-        statement->Bind(bindIdx++, bindStr);
-        statement->Bind(bindIdx++, bindStr);
+        statement->Bind(1, bindStr);
         if (usingTagKey) {
-            statement->Bind(bindIdx++, newAdvFilterInfo->tagKey);
+            statement->Bind(2, newAdvFilterInfo->tagKey);
         }
         if (usingTagVal) {
-            statement->Bind(bindIdx++, newAdvFilterInfo->tagVal);
+            statement->Bind(3, newAdvFilterInfo->tagVal);
         }
         auto results = statement->GetResults();
         ResetTable(results);

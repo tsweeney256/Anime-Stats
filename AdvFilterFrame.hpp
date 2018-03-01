@@ -103,6 +103,9 @@ private:
     wxCheckBox* m_tagKeyEnabled;
     wxCheckBox* m_tagValEnabled;
 
+    wxCheckBox* m_tagKeyInverse;
+    wxCheckBox* m_tagValInverse;
+
     wxSpinCtrl* m_ratingsSpinLow;
     wxSpinCtrl* m_ratingsSpinHigh;
     wxSpinCtrl* m_yearSpinLow;

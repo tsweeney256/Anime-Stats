@@ -128,6 +128,9 @@ struct AdvFilterInfo
     bool tagKeyEnabled = false;
     bool tagValEnabled = false;
 
+    bool tagKeyInverse = false;
+    bool tagValInverse = false;
+
     int ratingLow = 0;
     int ratingHigh = 0;
     int yearLow = 0;

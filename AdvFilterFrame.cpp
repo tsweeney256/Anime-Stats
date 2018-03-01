@@ -166,8 +166,10 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
                                      wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_maxDay);
 
     m_tagKeyTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
+    m_tagKeyInverse = new wxCheckBox(m_mainPanel, wxID_ANY, _("Invert"));
     m_tagKeyEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_TAG_KEY_ENABLE, _("Enable"));
     m_tagValTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
+    m_tagValInverse = new wxCheckBox(m_mainPanel, wxID_ANY, _("Invert"));
     m_tagValEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_TAG_VAL_ENABLE, _("Enable"));
 
     m_watchedCheck->SetValue(true);
@@ -551,11 +553,13 @@ void AdvFilterFrame::OnDateFinishedEnableCheckBox(wxCommandEvent& event)
 void AdvFilterFrame::OnTagKeyEnableCheckBox(wxCommandEvent& event)
 {
     m_tagKeyTextField->Enable(event.GetInt());
+    m_tagKeyInverse->Enable(event.GetInt());
 }
 
 void AdvFilterFrame::OnTagValEnableCheckBox(wxCommandEvent& event)
 {
     m_tagValTextField->Enable(event.GetInt());
+    m_tagValInverse->Enable(event.GetInt());
 }
 
 void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
@@ -634,6 +638,10 @@ void AdvFilterFrame::OnReset(wxCommandEvent& WXUNUSED(event))
     m_tagValTextField->SetValue("");
     m_tagKeyTextField->Disable();
     m_tagValTextField->Disable();
+    m_tagKeyInverse->SetValue(false);
+    m_tagValInverse->SetValue(false);
+    m_tagKeyInverse->Disable();
+    m_tagValInverse->Disable();
     m_tagKeyEnabled->SetValue(false);
     m_tagValEnabled->SetValue(false);
 }
@@ -724,6 +732,11 @@ void AdvFilterFrame::ApplyFilter()
     adv->dateFinishedEnabled = m_dateFinishedEnabled->GetValue();
     adv->tagKeyEnabled = m_tagKeyEnabled->GetValue();
     adv->tagValEnabled = m_tagValEnabled->GetValue();
+
+    adv->tagKeyInverse = m_tagKeyEnabled->GetValue() ?
+        m_tagKeyInverse->GetValue() : false;
+    adv->tagValInverse = m_tagValEnabled->GetValue() ?
+        m_tagValInverse->GetValue() : false;
 
     adv->ratingLow = m_ratingsSpinLow->GetValue();
     adv->yearLow = m_yearSpinLow->GetValue();
