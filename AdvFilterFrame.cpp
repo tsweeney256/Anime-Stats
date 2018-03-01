@@ -432,8 +432,8 @@ AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wx
     midSizer->Add(epsWatchedSizerOutline, expandFlag);
     midSizer->Add(rewatchedSizerOutline, expandFlag);
     midSizer->Add(totalEpsSizerOutline, expandFlag);
+    midSizer->Add(lengthSizerOutline, expandFlag);
 
-    rightSizer->Add(lengthSizerOutline, expandFlag);
     rightSizer->Add(dateStartedSizerOutline, expandFlag);
     rightSizer->Add(dateFinishedSizerOutline, expandFlag);
     rightSizer->Add(tagKeySizerOutline, expandFlag);
