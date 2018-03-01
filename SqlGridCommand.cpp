@@ -290,12 +290,11 @@ void DeleteCommand::ExecuteCommon()
         seriesViewSelectStmt->Reset();
         seriesViewSelectStmt->ClearBindings();
         seriesViewSelectStmt->Bind(1, "%%");
-        seriesViewSelectStmt->Bind(2, "%%");
-        seriesViewSelectStmt->Bind(3, m_idSeries[i]);
+        seriesViewSelectStmt->Bind(2, m_idSeries[i]);
         auto seriesViewResults = seriesViewSelectStmt->GetResults();
         while(seriesViewResults->NextRow()){
             std::array<std::string, numViewCols> rowView;
-            for(int k = 0; k < seriesViewResults->GetColumnCount(); ++k){
+            for(int k = 0; k < numViewCols; ++k){
                 rowView[k] = seriesViewResults->GetString(k);
             }
             m_seriesView.push_back(rowView);
