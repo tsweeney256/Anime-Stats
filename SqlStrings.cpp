@@ -12,6 +12,10 @@ namespace SqlStrings{
         "     OFFSET (SELECT (COUNT(%1$s) - 1) / 2\n"
         "     FROM Series))\n";
 
+    const std::string avgStr =
+        "SELECT printf(\"%2$s.2f\", AVG(%1$s))\n"
+        "FROM Series\n";
+
     const std::string timeWatchedSql =
         "SELECT *\n"
         "FROM\n"
