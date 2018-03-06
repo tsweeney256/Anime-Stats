@@ -19,12 +19,12 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "S
 set(SOURCE_FILES
   AdvFilterFrame.cpp
   AdvSortFrame.cpp
+  AnalysisBox.cpp
+  AnalysisPanel.cpp
   App.cpp
   AppIDs.cpp
   ColorOptionsDlg.cpp
   CustomGridCellEditors.cpp
-  AnalysisBox.cpp
-  AnalysisPanel.cpp
   DataPanel.cpp
   EditTagDialog.cpp
   FilterStructs.cpp
