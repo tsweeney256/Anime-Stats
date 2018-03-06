@@ -164,7 +164,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     auto mainPanelSizer = new wxBoxSizer(wxVERTICAL);
     auto notebook = new wxNotebook(mainPanel, wxID_ANY);
     m_dataPanel = new DataPanel(m_connection.get(), notebook, this, m_settings.get());
-    m_analysisPanel = new AnalysisPanel(m_connection.get(), notebook, this);
+    m_analysisPanel = new AnalysisPanel(notebook, this, m_connection.get());
     notebook->AddPage(m_dataPanel, _("Data"));
     notebook->AddPage(m_analysisPanel, _("Analysis"));
     mainPanelSizer->Add(notebook, wxSizerFlags(1).Expand());

@@ -5,15 +5,19 @@
 #include "AnalysisBox.hpp"
 #include "SqlStrings.hpp"
 
-AnalysisPanel::AnalysisPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top)
+AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top,
+                             cppw::Sqlite3Connection* connection)
     : wxScrolledWindow(parent)
 {
     SetScrollRate(10, 10);
     m_mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
     try{
-        m_statBoxes.push_back(new AnalysisTextBox(this, top, connection, SqlStrings::timeWatchedSql, "Time Spent on Anime", {"Days: ", "Formatted: "},
-                                                  SqlStrings::timeRewatchedSql, "Including Rewatches"));
+        m_statBoxes.push_back(
+            new AnalysisTextBox(
+                this, top, connection, SqlStrings::timeWatchedSql,
+                "Time Spent on Anime", {"Days: ", "Formatted: "},
+                SqlStrings::timeRewatchedSql, "Including Rewatches"));
         m_mainSizer->Add(m_statBoxes.back(), wxSizerFlags(0).Border(wxALL));
     } catch(const cppw::Sqlite3Exception& e){
         wxMessageBox(e.what());

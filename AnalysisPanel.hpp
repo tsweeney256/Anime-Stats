@@ -11,7 +11,8 @@ class wxSizer;
 class AnalysisPanel : public wxScrolledWindow
 {
 public:
-    AnalysisPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top);
+    AnalysisPanel(
+        wxWindow* parent, MainFrame* top, cppw::Sqlite3Connection* connection);
     void UpdateInfo();
 private:
     std::vector<AnalysisBox*> m_statBoxes;
