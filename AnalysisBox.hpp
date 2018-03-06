@@ -47,7 +47,7 @@ private:
     std::unique_ptr<cppw::Sqlite3Statement> m_altStatement;
     std::vector<wxString> m_outputLabels;
     std::vector<wxStaticText*> m_staticText;
-    wxCheckBox* m_checkBox;
+    wxCheckBox* m_checkBox = nullptr;
 
     DECLARE_EVENT_TABLE()
 };

@@ -52,7 +52,7 @@ AnalysisTextBox::AnalysisTextBox(
 void AnalysisTextBox::UpdateInfo()
 {
     std::unique_ptr<cppw::Sqlite3Result> result;
-    if (m_checkBox->GetValue()) {
+    if (m_checkBox && m_checkBox->GetValue()) {
         m_altStatement->Reset();
         result = m_altStatement->GetResults();
     } else {
