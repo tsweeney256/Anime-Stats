@@ -1,15 +1,16 @@
 #include "SqlStrings.hpp"
 
 namespace SqlStrings{
-    /*SELECT AVG(%s)
-      FROM (SELECT %s
-            FROM Series
-            where %s is not null
-            ORDER BY %s
-            LIMIT 2 - (SELECT COUNT(%s) FROM Series) % 2
-            OFFSET (SELECT (COUNT(%s) - 1) / 2
-            FROM Series))*/
-    const char* medianStr = "SELECT AVG(%s) FROM (SELECT %s FROM Series where %s is not null ORDER BY %s LIMIT 2 - (SELECT COUNT(%s) FROM Series) % 2 OFFSET (SELECT (COUNT(%s) - 1) / 2 FROM Series))";
+    const char* medianStr =
+        "SELECT AVG(%s)\n"
+        "FROM\n"
+        "    (SELECT %s\n"
+             "FROM Series\n"
+             "where %s is not null\n"
+             "ORDER BY %s\n"
+             "LIMIT 2 - (SELECT COUNT(%s) FROM Series) % 2\n"
+             "OFFSET (SELECT (COUNT(%s) - 1) / 2\n"
+             "FROM Series))";
     const int numToFormatMedianStr = 6;
 
     const std::string timeWatchedSql =
