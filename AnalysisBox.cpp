@@ -2,25 +2,33 @@
 #include <wx/checkbox.h>
 #include <wx/msgdlg.h>
 #include "MainFrame.hpp"
-#include "AnalysisTextBox.hpp"
+#include "AnalysisBox.hpp"
 
-BEGIN_EVENT_TABLE(AnalysisTextBox, wxPanel)
+BEGIN_EVENT_TABLE(AnalysisTextBox, AnalysisBox)
     EVT_CHECKBOX(wxID_ANY, AnalysisTextBox::OnCheckBox)
 END_EVENT_TABLE()
 
+AnalysisBox::AnalysisBox(
+    wxWindow* parent, MainFrame* top, wxString boxLabel,
+    cppw::Sqlite3Connection* connection, const std::string& sqlScript)
+    : wxPanel(parent), m_top(top),
+      m_statement(connection->PrepareStatement(sqlScript))
+
+{
+    m_mainSizer = new wxStaticBoxSizer(wxVERTICAL, this, boxLabel);
+    SetSizer(m_mainSizer);
+}
 
 AnalysisTextBox::AnalysisTextBox(
-    cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top,
-    wxString boxLabel, std::vector<wxString> outputLabels,
-    const std::string& sqlScript, const std::string& altSqlScript,
+    wxWindow* parent, MainFrame* top, cppw::Sqlite3Connection* connection,
+    const std::string& sqlScript, wxString boxLabel,
+    std::vector<wxString> outputLabels, const std::string& altSqlScript,
     wxString checkBoxLabel)
-    : wxPanel(parent), m_top(top),
-      m_statement(connection->PrepareStatement(sqlScript)),
+    : AnalysisBox(parent, top, boxLabel, connection, sqlScript),
       m_altStatement(altSqlScript.empty() ? nullptr :
                      connection->PrepareStatement(altSqlScript)),
       m_outputLabels(outputLabels)
 {
-    m_mainSizer = new wxStaticBoxSizer(wxVERTICAL, this, boxLabel);
     auto controlSizer = new wxBoxSizer(wxHORIZONTAL);
     auto textSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -38,7 +46,7 @@ AnalysisTextBox::AnalysisTextBox(
 
     m_mainSizer->Add(controlSizer, wxSizerFlags(0).Border(wxALL));
     m_mainSizer->Add(textSizer, wxSizerFlags(0).Border(wxALL));
-    SetSizerAndFit(m_mainSizer);
+    m_mainSizer->SetSizeHints(this);
 }
 
 void AnalysisTextBox::UpdateInfo()
