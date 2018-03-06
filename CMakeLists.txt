@@ -33,6 +33,7 @@ set(SOURCE_FILES
   Settings.cpp
   SortStruct.cpp
   SqlGridCommand.cpp
+  SqlStrings.cpp
   SqlTitleAliasCommand.cpp
   TitleAliasDialog.cpp
   )
