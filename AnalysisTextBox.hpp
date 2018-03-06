@@ -15,10 +15,11 @@ class MainFrame;
 class AnalysisTextBox : public wxPanel
 {
 public:
-    AnalysisTextBox(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, wxString boxLabel,
-                    std::vector<wxString> outputLabels, const std::string& sqlScript, const std::string& altSqlScript = "",
-                    wxString checkBoxLabel = "", int numBinds = 0,
-                    const std::vector<wxString>& comboVals = std::vector<wxString>());
+    AnalysisTextBox(
+        cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top,
+        wxString boxLabel, std::vector<wxString> outputLabels,
+        const std::string& sqlScript, const std::string& altSqlScript = "",
+        wxString checkBoxLabel = "");
     void UpdateInfo();
 
 private:
@@ -35,7 +36,6 @@ private:
     std::vector<wxStaticText*> m_staticText;
     wxCheckBox* m_checkBox;
     wxSizer* m_mainSizer;
-    int m_numBinds;
-    
+
     DECLARE_EVENT_TABLE()
 };
