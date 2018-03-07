@@ -40,7 +40,7 @@ namespace SqlStrings{
         "(\n"
         "       SELECT printf(\"%.2f\",  sum(episodesWatched * episodeLength) / 1436.068333333) , 0 as idx FROM Series\n\n"
 
-        "       UNION\n\n"
+        "       UNION ALL\n\n"
 
         "       --There are 366.2422 stellar days in a year\n"
         "       --Dividing by 12 gives us 30.520183333 days in a month\n"
@@ -61,7 +61,7 @@ namespace SqlStrings{
         "(\n"
         "       SELECT printf(\"%.2f\",  sum((IFNULL(rewatchedEpisodes, 0) + episodesWatched) * episodeLength) / 1436.068333333) , 0 as idx FROM Series\n\n"
 
-        "       UNION\n\n"
+        "       UNION ALL\n\n"
 
         "       --There are 366.2422 stellar days in a year\n"
         "       --Dividing by 12 gives us 30.520183333 days in a month\n"
