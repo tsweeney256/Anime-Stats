@@ -15,6 +15,8 @@ AnalysisBox::AnalysisBox(
       m_statement(connection->PrepareStatement(sqlScript))
 
 {
+    SetFont(wxFont(GetFont().GetPointSize(), wxFONTFAMILY_TELETYPE,
+                   wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     m_mainSizer = new wxStaticBoxSizer(wxVERTICAL, this, boxLabel);
     SetSizer(m_mainSizer);
 }
