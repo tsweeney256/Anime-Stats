@@ -61,7 +61,7 @@ void AnalysisTextBox::UpdateInfo()
     }
     for (int i = 0; result->NextRow(); ++i) {
         m_staticText[i]->SetLabel(
-            m_outputLabels[i] +
+            m_outputLabels[i] + ": " +
             wxString::FromUTF8(result->GetString(0).c_str()));
     }
     m_mainSizer->SetSizeHints(this);

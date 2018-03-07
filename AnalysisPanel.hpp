@@ -15,6 +15,8 @@ public:
         wxWindow* parent, MainFrame* top, cppw::Sqlite3Connection* connection);
     void UpdateInfo();
 private:
+    std::vector<wxString> GetDbLabels(
+        cppw::Sqlite3Connection*connection , std::string statementStr);
     std::vector<AnalysisBox*> m_statBoxes;
     wxSizer* m_mainSizer;
 };

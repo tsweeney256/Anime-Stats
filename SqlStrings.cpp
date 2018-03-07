@@ -16,6 +16,24 @@ namespace SqlStrings{
         "SELECT printf(\"%2$s.2f\", AVG(%1$s))\n"
         "FROM Series\n";
 
+    const std::string countWatchedStatus =
+        "select count(Series.idWatchedStatus)\n"
+        "from WatchedStatus\n"
+        "left join Series\n"
+        "on WatchedStatus.idWatchedStatus = Series.idWatchedStatus\n"
+        "where WatchedStatus.idWatchedStatus <> 0\n"
+        "group by WatchedStatus.idWatchedStatus\n"
+        "order by WatchedStatus.idWatchedStatus\n";
+
+    const std::string countReleaseType =
+        "select count(Series.idReleaseType)\n"
+        "from ReleaseType\n"
+        "left join Series\n"
+        "on ReleaseType.idReleaseType = Series.idReleaseType\n"
+        "where ReleaseType.idReleaseType <> 0\n"
+        "group by ReleaseType.idReleaseType\n"
+        "order by ReleaseType.idReleaseType\n";
+
     const std::string timeWatchedSql =
         "SELECT *\n"
         "FROM\n"
