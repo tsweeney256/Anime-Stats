@@ -2,7 +2,7 @@
 
 namespace SqlStrings{
     const std::string medianStr =
-        "SELECT AVG(%1$s)\n"
+        "SELECT printf(\"%2$s.2f\", AVG(%1$s))\n"
         "FROM\n"
         "    (SELECT %1$s\n"
         "     FROM Series\n"

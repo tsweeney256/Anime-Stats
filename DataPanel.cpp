@@ -1166,7 +1166,7 @@ int DataPanel::GetColAggregate(std::string colName, std::string function)
 int DataPanel::GetColMedian(const std::string& colName)
 {
     wxString wxMedianStr(SqlStrings::medianStr);
-    wxMedianStr = wxString::Format(wxMedianStr, colName);
+    wxMedianStr = wxString::Format(wxMedianStr, colName, "%");
     std::string medianStr(wxMedianStr.c_str());
     try{
         auto stmt = m_connection->PrepareStatement(medianStr);
