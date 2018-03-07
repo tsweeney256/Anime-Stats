@@ -34,7 +34,8 @@ public:
         wxWindow* parent, MainFrame* top,
         cppw::Sqlite3Connection* connection, const std::string& sqlScript,
         wxString boxLabel, std::vector<wxString> outputLabels,
-        const std::string& altSqlScript = "", wxString checkBoxLabel = "");
+        bool rightAlign = true, const std::string& altSqlScript = "",
+        wxString checkBoxLabel = "");
     void UpdateInfo() override;
 
 private:

@@ -17,7 +17,7 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top,
         m_statBoxes.push_back(
             new AnalysisTextBox(
                 this, top, connection, SqlStrings::timeWatchedSql,
-                "Time Spent on Anime", {"Days", "Formatted"},
+                "Time Spent on Anime", {"Days", "Formatted"}, false,
                 SqlStrings::timeRewatchedSql, "Including Rewatches"));
 
         wxString wxAvgMedianStr(SqlStrings::avgStr +

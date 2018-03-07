@@ -22,8 +22,8 @@ AnalysisBox::AnalysisBox(
 AnalysisTextBox::AnalysisTextBox(
     wxWindow* parent, MainFrame* top, cppw::Sqlite3Connection* connection,
     const std::string& sqlScript, wxString boxLabel,
-    std::vector<wxString> outputLabels, const std::string& altSqlScript,
-    wxString checkBoxLabel)
+    std::vector<wxString> outputLabels, bool rightAlign,
+    const std::string& altSqlScript, wxString checkBoxLabel)
     : AnalysisBox(parent, top, boxLabel, connection, sqlScript),
       m_altStatement(altSqlScript.empty() ? nullptr :
                      connection->PrepareStatement(altSqlScript)),
@@ -40,12 +40,24 @@ AnalysisTextBox::AnalysisTextBox(
 
     auto result = m_statement->GetResults();
     for (int i = 0; result->NextRow(); ++i) {
-        m_staticText.push_back(new wxStaticText(this, wxID_ANY, ""));
-        textSizer->Add(m_staticText.back(), wxSizerFlags(0).Border(wxALL));
+        auto rowSizer = new wxBoxSizer(wxHORIZONTAL);
+        auto rowItemSizer = new wxBoxSizer(wxVERTICAL);
+        m_staticText.push_back(
+            new wxStaticText(this, wxID_ANY, "", wxDefaultPosition,
+                             wxDefaultSize, wxALIGN_RIGHT));
+        rowSizer->Add(new wxStaticText(this, wxID_ANY, outputLabels[i] + ":"),
+                      wxSizerFlags(0).Border(wxLEFT | wxRIGHT | wxBOTTOM));
+        auto rowItemSizerFlags = wxSizerFlags(0).Border(wxLEFT | wxRIGHT);
+        if (rightAlign) {
+            rowItemSizerFlags = rowItemSizerFlags.Right();
+        }
+        rowItemSizer->Add(m_staticText.back(), rowItemSizerFlags);
+        rowSizer->Add(rowItemSizer, wxSizerFlags(1).Expand());
+        textSizer->Add(rowSizer, wxSizerFlags(1).Expand());
     }
 
     m_mainSizer->Add(controlSizer, wxSizerFlags(0).Border(wxALL));
-    m_mainSizer->Add(textSizer, wxSizerFlags(0).Border(wxALL));
+    m_mainSizer->Add(textSizer, wxSizerFlags(0).Border(wxALL).Expand());
     m_mainSizer->SetSizeHints(this);
 }
 
@@ -61,7 +73,6 @@ void AnalysisTextBox::UpdateInfo()
     }
     for (int i = 0; result->NextRow(); ++i) {
         m_staticText[i]->SetLabel(
-            m_outputLabels[i] + ": " +
             wxString::FromUTF8(result->GetString(0).c_str()));
     }
     m_mainSizer->SetSizeHints(this);
