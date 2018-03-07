@@ -10,7 +10,8 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top,
     : wxScrolledWindow(parent)
 {
     SetScrollRate(10, 10);
-    m_mainSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto statSizer = new wxBoxSizer(wxHORIZONTAL);
+    m_mainSizer = new wxBoxSizer(wxVERTICAL);
 
     try{
         m_statBoxes.push_back(
@@ -49,13 +50,14 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top,
                 "Release Type Count", releaseTypeLabels));
 
         for (auto& box : m_statBoxes) {
-            m_mainSizer->Add(box, wxSizerFlags(0).Border(wxALL));
+            statSizer->Add(box, wxSizerFlags(0).Border(wxALL).Expand());
         }
     } catch(const cppw::Sqlite3Exception& e){
         wxMessageBox(e.what());
         top->Close(true);
     }
 
+    m_mainSizer->Add(statSizer, wxSizerFlags(0));
     SetSizerAndFit(m_mainSizer);
 }
 

@@ -71,6 +71,7 @@ void AnalysisTextBox::OnCheckBox(wxCommandEvent& WXUNUSED(event))
 {
     try {
         UpdateInfo();
+        GetParent()->Layout();
     } catch(const cppw::Sqlite3Exception& e){
         wxMessageBox(e.what());
         m_top->Close();
