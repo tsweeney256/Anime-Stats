@@ -670,8 +670,7 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
             auto colName = wxString::FromUTF8(results->GetColumnName(i).c_str());
             m_grid->SetColLabelValue(i, colName);
             if(i != col::ID_SERIES){
-                if(i != col::PRONUNCIATION)
-                    m_colList.Add(colName);
+                m_colList.Add(colName);
                 int id = ID_VIEW_COL_BEGIN + i;
                 m_labelContextMenu->Append(id, colName, "", wxITEM_CHECK);
                 m_labelContextMenu->Check(id, true);
