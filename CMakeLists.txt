@@ -16,6 +16,10 @@ if(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "Stat
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 endif(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "Static_Debug")
 
+include_directories("${CMAKE_SOURCE_DIR}/external/fmt")
+
+add_subdirectory("${CMAKE_SOURCE_DIR}/external/fmt")
+
 set(SOURCE_FILES
   AdvFilterFrame.cpp
   AdvSortFrame.cpp
@@ -57,6 +61,8 @@ if(wxWidgets_FOUND)
   include("${wxWidgets_USE_FILE}")
   target_link_libraries(AnimeStats ${wxWidgets_LIBRARIES})
 endif(wxWidgets_FOUND)
+
+target_link_libraries(AnimeStats fmt)
 
 file(COPY "${CMAKE_SOURCE_DIR}/sql"
    DESTINATION .)

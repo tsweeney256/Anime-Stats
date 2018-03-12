@@ -1,5 +1,6 @@
 #include <wx/sizer.h>
 #include <wx/msgdlg.h>
+#include <fmt/format.h>
 #include "MainFrame.hpp"
 #include "AnalysisPanel.hpp"
 #include "AnalysisBox.hpp"
@@ -20,11 +21,10 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top,
                 "Time Spent on Anime", {"Days", "Formatted"}, false,
                 SqlStrings::timeRewatchedSql, "Including Rewatches"));
 
-        wxString wxAvgMedianStr(SqlStrings::avgStr +
+        std::string avgMedianStr(SqlStrings::avgStr +
                                 "\nUNION ALL\n" +
                                 SqlStrings::medianStr);
-        wxAvgMedianStr = wxString::Format(wxAvgMedianStr, "rating", "%");
-        std::string avgMedianStr(wxAvgMedianStr.utf8_str());
+        avgMedianStr = fmt::format(avgMedianStr, "rating");
         m_statBoxes.push_back(
             new AnalysisTextBox(this, top, connection, avgMedianStr, "Ratings",
                                 {"Average", "Median"}));

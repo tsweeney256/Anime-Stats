@@ -34,6 +34,7 @@
 #include <wx/dcclient.h>
 #include <wx/stdpaths.h>
 #include <wx/dialog.h>
+#include <fmt/format.h>
 #include "DataPanel.hpp"
 #include "AppIDs.hpp"
 #include "cppw/Sqlite3.hpp"
@@ -1165,10 +1166,9 @@ int DataPanel::GetColAggregate(std::string colName, std::string function)
 
 int DataPanel::GetColMedian(const std::string& colName)
 {
-    wxString wxMedianStr(SqlStrings::medianStr);
-    wxMedianStr = wxString::Format(wxMedianStr, colName, "%");
-    std::string medianStr(wxMedianStr.c_str());
+    std::string medianStr;
     try{
+        medianStr = fmt::format(SqlStrings::medianStr, colName);
         auto stmt = m_connection->PrepareStatement(medianStr);
         auto result = stmt->GetResults();
         result->NextRow();
@@ -1176,6 +1176,10 @@ int DataPanel::GetColMedian(const std::string& colName)
 
     }catch(cppw::Sqlite3Exception& e){
         wxMessageBox(std::string("Error preparing or executing median statement.\n") + e.what() + "\n" + medianStr);
+        m_top->Close(true);
+        return -1;
+    } catch(fmt::FormatError& e) {
+        wxMessageBox(e.what());
         m_top->Close(true);
         return -1;
     }
