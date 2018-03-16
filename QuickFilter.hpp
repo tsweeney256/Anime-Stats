@@ -31,11 +31,12 @@ namespace cppw
 }
 
 class DbFilter;
+class MainFrame;
 
 class QuickFilter : public wxPanel
 {
 public:
-    QuickFilter(wxWindow* parent, wxWindow* top, wxWindowID id,
+    QuickFilter(wxWindow* parent, MainFrame* top, wxWindowID id,
                 cppw::Sqlite3Connection* connection);
     void Reset(cppw::Sqlite3Connection* connection);
     ConstFilter GetFilter();
@@ -59,7 +60,7 @@ private:
     std::unique_ptr<DbFilter> m_dbFilter;
     wxTextCtrl* m_quickFilterTitle;
     wxComboBox* m_quickFilterSelect;
-    wxWindow* m_top;
+    MainFrame* m_top;
 
     wxDECLARE_EVENT_TABLE();
 };

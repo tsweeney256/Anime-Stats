@@ -43,7 +43,7 @@ wxBEGIN_EVENT_TABLE(QuickFilter, wxPanel)
     EVT_BUTTON(id_delete_btn, QuickFilter::OnQuickFilterDelete)
 wxEND_EVENT_TABLE()
 
-QuickFilter::QuickFilter(wxWindow* parent, wxWindow* top, wxWindowID id,
+QuickFilter::QuickFilter(wxWindow* parent, MainFrame* top, wxWindowID id,
                          cppw::Sqlite3Connection* connection)
     : wxPanel(parent, id), m_dbFilter(std::make_unique<DbFilter>()), m_top(top)
 {

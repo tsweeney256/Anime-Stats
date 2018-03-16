@@ -141,17 +141,6 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     ResetPanel(m_connection);
 }
 
-bool DataPanel::UnsavedChangesExist() { return m_unsavedChanges; }
-
-void DataPanel::SetUnsavedChanges(bool unsavedChanges)
-{
-    if(unsavedChanges && !m_unsavedChanges)
-        m_top->SetTitle("*" + m_top->GetTitle());
-    else if(m_unsavedChanges && !unsavedChanges)
-        m_top->SetTitle(m_top->GetTitle().Mid(1));
-    m_unsavedChanges = unsavedChanges;
-}
-
 void DataPanel::Undo()
 {
     try{
@@ -212,7 +201,7 @@ void DataPanel::DeleteRows()
         }
         ++m_commandLevel;
         HandleCommandChecking();
-        SetUnsavedChanges(true);
+        m_top->SetUnsavedChanges(true);
     }
 }
 
@@ -231,7 +220,7 @@ void DataPanel::AliasTitle()
         TitleAliasDialog aliasDlg(this, wxID_ANY, m_connection,
                                              wxAtol(m_grid->GetCellValue(rows[0], col::ID_SERIES)), m_grid->GetCellValue(rows[0], col::TITLE));
         if(aliasDlg.ShowModal() == wxID_OK)
-            SetUnsavedChanges(true);
+            m_top->SetUnsavedChanges(true);
     }
 }
 
@@ -253,7 +242,7 @@ void DataPanel::EditTags()
             m_grid->GetCellValue(rows[0], col::TITLE));
         editTagDlg.ShowModal();
         if (editTagDlg.MadeChanges()) {
-            SetUnsavedChanges(true);
+            m_top->SetUnsavedChanges(true);
         }
     }
 }
@@ -438,7 +427,7 @@ void DataPanel::OnGridCellChanging(wxGridEvent& event)
     if(successfulEdit){
         ++m_commandLevel;
         HandleCommandChecking();
-        SetUnsavedChanges(true);
+        m_top->SetUnsavedChanges(true);
     }
 }
 
@@ -843,7 +832,7 @@ void DataPanel::ResetPanel(cppw::Sqlite3Connection* connection)
     m_commands = std::vector<std::unique_ptr<SqlGridCommand>>();
     m_commandLevel = 0;
     m_connection = connection;
-    SetUnsavedChanges(false);
+    m_top->SetUnsavedChanges(false);
     m_quickFilter->Reset(connection);
     UpdateCellColorInfo();
     DefaultFilter();

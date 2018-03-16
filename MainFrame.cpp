@@ -167,9 +167,17 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     notebook->AddPage(m_dataPanel, _("Data"));
     mainPanelSizer->Add(notebook, wxSizerFlags(1).Expand());
     mainPanel->SetSizerAndFit(mainPanelSizer);
-    if (m_needUpdateNotify) {
-        DbUpdateNotify();
-    }
+}
+
+bool MainFrame::UnsavedChangesExist() { return m_unsavedChanges; }
+
+void MainFrame::SetUnsavedChanges(bool unsavedChanges)
+{
+    if(unsavedChanges && !m_unsavedChanges)
+        SetTitle("*" + GetTitle());
+    else if(m_unsavedChanges && !unsavedChanges)
+        SetTitle(GetTitle().Mid(1));
+    m_unsavedChanges = unsavedChanges;
 }
 
 void MainFrame::UpdateStats()
@@ -188,7 +196,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
         wxMessageBox("Unable to save application settings.");
         return;
     }
-    if(m_dataPanel->UnsavedChangesExist() && event.CanVeto()){
+    if(UnsavedChangesExist() && event.CanVeto()){
         auto status = SaveChangesPopup();
         if(status != wxID_CANCEL)
             Destroy();
@@ -220,7 +228,7 @@ void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
         }
     }
     if(savedChanges){
-        m_dataPanel->SetUnsavedChanges(false);
+        SetUnsavedChanges(false);
     }
 }
 
@@ -293,7 +301,7 @@ void MainFrame::OnMakeDefaultFilter(wxCommandEvent& WXUNUSED(event))
             wxMessageBox("No filter selected");
             return;
         }
-        m_dataPanel->SetUnsavedChanges(true);
+        SetUnsavedChanges(true);
         quickFilter->SetDefaultFilter(curFilter);
         wxMessageBox("The default filter is now \"" + curFilter + "\"");
     } catch (const cppw::Sqlite3Exception& e) {
@@ -317,7 +325,7 @@ void MainFrame::OnDefaultDb(wxCommandEvent& event)
 
 void MainFrame::OnNew(wxCommandEvent& WXUNUSED(event))
 {
-    if(!(m_dataPanel->UnsavedChangesExist() &&
+    if(!(UnsavedChangesExist() &&
          SaveChangesPopup() == wxID_CANCEL)){
         if (!CreateMemoryDb()) {
             return;
@@ -330,7 +338,7 @@ void MainFrame::OnNew(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 {
-    if (!(m_dataPanel->UnsavedChangesExist() &&
+    if (!(UnsavedChangesExist() &&
           SaveChangesPopup() == wxID_CANCEL)){
         wxString dir = wxStandardPaths::Get().GetDocumentsDir();
         wxFileDialog dlg(this, wxFileSelectorPromptStr, wxEmptyString,
@@ -354,9 +362,6 @@ void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
                 m_fileMenu->Check(DEFAULT_DB, true);
             }
             m_dataPanel->ResetPanel(m_connection.get());
-            if (m_needUpdateNotify) {
-                DbUpdateNotify();
-            }
         }
     }
 }
@@ -491,7 +496,7 @@ void MainFrame::OnImportMAL(wxCommandEvent& WXUNUSED(event))
                     }
                 }
             }while((child = child->GetNext()));
-            m_dataPanel->SetUnsavedChanges(true);
+            SetUnsavedChanges(true);
             m_dataPanel->UpdateCellColorInfo();
             m_dataPanel->RefreshFilter();
         }
@@ -524,7 +529,9 @@ bool MainFrame::OpenDb(const wxString& file)
     m_dbFile = file;
     SetDbFlags(m_connection.get());
     try {
-        m_needUpdateNotify = UpdateDb(GetDbVersion());
+        if (UpdateDb(GetDbVersion())) {
+            DbUpdateNotify();
+        }
     } catch (const cppw::Sqlite3Exception& e) {
         wxMessageBox(std::string("Error: ") + e.what());
         Destroy();
@@ -672,8 +679,7 @@ bool MainFrame::UpdateDb(int version)
 }
 
 void MainFrame::DbUpdateNotify() {
-    m_dataPanel->SetUnsavedChanges(true);
-    m_needUpdateNotify = false;
+    SetUnsavedChanges(true);
     wxMessageBox("Your database has been updated to the newest version.\n"
                  "If you do not wish to have your database structure modified, please close the application and do not save.\n"
                  "For details about the changes, please consult the changelog.");

@@ -41,8 +41,6 @@ public:
     DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, Settings* settings, wxWindowID id = ID_NOTEBOOK,
               const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
               long style = wxTAB_TRAVERSAL, const wxString& name = wxPanelNameStr);
-    bool UnsavedChangesExist();
-    void SetUnsavedChanges(bool);
     void Undo();
     void Redo();
     void AddRow();
@@ -126,7 +124,6 @@ private:
     std::vector<wxString> m_allowedSeasonVals;
     int m_commandLevel = 0;
     bool m_colsCreated = false;
-    bool m_unsavedChanges = false;
     bool m_firstDraw = true;
     wxBoxSizer* m_panelSizer;
     wxArrayString m_colList;

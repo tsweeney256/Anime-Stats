@@ -28,6 +28,8 @@ class MainFrame : public wxFrame
 {
 public:
     MainFrame(const wxString& title, const wxPoint &pos, const wxSize& size);
+    void SetUnsavedChanges(bool);
+    bool UnsavedChangesExist();
     void UpdateStats();
 
 private:
@@ -75,8 +77,8 @@ private:
     std::unique_ptr<Settings> m_settings = nullptr;
     wxString m_dbFile;
     bool m_dbInMemory = false;
-    bool m_needUpdateNotify = false;
     const char* const settingsFileName = "settings.xml";
+    bool m_unsavedChanges = false;
 
     enum
     {
