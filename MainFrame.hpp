@@ -28,6 +28,7 @@ class MainFrame : public wxFrame
 {
 public:
     MainFrame(const wxString& title, const wxPoint &pos, const wxSize& size);
+    void UpdateStats();
 
 private:
     void OnClose(wxCloseEvent& event);

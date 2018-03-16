@@ -17,66 +17,7 @@
 #define FILTERSTRUCTS_HPP
 
 #include <memory>
-#include <tuple>
-
-namespace cppw {
-    class Sqlite3Connection;
-}
-
-namespace FilterArg
-{
-    enum {
-        watched = 0,
-        watching,
-        stalled,
-        dropped,
-        toWatch,
-        blank,
-        tv,
-        movie,
-        ova,
-        ona,
-        tvSpecial,
-        releaseBlank,
-        winter,
-        spring,
-        summer,
-        fall,
-        seasonBlank,
-        ratingEnabled,
-        yearEnabled,
-        epsWatchedEnabled,
-        epsRewatchedEnabled,
-        totalEpsEnabled,
-        lengthEnabled,
-        dateStartedEnabled,
-        dateFinishedEnabled,
-        ratingLow,
-        ratingHigh,
-        yearLow,
-        yearHigh,
-        epsWatchedLow,
-        epsWatchedHigh,
-        epsRewatchedLow,
-        epsRewatchedHigh,
-        totalEpsLow,
-        totalEpsHigh,
-        lengthLow,
-        lengthHigh,
-        yearStartedLow,
-        yearStartedHigh,
-        monthStartedLow,
-        monthStartedHigh,
-        dayStartedLow,
-        dayStartedHigh,
-        yearFinishedLow,
-        yearFinishedHigh,
-        monthFinishedLow,
-        monthFinishedHigh,
-        dayFinishedLow,
-        dayFinishedHigh
-    };
-}
+#include <utility>
 
 struct BasicFilterInfo
 {
@@ -165,16 +106,7 @@ private:
     AdvFilterInfo() {}
 };
 
-using FilterTuple = std::tuple<int, std::shared_ptr<BasicFilterInfo>,
-                               std::shared_ptr<AdvFilterInfo>>;
-
-FilterTuple GetFiltersFromDb(cppw::Sqlite3Connection* connection,
-                 const wxString& filterName, const wxString& title);
-
-int InsertFiltersToDb(cppw::Sqlite3Connection* connection,
-                       const wxString& filterName,
-                       bool defaultFilter,
-                       BasicFilterInfo* basicFilterInfo,
-                       AdvFilterInfo* advFilterInfo);
+using Filter = std::pair<BasicFilterInfo*, AdvFilterInfo*>;
+using ConstFilter = std::pair<const BasicFilterInfo*, const AdvFilterInfo*>;
 
 #endif

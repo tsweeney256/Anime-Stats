@@ -22,12 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <wx/spinctrl.h>
 #include <wx/stattext.h>
 
-class DataPanel;
+class MainFrame;
+class QuickFilter;
 
 class AdvFilterFrame : public wxFrame
 {
 public:
-    AdvFilterFrame(wxWindow* parent, const wxString& title, const wxPoint &pos, const wxSize& size);
+    AdvFilterFrame(QuickFilter* parent, MainFrame* top, const wxString& title,
+                   const wxPoint &pos, const wxSize& size);
 
 private:
     void OnClose(wxCloseEvent& event);
@@ -67,7 +69,8 @@ private:
     const int m_minDay    = 1;
     const int m_maxDay    = 31;
 
-    DataPanel* m_parent;
+    MainFrame* m_top;
+    QuickFilter* m_quickFilter;
     wxScrolledWindow* m_mainPanel;
 
     wxCheckBox* m_watchedCheck;

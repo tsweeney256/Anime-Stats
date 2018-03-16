@@ -32,6 +32,7 @@ namespace cppw { class Sqlite3Connection; }
 class MainFrame;
 class wxMenu;
 struct Settings;
+class QuickFilter;
 
 //the panel that holds all the components that will make up the Data page
 class DataPanel : public wxPanel
@@ -48,14 +49,11 @@ public:
     void DeleteRows();
     void AliasTitle();
     void EditTags();
-    void ApplyFilter();
     void DefaultFilter();
     void AdvFilter();
     void AdvSort();
     void ClearCommandHistory();
-    void ApplyFilter(std::shared_ptr<BasicFilterInfo> newBasicFilterInfo,
-                     std::shared_ptr<AdvFilterInfo> newAdvFilterInfo);
-    void SetSort(std::vector<colSort> sortingRules);
+    void ApplyFilter();
     void SortByPronunciation(bool b);
 
     //This can't be done in the destructor for some reason or else it gets screwed up
@@ -70,14 +68,10 @@ public:
     const std::vector<wxString>* GetAllowedReleaseVals();
     const std::vector<wxString>* GetAllowedSeasonVals();
     MainFrame* GetTop() const;
-    wxString GetSelectedFilterName();
-    void SetDefaultFilter(wxString name);
+    QuickFilter* GetQuickFilter();
 
 private:
     void OnTextEnter(wxCommandEvent& event);
-    void OnQuickFilterNew(wxCommandEvent& event);
-    void OnQuickFilterOverwrite(wxCommandEvent& event);
-    void OnQuickFilterDelete(wxCommandEvent& event);
     void OnApplyFilter(wxCommandEvent& event);
     void OnDefaultFilter(wxCommandEvent& event);
     void OnAdvFilter(wxCommandEvent& event);
@@ -106,9 +100,6 @@ private:
     int GetColMedian(const std::string& colName);
     void RefreshColColors(int col);
     void ShowSqliteBusyErrorBox();
-    wxArrayString GetFilterNames();
-    void ApplyQuickFilter();
-    void DeleteFilterFromDb();
 
     class CellColorInfo{
     public:
@@ -123,7 +114,6 @@ private:
     MainFrame* m_top;
     wxGrid* m_grid;
     Settings* m_settings;
-    wxComboBox* m_quickFilterCombo;
     wxButton* m_advFilterButton;
     wxButton* m_advSortButton;
     wxTextCtrl* m_titleFilterTextField;
@@ -136,15 +126,13 @@ private:
     std::vector<wxString> m_allowedSeasonVals;
     int m_commandLevel = 0;
     bool m_colsCreated = false;
-    std::vector<colSort> m_sortingRules;
     bool m_unsavedChanges = false;
     bool m_firstDraw = true;
-    std::shared_ptr<BasicFilterInfo> m_basicFilterInfo;
-    std::shared_ptr<AdvFilterInfo> m_advFilterInfo;
     wxBoxSizer* m_panelSizer;
     wxArrayString m_colList;
     CellColorInfo m_cellColorInfo[col::NUM_COLS];
-    wxString m_defaultFilter;
+    QuickFilter* m_quickFilter;
+
 
     DECLARE_EVENT_TABLE()
 };

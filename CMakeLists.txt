@@ -24,12 +24,12 @@ set(SOURCE_FILES
   ColorOptionsDlg.cpp
   CustomGridCellEditors.cpp
   DataPanel.cpp
+  DbFilter.cpp
   EditTagDialog.cpp
-  FilterStructs.cpp
   Helpers.cpp
   MainFrame.cpp
+  QuickFilter.cpp
   Settings.cpp
-  SortStruct.cpp
   SqlGridCommand.cpp
   SqlTitleAliasCommand.cpp
   TitleAliasDialog.cpp

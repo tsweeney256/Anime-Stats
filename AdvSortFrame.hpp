@@ -22,10 +22,14 @@
 #include <wx/radiobut.h>
 #include "SortStruct.hpp"
 
+class MainFrame;
+class QuickFilter;
+
 class AdvSortFrame : public wxFrame
 {
 public:
-    AdvSortFrame(wxWindow* parent, const wxArrayString& cols);
+    AdvSortFrame(QuickFilter* quickFilter, MainFrame* top,
+                 const wxArrayString& cols);
 
 private:
     void OnClose(wxCloseEvent& event);
@@ -42,7 +46,8 @@ private:
     void UpDownCommon(int direction); //direction being positive or negative 1
     void ApplyOkCommon();
 
-    DataPanel* m_dataPanel;
+    MainFrame* m_top;
+    QuickFilter* m_quickFilter;
     wxListBox* m_sortList;
     wxListBox* m_dontList;
     wxRadioButton* m_ascBtnLeft;

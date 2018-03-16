@@ -36,6 +36,7 @@
 #include "ColorOptionsDlg.hpp"
 #include "Helpers.hpp"
 #include "cppw/Sqlite3.hpp"
+#include "QuickFilter.hpp"
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -171,6 +172,11 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     }
 }
 
+void MainFrame::UpdateStats()
+{
+    m_dataPanel->ApplyFilter();
+}
+
 void MainFrame::OnClose(wxCloseEvent& event)
 {
     SwitchToDataDir();
@@ -281,23 +287,14 @@ void MainFrame::OnAdvSort(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMakeDefaultFilter(wxCommandEvent& WXUNUSED(event))
 {
     try {
-        auto curFilter = m_dataPanel->GetSelectedFilterName();
+        auto quickFilter = m_dataPanel->GetQuickFilter();
+        auto curFilter = quickFilter->GetSelectedFilterName();
         if (curFilter == "") {
             wxMessageBox("No filter selected");
             return;
         }
-        auto stmt = m_connection->PrepareStatement(
-            "update SavedFilter set `default` = 1 where `name` = ?");
-        stmt->Bind(1, curFilter.utf8_str());
-        auto result = stmt->GetResults();
-        result->NextRow();
-        stmt = m_connection->PrepareStatement(
-            "update SavedFilter set `default` = 0 where `name` <> ?");
-        stmt->Bind(1, curFilter.utf8_str());
-        result = stmt->GetResults();
-        result->NextRow();
         m_dataPanel->SetUnsavedChanges(true);
-        m_dataPanel->SetDefaultFilter(curFilter);
+        quickFilter->SetDefaultFilter(curFilter);
         wxMessageBox("The default filter is now \"" + curFilter + "\"");
     } catch (const cppw::Sqlite3Exception& e) {
         wxMessageBox(e.what());

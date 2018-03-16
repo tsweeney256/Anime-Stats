@@ -17,9 +17,10 @@
 #include <wx/panel.h>
 #include <wx/button.h>
 #include <wx/sizer.h>
-#include "DataPanel.hpp"
-#include "AdvSortFrame.hpp"
 #include "AppIDs.hpp"
+#include "MainFrame.hpp"
+#include "QuickFilter.hpp"
+#include "AdvSortFrame.hpp"
 
 BEGIN_EVENT_TABLE(AdvSortFrame, wxFrame)
     EVT_CLOSE(AdvSortFrame::OnClose)
@@ -34,11 +35,13 @@ BEGIN_EVENT_TABLE(AdvSortFrame, wxFrame)
     EVT_LISTBOX(ID_LISTBOX_LEFT, AdvSortFrame::OnListBoxLeftSelect)
 END_EVENT_TABLE()
 
-AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
-    : wxFrame(parent, ID_ADV_SORT_FRAME, "Advanced Sorting", wxDefaultPosition, wxDefaultSize,
-          wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER |wxMAXIMIZE_BOX)), m_dataPanel(dynamic_cast<DataPanel*>(parent))
+AdvSortFrame::AdvSortFrame(QuickFilter* quickFilter, MainFrame* top,
+                           const wxArrayString& cols)
+    : wxFrame(quickFilter, ID_ADV_SORT_FRAME, "Advanced Sorting",
+              wxDefaultPosition, wxDefaultSize,
+              wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER |wxMAXIMIZE_BOX)),
+      m_top(top), m_quickFilter(quickFilter)
 {
-    wxASSERT(m_dataPanel);
     auto mainPanel = new wxPanel(this, wxID_ANY);
 
     m_sortList = new wxListBox(mainPanel, ID_LISTBOX_LEFT);
@@ -196,5 +199,6 @@ void AdvSortFrame::UpDownCommon(int direction)
 
 void AdvSortFrame::ApplyOkCommon()
 {
-    m_dataPanel->SetSort(m_toSort);
+    m_quickFilter->SetSort(m_toSort);
+    m_top->UpdateStats();
 }

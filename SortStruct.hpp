@@ -15,12 +15,7 @@
 
 #pragma once
 
-#include <vector>
 #include <wx/string.h>
-
-namespace cppw {
-    class Sqlite3Connection;
-}
 
 struct colSort
 {
@@ -28,8 +23,3 @@ struct colSort
     wxString name;
     bool asc = true;
 };
-
-void SaveSortToDb(cppw::Sqlite3Connection* connection,
-                  int idSavedFilter, std::vector<colSort> sortingRules);
-std::vector<colSort> LoadSortFromDb(cppw::Sqlite3Connection* connection,
-                                    int idSavedFilter);
