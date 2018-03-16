@@ -17,7 +17,9 @@
 #include <wx/panel.h>
 #include <wx/button.h>
 #include <wx/sizer.h>
+#include "cppw/Sqlite3.hpp"
 #include "AppIDs.hpp"
+#include "Helpers.hpp"
 #include "MainFrame.hpp"
 #include "QuickFilter.hpp"
 #include "AdvSortFrame.hpp"
@@ -36,8 +38,8 @@ BEGIN_EVENT_TABLE(AdvSortFrame, wxFrame)
 END_EVENT_TABLE()
 
 AdvSortFrame::AdvSortFrame(QuickFilter* quickFilter, MainFrame* top,
-                           const wxArrayString& cols)
-    : wxFrame(quickFilter, ID_ADV_SORT_FRAME, "Advanced Sorting",
+                           wxWindowID id, cppw::Sqlite3Connection* connection)
+    : wxFrame(quickFilter, id, "Advanced Sorting",
               wxDefaultPosition, wxDefaultSize,
               wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER |wxMAXIMIZE_BOX)),
       m_top(top), m_quickFilter(quickFilter)
@@ -101,6 +103,16 @@ AdvSortFrame::AdvSortFrame(QuickFilter* quickFilter, MainFrame* top,
     fullSizer->Add(contentSizer, borderNoExpandFlag);
     fullSizer->Add(bottomBtnSizer, wxSizerFlags(0).Border(wxALL).Bottom().Right());
 
+    wxArrayString cols;
+    wxString basicSelect;
+    readFileIntoString(basicSelect, "basicSelect.sql", top);
+    std::string stmtStr = std::string(basicSelect.utf8_str()) + " where 1<>1";
+    auto stmt = connection->PrepareStatement(stmtStr);
+    auto result = stmt->GetResults();
+    result->NextRow();
+    for (int i = col::FIRST_VISIBLE_COL; i < col::NUM_COLS; ++i) {
+        cols.Add(result->GetColumnName(i));
+    }
     m_dontList->InsertItems(cols, 0);
     mainPanel->SetSizerAndFit(fullSizer);
     this->Fit();

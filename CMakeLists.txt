@@ -32,7 +32,9 @@ set(SOURCE_FILES
   Settings.cpp
   SqlGridCommand.cpp
   SqlTitleAliasCommand.cpp
+  StatsPanel.cpp
   TitleAliasDialog.cpp
+  TopBar.cpp
   )
 set(CPPW_SQLITE3 cppw/Sqlite3/Sqlite3Connection.cpp
   cppw/Sqlite3/Sqlite3Exception.cpp

@@ -27,31 +27,30 @@
 #include "SqlGridCommand.hpp"
 #include "FilterStructs.hpp"
 #include "SortStruct.hpp"
+#include "StatsPanel.hpp"
 
 namespace cppw { class Sqlite3Connection; }
 class MainFrame;
 class wxMenu;
 struct Settings;
 class QuickFilter;
+class TopBar;
 
 //the panel that holds all the components that will make up the Data page
-class DataPanel : public wxPanel
+class DataPanel : public StatsPanel
 {
 public:
-    DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, Settings* settings, wxWindowID id = ID_NOTEBOOK,
-              const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
-              long style = wxTAB_TRAVERSAL, const wxString& name = wxPanelNameStr);
+    DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
+              cppw::Sqlite3Connection* connection, Settings* settings);
     void Undo();
     void Redo();
-    void AddRow();
-    void DeleteRows();
-    void AliasTitle();
-    void EditTags();
-    void DefaultFilter();
-    void AdvFilter();
-    void AdvSort();
+    void ApplyFilter() override;
+    void DefaultFilter() override;
+    void AddRow() override;
+    void DeleteRows() override;
+    void AliasTitle() override;
+    void EditTags() override;
     void ClearCommandHistory();
-    void ApplyFilter();
     void SortByPronunciation(bool b);
 
     //This can't be done in the destructor for some reason or else it gets screwed up
@@ -69,11 +68,11 @@ public:
     QuickFilter* GetQuickFilter();
 
 private:
+    void dummy() override {}
+
     void OnTextEnter(wxCommandEvent& event);
     void OnApplyFilter(wxCommandEvent& event);
     void OnDefaultFilter(wxCommandEvent& event);
-    void OnAdvFilter(wxCommandEvent& event);
-    void OnAdvSort(wxCommandEvent& event);
     void OnEditTags(wxCommandEvent& event);
     void OnAddRow(wxCommandEvent& event);
     void OnDeleteRow(wxCommandEvent& event);
@@ -109,7 +108,6 @@ private:
         enum{R, G, B};
     };
 
-    MainFrame* m_top;
     wxGrid* m_grid;
     Settings* m_settings;
     wxButton* m_advFilterButton;
@@ -117,7 +115,6 @@ private:
     wxTextCtrl* m_titleFilterTextField;
     wxMenu* m_labelContextMenu = nullptr;
     wxString m_basicSelectString;
-    cppw::Sqlite3Connection* m_connection;
     std::vector<std::unique_ptr<SqlGridCommand>> m_commands;
     std::vector<wxString> m_allowedWatchedVals;
     std::vector<wxString> m_allowedReleaseVals;
@@ -126,9 +123,9 @@ private:
     bool m_colsCreated = false;
     bool m_firstDraw = true;
     wxBoxSizer* m_panelSizer;
-    wxArrayString m_colList;
     CellColorInfo m_cellColorInfo[col::NUM_COLS];
     QuickFilter* m_quickFilter;
+    TopBar* m_topBar;
 
 
     DECLARE_EVENT_TABLE()

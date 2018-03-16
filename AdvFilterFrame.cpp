@@ -48,9 +48,9 @@ BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
 END_EVENT_TABLE()
 
 AdvFilterFrame::AdvFilterFrame(QuickFilter* parent, MainFrame* top,
-                               const wxString& title, const wxPoint& pos,
-                               const wxSize& size)
-    : wxFrame(parent, ID_ADV_FILTER_FRAME, title, pos, size,
+                               wxWindowID id, const wxString& title,
+                               const wxPoint& pos, const wxSize& size)
+    : wxFrame(parent, id, title, pos, size,
               wxDEFAULT_FRAME_STYLE & ~(/*wxRESIZE_BORDER |*/ wxMAXIMIZE_BOX)),
       m_top(top), m_quickFilter(parent)
 {

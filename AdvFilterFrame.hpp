@@ -28,8 +28,9 @@ class QuickFilter;
 class AdvFilterFrame : public wxFrame
 {
 public:
-    AdvFilterFrame(QuickFilter* parent, MainFrame* top, const wxString& title,
-                   const wxPoint &pos, const wxSize& size);
+    AdvFilterFrame(QuickFilter* parent, MainFrame* top, wxWindowID id,
+                   const wxString& title, const wxPoint &pos,
+                   const wxSize& size);
 
 private:
     void OnClose(wxCloseEvent& event);

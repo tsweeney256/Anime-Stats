@@ -38,8 +38,6 @@
 #include "AppIDs.hpp"
 #include "cppw/Sqlite3.hpp"
 #include "CustomGridCellEditors.hpp"
-#include "AdvFilterFrame.hpp"
-#include "AdvSortFrame.hpp"
 #include "TitleAliasDialog.hpp"
 #include "EditTagDialog.hpp"
 #include "MainFrame.hpp"
@@ -47,76 +45,39 @@
 #include "SqlStrings.hpp"
 #include "Helpers.hpp"
 #include "QuickFilter.hpp"
+#include "TopBar.hpp"
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_COMMAND(wxID_ANY, QuickFilterProcessEnterEvent, DataPanel::OnTextEnter)
-    EVT_BUTTON(ID_APPLY_FILTER_BTN, DataPanel::OnApplyFilter)
-    EVT_BUTTON(ID_RESET_FILTER_BTN, DataPanel::OnDefaultFilter)
-    EVT_BUTTON(ID_ADV_FILTER_BTN, DataPanel::OnAdvFilter)
-    EVT_BUTTON(ID_ADV_SORT_BTN, DataPanel::OnAdvSort)
-    EVT_BUTTON(ID_EDIT_TAGS_BTN, DataPanel::OnEditTags)
-    EVT_BUTTON(ID_ADD_ROW_BTN, DataPanel::OnAddRow)
-    EVT_BUTTON(ID_DELETE_ROW_BTN, DataPanel::OnDeleteRow)
-    EVT_BUTTON(ID_TITLE_ALIAS_BTN, DataPanel::OnAliasTitle)
+    EVT_COMMAND(TopBar::id_apply_filter_btn, TopBarButtonEvent,
+                DataPanel::OnApplyFilter)
+    EVT_COMMAND(TopBar::id_default_filter_btn, TopBarButtonEvent,
+                    DataPanel::OnDefaultFilter)
+    EVT_COMMAND(TopBar::id_add_row_btn, TopBarButtonEvent,
+                    DataPanel::OnEditTags)
+    EVT_COMMAND(TopBar::id_delete_row_btn, TopBarButtonEvent,
+                    DataPanel::OnAddRow)
+    EVT_COMMAND(TopBar::id_alias_title_btn, TopBarButtonEvent,
+                DataPanel::OnDeleteRow)
+    EVT_COMMAND(TopBar::id_edit_tags_btn, TopBarButtonEvent,
+                DataPanel::OnAliasTitle)
     EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
     EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
     EVT_GRID_CELL_CHANGED(DataPanel::OnGridCellChanged)
-    EVT_WINDOW_DESTROY(DataPanel::OnAdvrFrameDestruction)
     EVT_GRID_LABEL_RIGHT_CLICK(DataPanel::OnLabelContextMenu)
     EVT_MENU_RANGE(ID_VIEW_COL_BEGIN, ID_VIEW_COL_END, DataPanel::OnLabelContextMenuItem)
 END_EVENT_TABLE()
 
-DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, MainFrame* top, Settings* settings,
-                     wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-    : wxPanel(parent, id, pos, size, style, name), m_top(top), m_settings(settings), m_connection(connection)
+DataPanel::DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
+                     cppw::Sqlite3Connection* connection, Settings* settings)
+    : StatsPanel(parent, top, id, connection), m_settings(settings)
 {
     ////
     ////Top Bar
     ////
 
-    auto topBar = new wxScrolledWindow(this, wxID_ANY);
-    topBar->SetScrollRate(10, 10);
-
-    //
-    //quick filter
-    //
-    m_quickFilter = new QuickFilter(this, m_top, wxID_ANY, m_connection);
-
-    //
-    //buttons and textfield
-    //
-    auto applyFilterButton = new wxButton(topBar, ID_APPLY_FILTER_BTN, "Apply Filter");
-    auto resetFilterButton = new wxButton(topBar, ID_RESET_FILTER_BTN, "Default Filter");
-    m_advFilterButton = new wxButton(topBar, ID_ADV_FILTER_BTN, "Adv. Filter");
-    m_advSortButton = new wxButton(topBar, ID_ADV_SORT_BTN, "Adv. Sort");
-    auto addRowButton = new wxButton(topBar, ID_ADD_ROW_BTN, "Add Row");
-    auto deleteRowButton = new wxButton(topBar, ID_DELETE_ROW_BTN, "Delete Rows");
-    auto titleAliasButton = new wxButton(topBar, ID_TITLE_ALIAS_BTN, "Alias Title");
-    auto editTagsButton = new wxButton(topBar, ID_EDIT_TAGS_BTN, "Edit Tags");
-
-    //
-    //top bar sizers
-    //
-    auto btnSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto topControlBarSizer = new wxBoxSizer(wxVERTICAL);
-    m_panelSizer = new wxBoxSizer(wxVERTICAL);
-
-    auto btnFlags = wxSizerFlags(1).Expand();
-    btnSizer->Add(applyFilterButton, btnFlags);
-    btnSizer->Add(resetFilterButton, btnFlags);
-    btnSizer->Add(m_advFilterButton, btnFlags);
-    btnSizer->Add(m_advSortButton, btnFlags);
-    btnSizer->Add(addRowButton, btnFlags);
-    btnSizer->Add(deleteRowButton, btnFlags);
-    btnSizer->Add(titleAliasButton, btnFlags);
-    btnSizer->Add(editTagsButton, btnFlags);
-
-    topControlBarSizer->Add(
-        m_quickFilter, wxSizerFlags(0).Expand().Border(wxTOP | wxLEFT));
-    topControlBarSizer->Add(
-        btnSizer, wxSizerFlags(0).Expand().Border(wxALL ^ wxRIGHT ));
-    topBar->SetSizerAndFit(topControlBarSizer);
-
+    m_topBar = new TopBar(this, m_top, wxID_ANY, m_connection);
+    m_quickFilter = m_topBar->GetQuickFilter();
     ////
     ////grid
     ////
@@ -131,7 +92,8 @@ DataPanel::DataPanel(cppw::Sqlite3Connection* connection, wxWindow* parent, Main
     //
     //panel sizer
     //
-    m_panelSizer->Add(topBar, wxSizerFlags(0).Border(wxALL, 2));
+    m_panelSizer = new wxBoxSizer(wxVERTICAL);
+    m_panelSizer->Add(m_topBar, wxSizerFlags(0).Border(wxALL, 2));
     m_panelSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
     SetSizerAndFit(m_panelSizer);
 
@@ -253,23 +215,6 @@ void DataPanel::DefaultFilter()
     ApplyFilter();
 }
 
-void DataPanel::AdvFilter()
-{
-    //non-modal
-    auto frame = new AdvFilterFrame(m_quickFilter, m_top, "Advanced Filtering",
-                                    wxDefaultPosition, wxDefaultSize);
-    frame->Show(true);
-    m_advFilterButton->Disable();
-}
-
-void DataPanel::AdvSort()
-{
-    //non-modal
-    auto frame = new AdvSortFrame(m_quickFilter, m_top, m_colList);
-    frame->Show(true);
-    m_advSortButton->Disable();
-}
-
 void DataPanel::ClearCommandHistory()
 {
     m_commands.clear();
@@ -289,16 +234,6 @@ void DataPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
 void DataPanel::OnDefaultFilter(wxCommandEvent& WXUNUSED(event))
 {
     DefaultFilter();
-}
-
-void DataPanel::OnAdvFilter(wxCommandEvent& WXUNUSED(event))
-{
-    AdvFilter();
-}
-
-void DataPanel::OnAdvSort(wxCommandEvent& WXUNUSED(event))
-{
-    AdvSort();
 }
 
 void DataPanel::OnAddRow(wxCommandEvent& WXUNUSED(event))
@@ -449,14 +384,6 @@ void DataPanel::OnGridCellChanged(wxGridEvent& event)
     m_grid->Refresh(); //needed for Windows
 }
 
-void DataPanel::OnAdvrFrameDestruction(wxWindowDestroyEvent& event)
-{
-    if(event.GetId() == ID_ADV_FILTER_FRAME)
-        m_advFilterButton->Enable();
-    else if(event.GetId() == ID_ADV_SORT_FRAME)
-        m_advSortButton->Enable();
-}
-
 void DataPanel::OnLabelContextMenu(wxGridEvent& event)
 {
     if(event.GetRow() < 0)
@@ -522,8 +449,6 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
             auto colName = wxString::FromUTF8(results->GetColumnName(i).c_str());
             m_grid->SetColLabelValue(i, colName);
             if(i != col::ID_SERIES){
-                if(i != col::PRONUNCIATION)
-                    m_colList.Add(colName);
                 int id = ID_VIEW_COL_BEGIN + i;
                 m_labelContextMenu->Append(id, colName, "", wxITEM_CHECK);
                 m_labelContextMenu->Check(id, true);

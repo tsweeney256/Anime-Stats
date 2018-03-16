@@ -22,14 +22,19 @@
 #include <wx/radiobut.h>
 #include "SortStruct.hpp"
 
+namespace cppw
+{
+    class Sqlite3Connection;
+}
+
 class MainFrame;
 class QuickFilter;
 
 class AdvSortFrame : public wxFrame
 {
 public:
-    AdvSortFrame(QuickFilter* quickFilter, MainFrame* top,
-                 const wxArrayString& cols);
+    AdvSortFrame(QuickFilter* quickFilter, MainFrame* top, wxWindowID id,
+                 cppw::Sqlite3Connection* connection);
 
 private:
     void OnClose(wxCloseEvent& event);
