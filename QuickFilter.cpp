@@ -24,6 +24,7 @@
 #include "FilterStructs.hpp"
 #include "SortStruct.hpp"
 #include "DbFilter.hpp"
+#include "MainFrame.hpp"
 #include "QuickFilter.hpp"
 
 enum {
@@ -180,7 +181,7 @@ void QuickFilter::OnQuickFilterNew(wxCommandEvent& WXUNUSED(event))
                 m_quickFilterSelect->Append(name);
             }
             m_quickFilterSelect->SetValue(nameCtrl->GetValue());
-            // SetUnsavedChanges(true);
+            m_top->SetUnsavedChanges(true);
         } catch (const cppw::Sqlite3Exception& e) {
             if (e.GetErrorCode() == SQLITE_CONSTRAINT) {
                 wxMessageBox("Error: Filter with this name already exists");
@@ -210,7 +211,7 @@ void QuickFilter::OnQuickFilterOverwrite(wxCommandEvent& WXUNUSED(event))
             m_dbFilter->DeleteFilter(curFilter);
             m_dbFilter->SaveFilter(curFilter, isDefault);
             m_quickFilterSelect->RemoveSelection();
-            // SetUnsavedChanges(true);
+            m_top->SetUnsavedChanges(true);
         }
     } catch (const cppw::Sqlite3Exception& e) {
         wxMessageBox(wxString("Error: ") + e.what());
@@ -238,7 +239,7 @@ void QuickFilter::OnQuickFilterDelete(wxCommandEvent& WXUNUSED(event))
                 m_quickFilterSelect->Append(name);
             }
             m_quickFilterSelect->SetValue("");
-            // SetUnsavedChanges(true);
+            m_top->SetUnsavedChanges(true);
         }
     } catch (const cppw::Sqlite3Exception& e) {
         wxMessageBox(wxString("Error: ") + e.what());
