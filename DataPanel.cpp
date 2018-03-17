@@ -54,13 +54,13 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_COMMAND(TopBar::id_default_filter_btn, TopBarButtonEvent,
                     DataPanel::OnDefaultFilter)
     EVT_COMMAND(TopBar::id_add_row_btn, TopBarButtonEvent,
-                    DataPanel::OnEditTags)
-    EVT_COMMAND(TopBar::id_delete_row_btn, TopBarButtonEvent,
                     DataPanel::OnAddRow)
+    EVT_COMMAND(TopBar::id_delete_row_btn, TopBarButtonEvent,
+                    DataPanel::OnDeleteRow)
     EVT_COMMAND(TopBar::id_alias_title_btn, TopBarButtonEvent,
-                DataPanel::OnDeleteRow)
-    EVT_COMMAND(TopBar::id_edit_tags_btn, TopBarButtonEvent,
                 DataPanel::OnAliasTitle)
+    EVT_COMMAND(TopBar::id_edit_tags_btn, TopBarButtonEvent,
+                DataPanel::OnEditTags)
     EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
     EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
     EVT_GRID_CELL_CHANGED(DataPanel::OnGridCellChanged)
