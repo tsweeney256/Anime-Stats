@@ -256,10 +256,10 @@ void DataPanel::OnGridColSort(wxGridEvent& event)
 {
     int col = event.GetCol();
     std::string name;
-    if(event.GetCol() == col::TITLE) {
+    if(col == col::TITLE) {
         name = "nameSort";
     } else {
-        name = colViewName[col];
+        name = std::string(m_grid->GetColLabelValue(col).utf8_str());
     }
     auto sortingRules = *m_quickFilter->GetSort();
     if (sortingRules.size() == 1 && sortingRules[0].name == name) {

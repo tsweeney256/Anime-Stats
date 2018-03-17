@@ -42,7 +42,7 @@
 #include <iostream>
 #endif
 
-static const int current_db_version = 3;
+static const int current_db_version = 4;
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_CLOSE(MainFrame::OnClose)
