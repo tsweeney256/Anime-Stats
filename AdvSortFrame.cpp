@@ -17,9 +17,12 @@
 #include <wx/panel.h>
 #include <wx/button.h>
 #include <wx/sizer.h>
-#include "DataPanel.hpp"
-#include "AdvSortFrame.hpp"
+#include "cppw/Sqlite3.hpp"
 #include "AppIDs.hpp"
+#include "Helpers.hpp"
+#include "MainFrame.hpp"
+#include "QuickFilter.hpp"
+#include "AdvSortFrame.hpp"
 
 BEGIN_EVENT_TABLE(AdvSortFrame, wxFrame)
     EVT_CLOSE(AdvSortFrame::OnClose)
@@ -34,11 +37,13 @@ BEGIN_EVENT_TABLE(AdvSortFrame, wxFrame)
     EVT_LISTBOX(ID_LISTBOX_LEFT, AdvSortFrame::OnListBoxLeftSelect)
 END_EVENT_TABLE()
 
-AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
-    : wxFrame(parent, ID_ADV_SORT_FRAME, "Advanced Sorting", wxDefaultPosition, wxDefaultSize,
-          wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER |wxMAXIMIZE_BOX)), m_dataPanel(dynamic_cast<DataPanel*>(parent))
+AdvSortFrame::AdvSortFrame(QuickFilter* quickFilter, MainFrame* top,
+                           wxWindowID id, cppw::Sqlite3Connection* connection)
+    : wxFrame(quickFilter, id, "Advanced Sorting",
+              wxDefaultPosition, wxDefaultSize,
+              wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER |wxMAXIMIZE_BOX)),
+      m_top(top), m_quickFilter(quickFilter)
 {
-    wxASSERT(m_dataPanel);
     auto mainPanel = new wxPanel(this, wxID_ANY);
 
     m_sortList = new wxListBox(mainPanel, ID_LISTBOX_LEFT);
@@ -98,6 +103,16 @@ AdvSortFrame::AdvSortFrame(wxWindow* parent, const wxArrayString& cols)
     fullSizer->Add(contentSizer, borderNoExpandFlag);
     fullSizer->Add(bottomBtnSizer, wxSizerFlags(0).Border(wxALL).Bottom().Right());
 
+    wxArrayString cols;
+    wxString basicSelect;
+    readFileIntoString(basicSelect, "basicSelect.sql", top);
+    std::string stmtStr = std::string(basicSelect.utf8_str()) + " where 1<>1";
+    auto stmt = connection->PrepareStatement(stmtStr);
+    auto result = stmt->GetResults();
+    result->NextRow();
+    for (int i = col::FIRST_VISIBLE_COL; i < col::NUM_COLS; ++i) {
+        cols.Add(result->GetColumnName(i));
+    }
     m_dontList->InsertItems(cols, 0);
     mainPanel->SetSizerAndFit(fullSizer);
     this->Fit();
@@ -196,5 +211,6 @@ void AdvSortFrame::UpDownCommon(int direction)
 
 void AdvSortFrame::ApplyOkCommon()
 {
-    m_dataPanel->SetSort(m_toSort);
+    m_quickFilter->SetSort(m_toSort);
+    m_top->UpdateStats();
 }

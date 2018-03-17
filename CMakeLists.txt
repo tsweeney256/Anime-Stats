@@ -24,15 +24,17 @@ set(SOURCE_FILES
   ColorOptionsDlg.cpp
   CustomGridCellEditors.cpp
   DataPanel.cpp
+  DbFilter.cpp
   EditTagDialog.cpp
-  FilterStructs.cpp
   Helpers.cpp
   MainFrame.cpp
+  QuickFilter.cpp
   Settings.cpp
-  SortStruct.cpp
   SqlGridCommand.cpp
   SqlTitleAliasCommand.cpp
+  StatsPanel.cpp
   TitleAliasDialog.cpp
+  TopBar.cpp
   )
 set(CPPW_SQLITE3 cppw/Sqlite3/Sqlite3Connection.cpp
   cppw/Sqlite3/Sqlite3Exception.cpp
