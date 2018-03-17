@@ -17,10 +17,11 @@
 #include <wx/sizer.h>
 #include <wx/textctrl.h>
 #include <wx/button.h>
-#include "AdvFilterFrame.hpp"
-#include "DataPanel.hpp"
-#include "FilterStructs.hpp"
 #include "AppIDs.hpp"
+#include "FilterStructs.hpp"
+#include "MainFrame.hpp"
+#include "QuickFilter.hpp"
+#include "AdvFilterFrame.hpp"
 
 BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
     EVT_CLOSE(AdvFilterFrame::OnClose)
@@ -46,11 +47,13 @@ BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
     EVT_BUTTON(wxID_APPLY, AdvFilterFrame::OnApply)
 END_EVENT_TABLE()
 
-AdvFilterFrame::AdvFilterFrame(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size)
-    : wxFrame(parent, ID_ADV_FILTER_FRAME, title, pos, size, wxDEFAULT_FRAME_STYLE & ~(/*wxRESIZE_BORDER |*/ wxMAXIMIZE_BOX))
+AdvFilterFrame::AdvFilterFrame(QuickFilter* parent, MainFrame* top,
+                               wxWindowID id, const wxString& title,
+                               const wxPoint& pos, const wxSize& size)
+    : wxFrame(parent, id, title, pos, size,
+              wxDEFAULT_FRAME_STYLE & ~(/*wxRESIZE_BORDER |*/ wxMAXIMIZE_BOX)),
+      m_top(top), m_quickFilter(parent)
 {
-    m_parent = dynamic_cast<DataPanel*>(parent);
-    wxASSERT(parent);
     m_mainPanel = new wxScrolledWindow(this, wxID_ANY);
     m_mainPanel->SetScrollRate(10, 10);
 
@@ -698,8 +701,8 @@ void AdvFilterFrame::EnableAllSeason(bool val)
 
 void AdvFilterFrame::ApplyFilter()
 {
-    auto basic = BasicFilterInfo::MakeShared();
-    auto adv = AdvFilterInfo::MakeShared();
+    auto basic = BasicFilterInfo::MakeUnique();
+    auto adv = AdvFilterInfo::MakeUnique();
 
     basic->title = m_titleTextField->GetValue().utf8_str();
     basic->watched = m_watchedCheck->GetValue();
@@ -768,5 +771,6 @@ void AdvFilterFrame::ApplyFilter()
     adv->tagKey = m_tagKeyTextField->GetValue().utf8_str();
     adv->tagVal = m_tagValTextField->GetValue().utf8_str();
 
-    m_parent->ApplyFilter(basic, adv);
+    m_quickFilter->SetFilter(std::move(basic), std::move(adv));
+    m_top->UpdateStats();
 }
