@@ -21,8 +21,9 @@
 #include "cppw/Sqlite3.hpp"
 #include "Settings.hpp"
 
-class DataPanel;
 class wxMenu;
+class DataPanel;
+class TopBar;
 
 class MainFrame : public wxFrame
 {
@@ -67,6 +68,7 @@ private:
     bool UpdateDb(int version);
     void DbUpdateNotify();
     void UpdateNegOneDb();
+    void Reset(cppw::Sqlite3Connection* connection);
 
     wxDECLARE_EVENT_TABLE();
 
@@ -79,6 +81,7 @@ private:
     bool m_dbInMemory = false;
     const char* const settingsFileName = "settings.xml";
     bool m_unsavedChanges = false;
+    TopBar* m_topBar = nullptr;
 
     enum
     {

@@ -41,7 +41,8 @@ class DataPanel : public StatsPanel
 {
 public:
     DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
-              cppw::Sqlite3Connection* connection, Settings* settings);
+              cppw::Sqlite3Connection* connection, Settings* settings,
+              TopBar* topBar);
     void Undo();
     void Redo();
     void ApplyFilter() override;
@@ -125,7 +126,6 @@ private:
     wxBoxSizer* m_panelSizer;
     CellColorInfo m_cellColorInfo[col::NUM_COLS];
     QuickFilter* m_quickFilter;
-    TopBar* m_topBar;
 
 
     DECLARE_EVENT_TABLE()

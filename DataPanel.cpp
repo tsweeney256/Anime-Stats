@@ -69,15 +69,11 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
 END_EVENT_TABLE()
 
 DataPanel::DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
-                     cppw::Sqlite3Connection* connection, Settings* settings)
-    : StatsPanel(parent, top, id, connection), m_settings(settings)
+                     cppw::Sqlite3Connection* connection, Settings* settings,
+                     TopBar* topBar)
+    : StatsPanel(parent, top, id, connection), m_settings(settings),
+      m_quickFilter(topBar->GetQuickFilter())
 {
-    ////
-    ////Top Bar
-    ////
-
-    m_topBar = new TopBar(this, m_top, wxID_ANY, m_connection);
-    m_quickFilter = m_topBar->GetQuickFilter();
     ////
     ////grid
     ////
@@ -93,7 +89,7 @@ DataPanel::DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
     //panel sizer
     //
     m_panelSizer = new wxBoxSizer(wxVERTICAL);
-    m_panelSizer->Add(m_topBar, wxSizerFlags(0).Border(wxALL, 2));
+    m_panelSizer->Add(topBar, wxSizerFlags(0).Border(wxALL, 2));
     m_panelSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
     SetSizerAndFit(m_panelSizer);
 
@@ -757,8 +753,6 @@ void DataPanel::ResetPanel(cppw::Sqlite3Connection* connection)
     m_commands = std::vector<std::unique_ptr<SqlGridCommand>>();
     m_commandLevel = 0;
     m_connection = connection;
-    m_top->SetUnsavedChanges(false);
-    m_quickFilter->Reset(connection);
     UpdateCellColorInfo();
     DefaultFilter();
 }

@@ -37,6 +37,7 @@
 #include "Helpers.hpp"
 #include "cppw/Sqlite3.hpp"
 #include "QuickFilter.hpp"
+#include "TopBar.hpp"
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -163,8 +164,11 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     auto mainPanel = new wxPanel(this, wxID_ANY);
     auto mainPanelSizer = new wxBoxSizer(wxVERTICAL);
     auto notebook = new wxNotebook(mainPanel, wxID_ANY);
+    m_topBar = new TopBar(this, this, wxID_ANY, m_connection.get());
     m_dataPanel = new DataPanel(
-        notebook, this, wxID_ANY, m_connection.get(), m_settings.get());
+        notebook, this, wxID_ANY, m_connection.get(), m_settings.get(),
+        m_topBar);
+    m_topBar->Reparent(m_dataPanel);
     notebook->AddPage(m_dataPanel, _("Data"));
     mainPanelSizer->Add(notebook, wxSizerFlags(1).Expand());
     mainPanel->SetSizerAndFit(mainPanelSizer);
@@ -333,7 +337,7 @@ void MainFrame::OnNew(wxCommandEvent& WXUNUSED(event))
         }
         m_fileMenu->Check(DEFAULT_DB, false);
         m_fileMenu->Enable(DEFAULT_DB, false);
-        m_dataPanel->ResetPanel(m_connection.get());
+        Reset(m_connection.get());
     }
 }
 
@@ -362,7 +366,7 @@ void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
                 m_fileMenu->Enable(DEFAULT_DB, true);
                 m_fileMenu->Check(DEFAULT_DB, true);
             }
-            m_dataPanel->ResetPanel(m_connection.get());
+            Reset(m_connection.get());
         }
     }
 }
@@ -751,4 +755,10 @@ void MainFrame::OnColorOptions(wxCommandEvent& WXUNUSED(event))
 {
     ColorOptionsDlg dlg(m_settings.get(), m_dataPanel, this);
     dlg.ShowModal();
+}
+
+void MainFrame::Reset(cppw::Sqlite3Connection* connection)
+{
+    m_dataPanel->ResetPanel(connection);
+    SetUnsavedChanges(false);
 }
