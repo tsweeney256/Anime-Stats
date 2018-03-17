@@ -238,7 +238,10 @@ void QuickFilter::OnQuickFilterDelete(wxCommandEvent& WXUNUSED(event))
             for (auto& name : m_dbFilter->GetFilterNames()) {
                 m_quickFilterSelect->Append(name);
             }
+            //to ensure the readonly comboxbox value is blank
+            m_quickFilterSelect->Append("");
             m_quickFilterSelect->SetValue("");
+            m_quickFilterSelect->Delete(m_quickFilterSelect->GetSelection());
             m_top->SetUnsavedChanges(true);
         }
     } catch (const cppw::Sqlite3Exception& e) {
