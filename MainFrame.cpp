@@ -169,7 +169,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     m_dataPanel = new DataPanel(
         notebook, this, wxID_ANY, m_connection.get(), m_settings.get(),
         m_topBar);
-    m_analysisPanel = new AnalysisPanel(notebook, this, m_connection.get());
+    m_analysisPanel = new AnalysisPanel(
+        notebook, this, wxID_ANY, m_connection.get(), m_topBar);
     m_topBar->Reparent(m_dataPanel);
     notebook->AddPage(m_dataPanel, _("Data"));
     notebook->AddPage(m_analysisPanel, _("Analysis"));

@@ -123,7 +123,6 @@ private:
     int m_commandLevel = 0;
     bool m_colsCreated = false;
     bool m_firstDraw = true;
-    wxBoxSizer* m_panelSizer;
     CellColorInfo m_cellColorInfo[col::NUM_COLS];
     QuickFilter* m_quickFilter;
 

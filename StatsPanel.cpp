@@ -13,7 +13,9 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
+#include "wx/sizer.h"
 #include "cppw/Sqlite3.hpp"
+#include "TopBar.hpp"
 #include "StatsPanel.hpp"
 
 const char* StatsPanelNotImplementedException::what() const noexcept
@@ -22,9 +24,14 @@ const char* StatsPanelNotImplementedException::what() const noexcept
 }
 
 StatsPanel::StatsPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
-                       cppw::Sqlite3Connection* connection)
+                       cppw::Sqlite3Connection* connection, TopBar* topBar)
     : wxScrolledWindow(parent, id), m_connection(connection), m_top(top)
-{}
+{
+    SetScrollRate(10, 10);
+    m_mainSizer = new wxBoxSizer(wxVERTICAL);
+    m_mainSizer->Add(topBar, wxSizerFlags(0).Border(wxALL, 2));
+    SetSizer(m_mainSizer);
+}
 
 void StatsPanel::ApplyFilter()
 {

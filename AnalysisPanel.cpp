@@ -6,13 +6,11 @@
 #include "AnalysisBox.hpp"
 #include "SqlStrings.hpp"
 
-AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top,
-                             cppw::Sqlite3Connection* connection)
-    : StatsPanel(parent, top, wxID_ANY, connection)
+AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
+                             cppw::Sqlite3Connection* connection, TopBar* topBar)
+    : StatsPanel(parent, top, id, connection, topBar)
 {
-    SetScrollRate(10, 10);
     auto statSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_mainSizer = new wxBoxSizer(wxVERTICAL);
 
     try{
         m_statBoxes.push_back(
@@ -58,7 +56,7 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top,
     }
 
     m_mainSizer->Add(statSizer, wxSizerFlags(0));
-    SetSizerAndFit(m_mainSizer);
+    m_mainSizer->SetSizeHints(this);
 }
 
 void AnalysisPanel::UpdateInfo()

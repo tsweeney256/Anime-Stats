@@ -72,10 +72,9 @@ END_EVENT_TABLE()
 DataPanel::DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
                      cppw::Sqlite3Connection* connection, Settings* settings,
                      TopBar* topBar)
-    : StatsPanel(parent, top, id, connection), m_settings(settings),
+    : StatsPanel(parent, top, id, connection, topBar), m_settings(settings),
       m_quickFilter(topBar->GetQuickFilter())
 {
-    SetScrollRate(10, 10);
     ////
     ////grid
     ////
@@ -90,10 +89,8 @@ DataPanel::DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
     //
     //panel sizer
     //
-    m_panelSizer = new wxBoxSizer(wxVERTICAL);
-    m_panelSizer->Add(topBar, wxSizerFlags(0).Border(wxALL, 2));
-    m_panelSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
-    SetSizerAndFit(m_panelSizer);
+    m_mainSizer->Add(m_grid, wxSizerFlags(1).Expand().Border(wxALL, 0));
+    m_mainSizer->SetSizeHints(this);
 
     //
     //Misc initializations

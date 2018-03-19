@@ -23,7 +23,9 @@ namespace cppw
     class Sqlite3Connection;
 }
 
+class wxBoxSizer;
 class MainFrame;
+class TopBar;
 
 class StatsPanelNotImplementedException : public std::exception
 {
@@ -35,7 +37,7 @@ class StatsPanel : public wxScrolledWindow
 {
 public:
     StatsPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
-               cppw::Sqlite3Connection* connection);
+               cppw::Sqlite3Connection* connection, TopBar* topBar);
     virtual void ApplyFilter();
     virtual void DefaultFilter();
     virtual void AdvFilter();
@@ -48,5 +50,6 @@ protected:
     virtual void dummy() = 0;
 
     cppw::Sqlite3Connection* m_connection;
+    wxBoxSizer* m_mainSizer;
     MainFrame* m_top;
 };
