@@ -41,14 +41,14 @@ public:
     QuickFilter(wxWindow* parent, MainFrame* top, wxWindowID id,
                 cppw::Sqlite3Connection* connection);
     void Reset(cppw::Sqlite3Connection* connection);
-    ConstFilter GetFilter();
-    const std::vector<colSort>* GetSort();
+    ConstFilter GetFilter() const;
+    const std::vector<colSort>* GetSort() const;
     void LoadDefaultFilter();
     void SetFilter(std::unique_ptr<BasicFilterInfo> bfi,
                    std::unique_ptr<AdvFilterInfo> afi);
     void SetSort(std::vector<colSort> sortingRules);
     void SetDefaultFilter(wxString name);
-    wxString GetSelectedFilterName();
+    wxString GetSelectedFilterName() const;
     cppw::Sqlite3Result* GetAnimeData(bool filtered, bool sorted);
 
 private:

@@ -102,13 +102,13 @@ void QuickFilter::Reset(cppw::Sqlite3Connection* connection)
     m_basicSelectString = std::string(basicSelectStringTemp.utf8_str());
 }
 
-ConstFilter QuickFilter::GetFilter()
+ConstFilter QuickFilter::GetFilter() const
 {
     const auto& cDbFilter = *m_dbFilter;
     return cDbFilter.GetFilter();
 }
 
-const std::vector<colSort>* QuickFilter::GetSort()
+const std::vector<colSort>* QuickFilter::GetSort() const
 {
     const auto& cDbFilter = *m_dbFilter;
     return cDbFilter.GetSort();
@@ -135,7 +135,7 @@ void QuickFilter::SetDefaultFilter(wxString name)
     m_dbFilter->SetDefaultFilter(std::string(name.utf8_str()));
 }
 
-wxString QuickFilter::GetSelectedFilterName()
+wxString QuickFilter::GetSelectedFilterName() const
 {
     return m_quickFilterSelect->GetValue();
 }
