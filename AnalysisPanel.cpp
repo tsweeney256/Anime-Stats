@@ -8,7 +8,7 @@
 
 AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top,
                              cppw::Sqlite3Connection* connection)
-    : wxScrolledWindow(parent)
+    : StatsPanel(parent, top, wxID_ANY, connection)
 {
     SetScrollRate(10, 10);
     auto statSizer = new wxBoxSizer(wxHORIZONTAL);

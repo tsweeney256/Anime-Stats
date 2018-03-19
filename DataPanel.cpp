@@ -75,6 +75,7 @@ DataPanel::DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
     : StatsPanel(parent, top, id, connection), m_settings(settings),
       m_quickFilter(topBar->GetQuickFilter())
 {
+    SetScrollRate(10, 10);
     ////
     ////grid
     ////
