@@ -5,7 +5,7 @@
 #include "cppw/Sqlite3.hpp"
 #include "StatsPanel.hpp"
 
-class wxSizer;
+class wxBoxSizer;
 class MainFrame;
 class AnalysisBox;
 class TopBar;
@@ -16,11 +16,10 @@ public:
     AnalysisPanel(
         wxWindow* parent, MainFrame* top, wxWindowID id,
         cppw::Sqlite3Connection* connection, TopBar* topBar);
-    void UpdateInfo();
+    void ResetConnection(cppw::Sqlite3Connection* connection);
+    void ResetStats();
+
 private:
     void dummy() override {}
-
-    std::vector<wxString> GetDbLabels(
-        cppw::Sqlite3Connection*connection , std::string statementStr);
-    std::vector<AnalysisBox*> m_statBoxes;
+    wxBoxSizer* m_statSizer = nullptr;
 };

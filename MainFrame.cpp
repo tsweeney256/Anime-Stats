@@ -572,7 +572,7 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& event)
                 m_topBar->ShowButton(rule.first, rule.second);
             }
             m_topBar->Reparent(m_analysisPanel);
-            m_analysisPanel->UpdateInfo();
+            m_analysisPanel->ResetStats();
         } catch(const cppw::Sqlite3Exception& e){
             wxMessageBox(e.what());
             Close();
@@ -812,5 +812,6 @@ void MainFrame::Reset(cppw::Sqlite3Connection* connection)
 {
     m_topBar->Reset(connection);
     m_dataPanel->ResetPanel(connection);
+    m_analysisPanel->ResetConnection(connection);
     SetUnsavedChanges(false);
 }
