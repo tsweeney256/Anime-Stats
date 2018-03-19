@@ -111,8 +111,6 @@ private:
 
     wxGrid* m_grid;
     Settings* m_settings;
-    wxButton* m_advFilterButton;
-    wxButton* m_advSortButton;
     wxTextCtrl* m_titleFilterTextField;
     wxMenu* m_labelContextMenu = nullptr;
     wxString m_basicSelectString;
