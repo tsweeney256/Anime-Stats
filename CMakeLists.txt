@@ -47,7 +47,14 @@ set(CPPW_SQLITE3 cppw/Sqlite3/Sqlite3Connection.cpp
   cppw/Sqlite3/Sqlite3Exception.cpp
   cppw/Sqlite3/Sqlite3Result.cpp
   cppw/Sqlite3/Sqlite3Statement.cpp)
+
+add_library(extensions-functions STATIC
+  external/sqlite3-extensions/extension-functions.c)
+target_compile_definitions(extensions-functions PRIVATE
+  SQLITE_CORE=1)
+
 add_executable(AnimeStats ${CPPW_SQLITE3} ${SOURCE_FILES})
+
 if(WIN STREQUAL "true" OR WIN32)
   target_sources(AnimeStats PUBLIC resource.rc)
 endif(WIN STREQUAL "true" OR WIN32)
@@ -64,7 +71,9 @@ if(wxWidgets_FOUND)
   target_link_libraries(AnimeStats ${wxWidgets_LIBRARIES})
 endif(wxWidgets_FOUND)
 
-target_link_libraries(AnimeStats fmt)
+target_link_libraries(AnimeStats
+  extensions-functions
+  fmt)
 
 file(COPY "${CMAKE_SOURCE_DIR}/sql"
    DESTINATION .)

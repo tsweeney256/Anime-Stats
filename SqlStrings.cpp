@@ -2,15 +2,8 @@
 
 namespace SqlStrings{
     const std::string medianStr =
-        "SELECT printf(\"%.2f\", AVG({0}))\n"
-        "FROM\n"
-        "    (SELECT {0}\n"
-        "     FROM Series\n"
-        "     WHERE {0} is not NULL\n"
-        "     ORDER BY {0}\n"
-        "     LIMIT 2 - (SELECT COUNT({0}) FROM Series) % 2\n"
-        "     OFFSET (SELECT (COUNT({0}) - 1) / 2\n"
-        "     FROM Series))\n";
+        "select median({0})\n"
+        "from Series\n";
 
     const std::string avgStr =
         "SELECT printf(\"%.2f\", AVG({0}))\n"
