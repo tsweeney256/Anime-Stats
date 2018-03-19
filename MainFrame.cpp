@@ -553,13 +553,42 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& event)
 {
     if(event.GetSelection() == 1){
         try{
+            std::pair<int, bool> buttonRules[] = {
+                {TopBar::id_apply_filter_btn, true},
+                {TopBar::id_default_filter_btn, true},
+                {TopBar::id_adv_filter_btn, true},
+                {TopBar::id_adv_sort_btn, false},
+                {TopBar::id_add_row_btn, false},
+                {TopBar::id_delete_row_btn, false},
+                {TopBar::id_alias_title_btn, false},
+                {TopBar::id_edit_tags_btn, false}
+            };
+            for (auto& rule : buttonRules) {
+                m_topBar->ShowButton(rule.first, rule.second);
+            }
+            m_topBar->Reparent(m_analysisPanel);
             m_analysisPanel->UpdateInfo();
-        }catch(const cppw::Sqlite3Exception& e){
+        } catch(const cppw::Sqlite3Exception& e){
             wxMessageBox(e.what());
             Close();
         }
+    } else {
+        std::pair<int, bool> buttonRules[] = {
+            {TopBar::id_apply_filter_btn, true},
+            {TopBar::id_default_filter_btn, true},
+            {TopBar::id_adv_filter_btn, true},
+            {TopBar::id_adv_sort_btn, true},
+            {TopBar::id_add_row_btn, true},
+            {TopBar::id_delete_row_btn, true},
+            {TopBar::id_alias_title_btn, true},
+            {TopBar::id_edit_tags_btn, true}
+        };
+        for (auto& rule : buttonRules) {
+            m_topBar->ShowButton(rule.first, rule.second);
+        }
+        m_topBar->Reparent(m_dataPanel);
     }
-
+    m_topBar->Layout();
 }
 
 void MainFrame::SwitchToDataDir()
