@@ -61,6 +61,10 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
 
 void AnalysisPanel::UpdateInfo()
 {
+    auto dropStmt = m_connection->PrepareStatement(
+        "drop table if exists temp.Series");
+    auto dropResult = dropStmt->GetResults();
+    dropResult->NextRow();
     for(auto statBox : m_statBoxes){
         statBox->UpdateInfo();
     }

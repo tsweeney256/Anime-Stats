@@ -28,6 +28,8 @@ class wxButton;
 namespace cppw
 {
     class Sqlite3Connection;
+    class Sqlite3Result;
+    class Sqlite3Statement;
 }
 
 class DbFilter;
@@ -47,6 +49,7 @@ public:
     void SetSort(std::vector<colSort> sortingRules);
     void SetDefaultFilter(wxString name);
     wxString GetSelectedFilterName();
+    cppw::Sqlite3Result* GetAnimeData(bool filtered, bool sorted);
 
 private:
     void OnProcessEnter(wxCommandEvent& event);
@@ -56,6 +59,13 @@ private:
     void OnQuickFilterOverwrite(wxCommandEvent& event);
     void OnQuickFilterDelete(wxCommandEvent& event);
 
+    void AppendStatusStr(
+        std::stringstream& statusStr, std::string toAppend, bool& firstStatus);
+    std::string CreateSortStr();
+
+    std::unique_ptr<cppw::Sqlite3Result> m_animeStatsResults;
+    std::unique_ptr<cppw::Sqlite3Statement> m_animeStatsStmt;
+    std::string m_basicSelectString;
     cppw::Sqlite3Connection* m_connection;
     std::unique_ptr<DbFilter> m_dbFilter;
     wxTextCtrl* m_quickFilterTitle;

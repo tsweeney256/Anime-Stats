@@ -82,7 +82,6 @@ DataPanel::DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
     m_grid = new wxGrid(this, ID_DATA_GRID);
     m_grid->CreateGrid(0,0);
 
-    readFileIntoString(m_basicSelectString, "basicSelect.sql", top);
     BuildAllowedValsMap(m_allowedWatchedVals, "select status from WatchedStatus order by idWatchedStatus");
     BuildAllowedValsMap(m_allowedReleaseVals, "select type from ReleaseType order by idReleaseType");
     BuildAllowedValsMap(m_allowedSeasonVals, "select season from Season order by idSeason");
@@ -401,7 +400,7 @@ void DataPanel::OnLabelContextMenuItem(wxCommandEvent& event)
         m_grid->HideCol(col);
 }
 
-void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
+void DataPanel::ResetTable(cppw::Sqlite3Result* results)
 {
     wxGridUpdateLocker lock(m_grid);
     int rowSize = 1; //don't initialize to 0, because a rowSize of 0 hides the row
@@ -496,189 +495,13 @@ void DataPanel::ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results)
 void DataPanel::ApplyFilter()
 {
     try{
-        //setting up the where part of the sql statement to filter by watched statuses
-        ConstFilter filter = m_quickFilter->GetFilter();
-        auto newBasicFilterInfo = filter.first;
-        auto newAdvFilterInfo = filter.second;
-        std::string watchedStatus = "idWatchedStatus";
-        std::string releaseType = "idReleaseType";
-        std::string season = "idSeason";
-        bool firstStatus = true;
-        bool showNothing = false; //if none of the boxes are ticked then nothing should be displayed
-        std::stringstream statusStr;
-
-        //watchedStatus
-        if(newBasicFilterInfo->watched)
-            AppendStatusStr(statusStr, watchedStatus + "= 1 ", firstStatus);
-        if(newBasicFilterInfo->watching)
-            AppendStatusStr(statusStr, watchedStatus + "= 2 ", firstStatus);
-        if(newBasicFilterInfo->stalled)
-            AppendStatusStr(statusStr, watchedStatus + "= 3 ", firstStatus);
-        if(newBasicFilterInfo->dropped)
-            AppendStatusStr(statusStr, watchedStatus + "= 4 ", firstStatus);
-        if(newBasicFilterInfo->toWatch)
-            AppendStatusStr(statusStr, watchedStatus + "= 5 ", firstStatus);
-        if(newBasicFilterInfo->watchedBlank)
-            AppendStatusStr(statusStr, watchedStatus + "= 0 ", firstStatus);
-        if(!firstStatus)
-            statusStr << " ) ";
-        else
-            showNothing = true;
-
-        bool usingTagKey = false;
-        bool usingTagVal = false;
-        if(newAdvFilterInfo){
-	    firstStatus = true;
-
-            firstStatus = true;
-            if(newAdvFilterInfo->tv)
-                AppendStatusStr(statusStr, releaseType + "= 1 ", firstStatus);
-            if(newAdvFilterInfo->ova)
-                AppendStatusStr(statusStr, releaseType + "= 2 ", firstStatus);
-            if(newAdvFilterInfo->ona)
-                AppendStatusStr(statusStr, releaseType + "= 3 ", firstStatus);
-            if(newAdvFilterInfo->movie)
-                AppendStatusStr(statusStr, releaseType + "= 4 ", firstStatus);
-            if(newAdvFilterInfo->tvSpecial)
-                AppendStatusStr(statusStr, releaseType + "= 5 ", firstStatus);
-            if(newAdvFilterInfo->releaseBlank)
-                AppendStatusStr(statusStr, releaseType + "= 0 ", firstStatus);
-            if(!firstStatus)
-                statusStr << " ) ";
-            else
-                showNothing = true;
-
-            firstStatus = true;
-            if(newAdvFilterInfo->winter)
-                AppendStatusStr(statusStr, season + "= 1 ", firstStatus);
-            if(newAdvFilterInfo->spring)
-                AppendStatusStr(statusStr, season + "= 2 ", firstStatus);
-            if(newAdvFilterInfo->summer)
-                AppendStatusStr(statusStr, season + "= 3 ", firstStatus);
-            if(newAdvFilterInfo->fall)
-                AppendStatusStr(statusStr, season + "= 4 ", firstStatus);
-            if(newAdvFilterInfo->seasonBlank)
-                AppendStatusStr(statusStr, season + "= 0 ", firstStatus);
-            if(!firstStatus)
-                statusStr << " ) ";
-            else
-                showNothing = true;
-
-            if(newAdvFilterInfo->ratingEnabled)
-                statusStr << " and (rating between " << newAdvFilterInfo->ratingLow << " and " <<
-                    newAdvFilterInfo->ratingHigh << ") ";
-            if(newAdvFilterInfo->yearEnabled)
-                statusStr << " and (year between " << newAdvFilterInfo->yearLow << " and "
-                          << newAdvFilterInfo->yearHigh << ") ";
-            if(newAdvFilterInfo->epsWatchedEnabled)
-                statusStr << " and (episodesWatched between " << newAdvFilterInfo->epsWatchedLow <<
-                    " and " << newAdvFilterInfo->epsWatchedHigh <<") ";
-            if(newAdvFilterInfo->totalEpsEnabled)
-                statusStr << " and (totalEpisodes between " << newAdvFilterInfo->totalEpsLow <<
-                    " and " << newAdvFilterInfo->totalEpsHigh << ") ";
-            if(newAdvFilterInfo->epsRewatchedEnabled)
-                statusStr << " and (rewatchedEpisodes between " << newAdvFilterInfo->epsRewatchedLow <<
-                    " and " << newAdvFilterInfo->epsRewatchedHigh << ") ";
-            if(newAdvFilterInfo->lengthEnabled)
-                statusStr << " and (episodeLength between " << newAdvFilterInfo->lengthLow << " and " <<
-                    newAdvFilterInfo->lengthHigh << ") ";
-            if(newAdvFilterInfo->dateStartedEnabled){
-                statusStr << " and (dateStarted between date('";
-                statusStr << std::setfill('0') << std::setw(4) << newAdvFilterInfo->yearStartedLow;
-                statusStr << "-";
-                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->monthStartedLow;
-                statusStr << "-";
-                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->dayStartedLow;
-                statusStr << "') and date('";
-                statusStr << std::setfill('0') << std::setw(4) << newAdvFilterInfo->yearStartedHigh;
-                statusStr << "-";
-                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->monthStartedHigh;
-                statusStr << "-";
-                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->dayStartedHigh;
-                statusStr << "')) ";
-            }
-            if(newAdvFilterInfo->dateFinishedEnabled){
-                statusStr << " and (dateFinished between date('";
-                statusStr << std::setfill('0') << std::setw(4) << newAdvFilterInfo->yearFinishedLow;
-                statusStr << "-";
-                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->monthFinishedLow;
-                statusStr << "-";
-                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->dayFinishedLow;
-                statusStr << "') and date('";
-                statusStr << std::setfill('0') << std::setw(4) << newAdvFilterInfo->yearFinishedHigh;
-                statusStr << "-";
-                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->monthFinishedHigh;
-                statusStr << "-";
-                statusStr << std::setfill('0') << std::setw(2) << newAdvFilterInfo->dayFinishedHigh;
-                statusStr << "')) ";
-            }
-            if(newAdvFilterInfo->tagKeyEnabled &&
-               !newAdvFilterInfo->tagKeyInverse) {
-                usingTagKey = true;
-                statusStr << " and tag like ?2 ";
-            }
-            if(newAdvFilterInfo->tagValEnabled &&
-               !newAdvFilterInfo->tagValInverse) {
-                usingTagVal = true;
-                statusStr << " and val like ?3 ";
-            }
-        }
-        auto sqlStr = std::string(m_basicSelectString.utf8_str()) +
-            " where 1=1 " + //just a dumb hack so I don't have to worry about when to start using 'and's and 'or's
-            (showNothing ? " and 1 <> 1 " : statusStr.str());
-        if (newAdvFilterInfo->tagKeyInverse || newAdvFilterInfo->tagValInverse) {
-            sqlStr += "\nexcept\n" + sqlStr;
-        }
-        if(newAdvFilterInfo->tagKeyEnabled &&
-           newAdvFilterInfo->tagKeyInverse) {
-            usingTagKey = true;
-            sqlStr += " and tag like ?2 ";
-        }
-        if(newAdvFilterInfo->tagValEnabled &&
-           newAdvFilterInfo->tagValInverse) {
-            usingTagVal = true;
-            sqlStr += " and val like ?3 ";
-        }
-        sqlStr += " order by " + CreateSortStr();
-        auto statement = m_connection->PrepareStatement(sqlStr);
-        std::string bindStr = "%" + newBasicFilterInfo->title + "%";
-        statement->Bind(1, bindStr);
-        if (usingTagKey) {
-            statement->Bind(2, newAdvFilterInfo->tagKey);
-        }
-        if (usingTagVal) {
-            statement->Bind(3, newAdvFilterInfo->tagVal);
-        }
-        auto results = statement->GetResults();
+        auto results = m_quickFilter->GetAnimeData(true, true);
         ResetTable(results);
     }catch(cppw::Sqlite3Exception& e){
         wxMessageBox(std::string("Error applying filter.\n") + e.what());
         m_top->Close(true);
         return;
     }
-}
-
-void DataPanel::AppendStatusStr(std::stringstream& statusStr, std::string toAppend, bool& firstStatus)
-{
-    if(!firstStatus)
-        statusStr << " or ";
-    else{
-        statusStr << " and ( ";
-        firstStatus = false;
-    }
-    statusStr << toAppend;
-}
-
-std::string DataPanel::CreateSortStr()
-{
-    const auto& sortingRules = *m_quickFilter->GetSort();
-    std::string sortStr;
-    for(size_t i = 0; i < sortingRules.size(); ++i) {
-        sortStr += "`" + sortingRules[i].name + "` collate nocase " +
-            (sortingRules[i].asc ? "asc " : "desc ") +
-            (i + 1 == sortingRules.size() ? "" : ", ");
-    }
-    return sortStr;
 }
 
 void DataPanel::HandleCommandChecking()

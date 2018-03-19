@@ -805,6 +805,7 @@ void MainFrame::OnColorOptions(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::Reset(cppw::Sqlite3Connection* connection)
 {
+    m_topBar->Reset(connection);
     m_dataPanel->ResetPanel(connection);
     SetUnsavedChanges(false);
 }

@@ -13,6 +13,8 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
+#include <iomanip>
+#include <sstream>
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/combobox.h>
@@ -21,10 +23,11 @@
 #include <wx/sizer.h>
 #include <wx/textctrl.h>
 #include "cppw/Sqlite3.hpp"
-#include "FilterStructs.hpp"
-#include "SortStruct.hpp"
 #include "DbFilter.hpp"
+#include "Helpers.hpp"
+#include "FilterStructs.hpp"
 #include "MainFrame.hpp"
+#include "SortStruct.hpp"
 #include "QuickFilter.hpp"
 
 enum {
@@ -94,6 +97,9 @@ void QuickFilter::Reset(cppw::Sqlite3Connection* connection)
         m_quickFilterSelect->Append(wxString::FromUTF8(name.c_str()));
     }
     m_quickFilterSelect->SetValue(m_dbFilter->GetDefaultFilterName());
+    wxString basicSelectStringTemp;
+    readFileIntoString(basicSelectStringTemp, "basicSelect.sql", m_top);
+    m_basicSelectString = std::string(basicSelectStringTemp.utf8_str());
 }
 
 ConstFilter QuickFilter::GetFilter()
@@ -132,6 +138,192 @@ void QuickFilter::SetDefaultFilter(wxString name)
 wxString QuickFilter::GetSelectedFilterName()
 {
     return m_quickFilterSelect->GetValue();
+}
+
+cppw::Sqlite3Result* QuickFilter::GetAnimeData(bool filtered,  bool sorted)
+{
+    auto sqlStr = std::string(m_basicSelectString);
+    const auto* cThis = this;
+    ConstFilter filter = cThis->GetFilter();
+    auto newBasicFilterInfo = filter.first;
+    auto newAdvFilterInfo = filter.second;
+    bool usingTagKey = false;
+    bool usingTagVal = false;
+    if (filtered) {
+        std::string watchedStatus = "idWatchedStatus";
+        std::string releaseType = "idReleaseType";
+        std::string season = "idSeason";
+        bool firstStatus = true;
+        //if none of the boxes are ticked then nothing should be displayed
+        bool showNothing = false;
+        std::stringstream statusStr;
+
+        //watchedStatus
+        if(newBasicFilterInfo->watched)
+            AppendStatusStr(statusStr, watchedStatus + "= 1 ", firstStatus);
+        if(newBasicFilterInfo->watching)
+            AppendStatusStr(statusStr, watchedStatus + "= 2 ", firstStatus);
+        if(newBasicFilterInfo->stalled)
+            AppendStatusStr(statusStr, watchedStatus + "= 3 ", firstStatus);
+        if(newBasicFilterInfo->dropped)
+            AppendStatusStr(statusStr, watchedStatus + "= 4 ", firstStatus);
+        if(newBasicFilterInfo->toWatch)
+            AppendStatusStr(statusStr, watchedStatus + "= 5 ", firstStatus);
+        if(newBasicFilterInfo->watchedBlank)
+            AppendStatusStr(statusStr, watchedStatus + "= 0 ", firstStatus);
+        if(!firstStatus)
+            statusStr << " ) ";
+        else
+            showNothing = true;
+
+        if(newAdvFilterInfo){
+            firstStatus = true;
+
+            firstStatus = true;
+            if(newAdvFilterInfo->tv)
+                AppendStatusStr(statusStr, releaseType + "= 1 ", firstStatus);
+            if(newAdvFilterInfo->ova)
+                AppendStatusStr(statusStr, releaseType + "= 2 ", firstStatus);
+            if(newAdvFilterInfo->ona)
+                AppendStatusStr(statusStr, releaseType + "= 3 ", firstStatus);
+            if(newAdvFilterInfo->movie)
+                AppendStatusStr(statusStr, releaseType + "= 4 ", firstStatus);
+            if(newAdvFilterInfo->tvSpecial)
+                AppendStatusStr(statusStr, releaseType + "= 5 ", firstStatus);
+            if(newAdvFilterInfo->releaseBlank)
+                AppendStatusStr(statusStr, releaseType + "= 0 ", firstStatus);
+            if(!firstStatus)
+                statusStr << " ) ";
+            else
+                showNothing = true;
+
+            firstStatus = true;
+            if(newAdvFilterInfo->winter)
+                AppendStatusStr(statusStr, season + "= 1 ", firstStatus);
+            if(newAdvFilterInfo->spring)
+                AppendStatusStr(statusStr, season + "= 2 ", firstStatus);
+            if(newAdvFilterInfo->summer)
+                AppendStatusStr(statusStr, season + "= 3 ", firstStatus);
+            if(newAdvFilterInfo->fall)
+                AppendStatusStr(statusStr, season + "= 4 ", firstStatus);
+            if(newAdvFilterInfo->seasonBlank)
+                AppendStatusStr(statusStr, season + "= 0 ", firstStatus);
+            if(!firstStatus)
+                statusStr << " ) ";
+            else
+                showNothing = true;
+
+            if(newAdvFilterInfo->ratingEnabled)
+                statusStr << " and (rating between " <<
+                    newAdvFilterInfo->ratingLow << " and " <<
+                    newAdvFilterInfo->ratingHigh << ") ";
+            if(newAdvFilterInfo->yearEnabled)
+                statusStr << " and (year between " <<
+                    newAdvFilterInfo->yearLow << " and "
+                          << newAdvFilterInfo->yearHigh << ") ";
+            if(newAdvFilterInfo->epsWatchedEnabled)
+                statusStr << " and (episodesWatched between " <<
+                    newAdvFilterInfo->epsWatchedLow <<
+                    " and " << newAdvFilterInfo->epsWatchedHigh <<") ";
+            if(newAdvFilterInfo->totalEpsEnabled)
+                statusStr << " and (totalEpisodes between " <<
+                    newAdvFilterInfo->totalEpsLow <<
+                    " and " << newAdvFilterInfo->totalEpsHigh << ") ";
+            if(newAdvFilterInfo->epsRewatchedEnabled)
+                statusStr << " and (rewatchedEpisodes between " <<
+                    newAdvFilterInfo->epsRewatchedLow <<
+                    " and " << newAdvFilterInfo->epsRewatchedHigh << ") ";
+            if(newAdvFilterInfo->lengthEnabled)
+                statusStr << " and (episodeLength between " <<
+                    newAdvFilterInfo->lengthLow << " and " <<
+                    newAdvFilterInfo->lengthHigh << ") ";
+            if(newAdvFilterInfo->dateStartedEnabled){
+                statusStr << " and (dateStarted between date('";
+                statusStr << std::setfill('0') << std::setw(4) <<
+                    newAdvFilterInfo->yearStartedLow;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) <<
+                    newAdvFilterInfo->monthStartedLow;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) <<
+                    newAdvFilterInfo->dayStartedLow;
+                statusStr << "') and date('";
+                statusStr << std::setfill('0') << std::setw(4) <<
+                    newAdvFilterInfo->yearStartedHigh;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) <<
+                    newAdvFilterInfo->monthStartedHigh;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) <<
+                    newAdvFilterInfo->dayStartedHigh;
+                statusStr << "')) ";
+            }
+            if(newAdvFilterInfo->dateFinishedEnabled){
+                statusStr << " and (dateFinished between date('";
+                statusStr << std::setfill('0') << std::setw(4) <<
+                    newAdvFilterInfo->yearFinishedLow;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) <<
+                    newAdvFilterInfo->monthFinishedLow;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) <<
+                    newAdvFilterInfo->dayFinishedLow;
+                statusStr << "') and date('";
+                statusStr << std::setfill('0') << std::setw(4) <<
+                    newAdvFilterInfo->yearFinishedHigh;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) <<
+                    newAdvFilterInfo->monthFinishedHigh;
+                statusStr << "-";
+                statusStr << std::setfill('0') << std::setw(2) <<
+                    newAdvFilterInfo->dayFinishedHigh;
+                statusStr << "')) ";
+            }
+            if(newAdvFilterInfo->tagKeyEnabled &&
+               !newAdvFilterInfo->tagKeyInverse) {
+                usingTagKey = true;
+                statusStr << " and tag like ?2 ";
+            }
+            if(newAdvFilterInfo->tagValEnabled &&
+               !newAdvFilterInfo->tagValInverse) {
+                usingTagVal = true;
+                statusStr << " and val like ?3 ";
+            }
+        }
+        //1=1 is just a dumb hack so I don't have to worry about when
+        //to start using 'and's and 'or's
+        sqlStr += " where 1=1 " +
+            (showNothing ? " and 1 <> 1 " : statusStr.str());
+        if (newAdvFilterInfo->tagKeyInverse || newAdvFilterInfo->tagValInverse) {
+            sqlStr += "\nexcept\n" + sqlStr;
+        }
+        if(newAdvFilterInfo->tagKeyEnabled &&
+           newAdvFilterInfo->tagKeyInverse) {
+            usingTagKey = true;
+            sqlStr += " and tag like ?2 ";
+        }
+        if(newAdvFilterInfo->tagValEnabled &&
+           newAdvFilterInfo->tagValInverse) {
+            usingTagVal = true;
+            sqlStr += " and val like ?3 ";
+        }
+    }
+    if (sorted) {
+        sqlStr += " order by " + CreateSortStr();
+    }
+    m_animeStatsStmt = m_connection->PrepareStatement(sqlStr);
+    if (filtered) {
+        std::string bindStr = "%" + newBasicFilterInfo->title + "%";
+        m_animeStatsStmt->Bind(1, bindStr);
+        if (usingTagKey) {
+            m_animeStatsStmt->Bind(2, newAdvFilterInfo->tagKey);
+        }
+        if (usingTagVal) {
+            m_animeStatsStmt->Bind(3, newAdvFilterInfo->tagVal);
+        }
+    }
+    m_animeStatsResults = m_animeStatsStmt->GetResults();
+    return m_animeStatsResults.get();
 }
 
 void QuickFilter::OnProcessEnter(wxCommandEvent& event)
@@ -248,6 +440,31 @@ void QuickFilter::OnQuickFilterDelete(wxCommandEvent& WXUNUSED(event))
         wxMessageBox(wxString("Error: ") + e.what());
         m_top->Close(true);
     }
+}
+
+void QuickFilter::AppendStatusStr(
+    std::stringstream& statusStr, std::string toAppend, bool& firstStatus)
+{
+    if(!firstStatus)
+        statusStr << " or ";
+    else{
+        statusStr << " and ( ";
+        firstStatus = false;
+    }
+    statusStr << toAppend;
+}
+
+std::string QuickFilter::CreateSortStr()
+{
+    const auto* cThis = this;
+    const auto& sortingRules = *cThis->GetSort();
+    std::string sortStr;
+    for(size_t i = 0; i < sortingRules.size(); ++i) {
+        sortStr += "`" + sortingRules[i].name + "` collate nocase " +
+            (sortingRules[i].asc ? "asc " : "desc ") +
+            (i + 1 == sortingRules.size() ? "" : ", ");
+    }
+    return sortStr;
 }
 
 wxDEFINE_EVENT(QuickFilterProcessEnterEvent, wxCommandEvent);

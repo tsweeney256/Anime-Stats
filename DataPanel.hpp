@@ -85,9 +85,7 @@ private:
     void OnLabelContextMenu(wxGridEvent& event);
     void OnLabelContextMenuItem(wxCommandEvent& event);
 
-    void ResetTable(std::unique_ptr<cppw::Sqlite3Result>& results);
-    void AppendStatusStr(std::stringstream& statusStr, std::string toAppend, bool& firstStatus);
-    std::string CreateSortStr();
+    void ResetTable(cppw::Sqlite3Result* results);
     void HandleCommandChecking();
     void BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr);
     void HandleUndoRedoColorChange();
@@ -113,7 +111,6 @@ private:
     Settings* m_settings;
     wxTextCtrl* m_titleFilterTextField;
     wxMenu* m_labelContextMenu = nullptr;
-    wxString m_basicSelectString;
     std::vector<std::unique_ptr<SqlGridCommand>> m_commands;
     std::vector<wxString> m_allowedWatchedVals;
     std::vector<wxString> m_allowedReleaseVals;
