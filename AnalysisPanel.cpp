@@ -23,18 +23,6 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
     m_mainSizer->Add(m_statSizer, wxSizerFlags(0));
 }
 
-void AnalysisPanel::AttachTopBar()
-{
-    m_mainSizer->Prepend(m_topBar, wxSizerFlags(0));
-    m_topBar->Reparent(this);
-}
-
-void AnalysisPanel::DetachTopBar()
-{
-    m_mainSizer->Detach(m_topBar);
-    m_topBar->Reparent(nullptr);
-}
-
 void AnalysisPanel::ResetConnection(cppw::Sqlite3Connection* connection)
 {
     m_connection = connection;

@@ -35,14 +35,18 @@ StatsPanel::StatsPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
 
 void StatsPanel::AttachTopBar()
 {
-    m_mainSizer->Prepend(m_topBar, wxSizerFlags(0));
-    m_topBar->Reparent(this);
+    if (m_topBar->GetParent() != this) {
+        m_mainSizer->Prepend(m_topBar, wxSizerFlags(0));
+        m_topBar->Reparent(this);
+        Layout();
+    }
 }
 
 void StatsPanel::DetachTopBar()
 {
-    m_mainSizer->Detach(m_topBar);
-    m_topBar->Reparent(nullptr);
+    if (m_mainSizer->Detach(m_topBar)) {
+        m_topBar->Reparent(nullptr);
+    }
 }
 
 void StatsPanel::ApplyFilter()
