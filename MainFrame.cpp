@@ -138,7 +138,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     editMenu->Append(wxID_UNDO);
     editMenu->Append(wxID_REDO);
     editMenu->Append(ADD_ROW, _("Add Row\tCTRL+Enter"));
-    editMenu->Append(DELETE_ROWS, _("Delete Rows\tCTRL+Del"));
+    editMenu->Append(DELETE_ROWS, _("Delete Rows\tCTRL+SHIFT+Del"));
     editMenu->Append(ALIAS_TITLE, _("Alias Title\tCTRL+t"));
     editMenu->Append(EDIT_TAGS, _("Edit Tags\tCTRL+SHIFT+t"));
     m_preferencesMenu = new wxMenu;
