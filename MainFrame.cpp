@@ -177,7 +177,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
         m_topBar);
     m_analysisPanel = new AnalysisPanel(
         notebook, this, wxID_ANY, m_connection.get(), m_topBar);
-    m_topBar->Reparent(m_dataPanel);
+    m_dataPanel->AttachTopBar();
     notebook->AddPage(m_dataPanel, _("Data"));
     notebook->AddPage(m_analysisPanel, _("Analysis"));
     mainPanelSizer->Add(notebook, wxSizerFlags(1).Expand());
@@ -576,6 +576,7 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& event)
             m_dataPanel->DetachTopBar();
             m_analysisPanel->AttachTopBar();
             m_analysisPanel->ResetStats();
+            m_analysisPanel->Layout();
         } catch(const cppw::Sqlite3Exception& e){
             wxMessageBox(e.what());
             Close();
@@ -596,8 +597,8 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& event)
         }
         m_analysisPanel->DetachTopBar();
         m_dataPanel->AttachTopBar();
-        m_dataPanel->Layout();
         m_dataPanel->ApplyFilter();
+        m_dataPanel->Layout();
     }
 }
 
