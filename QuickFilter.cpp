@@ -301,11 +301,16 @@ cppw::Sqlite3Result* QuickFilter::GetAnimeData(
             }
         }
         if (useTempTable) {
-            auto dropStmt = m_connection->PrepareStatement(
-                "drop table if exists tempSeries");
-            auto dropResult = dropStmt->GetResults();
-            dropResult->NextRow();
-            sqlStr = "create temp table tempSeries as " + sqlStr;
+            try {
+                auto dropStmt = m_connection->PrepareStatement(
+                    "drop table if exists tempSeries");
+                auto dropResult = dropStmt->GetResults();
+                dropResult->NextRow();
+                sqlStr = "create temp table tempSeries as " + sqlStr;
+            } catch (const cppw::Sqlite3Exception& e) {
+                wxMessageBox(e.what());
+                m_top->Close(true);
+            }
         }
         //1=1 is just a dumb hack so I don't have to worry about when
         //to start using 'and's and 'or's
@@ -328,18 +333,23 @@ cppw::Sqlite3Result* QuickFilter::GetAnimeData(
     if (sorted) {
         sqlStr += " order by " + CreateSortStr();
     }
-    m_animeStatsStmt = m_connection->PrepareStatement(sqlStr);
-    if (filtered) {
-        std::string bindStr = "%" + newBasicFilterInfo->title + "%";
-        m_animeStatsStmt->Bind(1, bindStr);
-        if (usingTagKey) {
-            m_animeStatsStmt->Bind(2, newAdvFilterInfo->tagKey);
+    try {
+        m_animeStatsStmt = m_connection->PrepareStatement(sqlStr);
+        if (filtered) {
+            std::string bindStr = "%" + newBasicFilterInfo->title + "%";
+            m_animeStatsStmt->Bind(1, bindStr);
+            if (usingTagKey) {
+                m_animeStatsStmt->Bind(2, newAdvFilterInfo->tagKey);
+            }
+            if (usingTagVal) {
+                m_animeStatsStmt->Bind(3, newAdvFilterInfo->tagVal);
+            }
         }
-        if (usingTagVal) {
-            m_animeStatsStmt->Bind(3, newAdvFilterInfo->tagVal);
-        }
+        m_animeStatsResults = m_animeStatsStmt->GetResults();
+    } catch (const cppw::Sqlite3Exception& e) {
+        wxMessageBox(e.what());
+        m_top->Close(true);
     }
-    m_animeStatsResults = m_animeStatsStmt->GetResults();
     return m_animeStatsResults.get();
 }
 
