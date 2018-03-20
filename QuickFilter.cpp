@@ -302,11 +302,11 @@ cppw::Sqlite3Result* QuickFilter::GetAnimeData(
         }
         if (useTempTable) {
             try {
-                auto dropStmt = m_connection->PrepareStatement(
-                    "drop table if exists tempSeries");
-                auto dropResult = dropStmt->GetResults();
-                dropResult->NextRow();
-                sqlStr = "create temp table tempSeries as " + sqlStr;
+                auto deleteStmt = m_connection->PrepareStatement(
+                    "delete from tempSeries");
+                auto deleteResult = deleteStmt->GetResults();
+                deleteResult->NextRow();
+                sqlStr = "insert into tempSeries " + sqlStr;
             } catch (const cppw::Sqlite3Exception& e) {
                 wxMessageBox(e.what());
                 m_top->Close(true);
