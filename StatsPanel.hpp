@@ -38,6 +38,8 @@ class StatsPanel : public wxScrolledWindow
 public:
     StatsPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
                cppw::Sqlite3Connection* connection, TopBar* topBar);
+    void AttachTopBar();
+    void DetachTopBar();
     virtual void ApplyFilter();
     virtual void DefaultFilter();
     virtual void AdvFilter();

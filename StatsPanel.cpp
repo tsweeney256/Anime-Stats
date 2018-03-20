@@ -30,8 +30,19 @@ StatsPanel::StatsPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
 {
     SetScrollRate(10, 10);
     m_mainSizer = new wxBoxSizer(wxVERTICAL);
-    m_mainSizer->Add(topBar, wxSizerFlags(0).Border(wxALL, 2));
     SetSizer(m_mainSizer);
+}
+
+void StatsPanel::AttachTopBar()
+{
+    m_mainSizer->Prepend(m_topBar, wxSizerFlags(0));
+    m_topBar->Reparent(this);
+}
+
+void StatsPanel::DetachTopBar()
+{
+    m_mainSizer->Detach(m_topBar);
+    m_topBar->Reparent(nullptr);
 }
 
 void StatsPanel::ApplyFilter()

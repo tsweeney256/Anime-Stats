@@ -571,7 +571,8 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& event)
             for (auto& rule : buttonRules) {
                 m_topBar->ShowButton(rule.first, rule.second);
             }
-            m_topBar->Reparent(m_analysisPanel);
+            m_dataPanel->DetachTopBar();
+            m_analysisPanel->AttachTopBar();
             m_analysisPanel->ResetStats();
         } catch(const cppw::Sqlite3Exception& e){
             wxMessageBox(e.what());
@@ -591,11 +592,11 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& event)
         for (auto& rule : buttonRules) {
             m_topBar->ShowButton(rule.first, rule.second);
         }
-        m_topBar->Reparent(m_dataPanel);
+        m_analysisPanel->DetachTopBar();
+        m_dataPanel->AttachTopBar();
         m_dataPanel->Layout();
         m_dataPanel->ApplyFilter();
     }
-    m_topBar->Layout();
 }
 
 void MainFrame::SwitchToDataDir()

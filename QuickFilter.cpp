@@ -73,7 +73,7 @@ QuickFilter::QuickFilter(wxWindow* parent, MainFrame* top, wxWindowID id,
     auto quickFilterSizer = new wxBoxSizer(wxHORIZONTAL);
 
     quickFilterTypeSizer->Add(
-        m_quickFilterSelect, wxSizerFlags(3).Border(wxALL).Center().Expand());
+        m_quickFilterSelect, wxSizerFlags(3).Border(wxALL).Expand());
     auto qfButtonFlags = wxSizerFlags(1).Center();
     quickFilterTypeSizer->Add(quickFilterNewButton, qfButtonFlags);
     quickFilterTypeSizer->Add(quickFilterOverwriteButton, qfButtonFlags);

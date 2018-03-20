@@ -28,6 +28,21 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
     stmt->Bind(1, "");
     auto result = stmt->GetResults();
     result->NextRow();
+
+    m_statSizer = new wxBoxSizer(wxHORIZONTAL);
+    m_mainSizer->Add(m_statSizer, wxSizerFlags(0));
+}
+
+void AnalysisPanel::AttachTopBar()
+{
+    m_mainSizer->Prepend(m_topBar, wxSizerFlags(0));
+    m_topBar->Reparent(this);
+}
+
+void AnalysisPanel::DetachTopBar()
+{
+    m_mainSizer->Detach(m_topBar);
+    m_topBar->Reparent(nullptr);
 }
 
 void AnalysisPanel::ResetConnection(cppw::Sqlite3Connection* connection)
@@ -40,11 +55,7 @@ void AnalysisPanel::ResetStats()
     auto tempTable = m_topBar->GetQuickFilter()->GetAnimeData(true, false, true);
     tempTable->NextRow();
 
-    //workaround bizarre crash involving wxSizer::Clear()
-    m_mainSizer->Detach(m_topBar);
-    m_mainSizer->Clear(true);
-    m_statSizer = new wxBoxSizer(wxHORIZONTAL);
-
+    m_statSizer->Clear(true);
     auto statSizerFlags = wxSizerFlags(0).Border(wxALL).Expand();
 
     auto stmt = m_connection->PrepareStatement(SqlStrings::timeWatchedSql);
@@ -73,10 +84,7 @@ void AnalysisPanel::ResetStats()
             this, m_top, wxID_ANY, result.get(), "Release Type Count"),
         statSizerFlags);
 
-    //workaround bizarre crash involving wxSizer::Clear()
-    m_mainSizer->Add(m_topBar, wxSizerFlags(0).Border(wxALL, 2));
-    m_mainSizer->Add(m_statSizer, wxSizerFlags(0));
-    SetSizerAndFit(m_mainSizer);
+    m_mainSizer->SetSizeHints(this);
 }
 
 void AnalysisPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
