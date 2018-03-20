@@ -30,6 +30,8 @@
 #include "SortStruct.hpp"
 #include "QuickFilter.hpp"
 
+namespace
+{
 enum {
     id_select_combo = wxID_HIGHEST + 1,
     id_title_text_field,
@@ -37,6 +39,7 @@ enum {
     id_overwrite_btn,
     id_delete_btn
 };
+}
 
 wxBEGIN_EVENT_TABLE(QuickFilter, wxPanel)
     EVT_TEXT_ENTER(wxID_ANY, QuickFilter::OnProcessEnter)
