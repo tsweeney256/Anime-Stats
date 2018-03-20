@@ -14,8 +14,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "../Sqlite3.hpp"
 
-cppw::Sqlite3Exception::Sqlite3Exception(int errCode)
-    : m_errCode(errCode) {}
+cppw::Sqlite3Exception::Sqlite3Exception(
+    sqlite3* connection, int errCode)
+    : m_connection(connection), m_errCode(errCode) {}
 
 int cppw::Sqlite3Exception::GetErrorCode() const
 {
@@ -24,5 +25,5 @@ int cppw::Sqlite3Exception::GetErrorCode() const
 
 const char* cppw::Sqlite3Exception::what() const noexcept
 {
-    return sqlite3_errstr(m_errCode);
+    return sqlite3_errmsg(m_connection);
 }

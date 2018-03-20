@@ -24,12 +24,13 @@ namespace cppw
 	class Sqlite3Exception : public std::exception
 	{
 	public:
-		Sqlite3Exception(int errCode);
+		Sqlite3Exception(sqlite3* connection, int errCode);
 
 		int GetErrorCode() const;
 		virtual const char* what() const noexcept;
 
 	private:
+        sqlite3* m_connection;
 		int m_errCode;
 	};
 }

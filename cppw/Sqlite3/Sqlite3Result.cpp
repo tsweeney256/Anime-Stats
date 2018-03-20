@@ -22,14 +22,14 @@ cppw::Sqlite3Result::Sqlite3Result(sqlite3* connection, std::string query)
 {
     int code;
     if((code = sqlite3_exec(connection, query.c_str(), nullptr, nullptr, nullptr)) != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 }
 
 bool cppw::Sqlite3Result::NextRow()
 {
 	int code;
 	if((code = sqlite3_step(m_statement)) != SQLITE_ROW && code != SQLITE_DONE)
-			throw Sqlite3Exception(code);
+			throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 	return code != SQLITE_DONE;
 }
 
@@ -132,5 +132,5 @@ void cppw::Sqlite3Result::Reset(bool throws)
 {
     int code = sqlite3_reset(m_statement);
     if(throws && code != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 }

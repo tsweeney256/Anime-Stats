@@ -29,7 +29,7 @@ void cppw::Sqlite3Connection::Open(const std::string& filename)
 {
     int code;
 	if((code = sqlite3_open(filename.c_str(), &m_connection)) != SQLITE_OK){
-		throw Sqlite3Exception(code);
+		throw Sqlite3Exception(m_connection, code);
 	}
 }
 
@@ -37,7 +37,7 @@ void cppw::Sqlite3Connection::Open(const char* filename)
 {
     int code;
     if((code = sqlite3_open(filename, &m_connection)) != SQLITE_OK){
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(m_connection, code);
     }
 }
 
@@ -76,11 +76,11 @@ cppw::Sqlite3Connection cppw::Sqlite3Connection::BackupToFile(const std::string&
     Sqlite3Connection dest(file);
     auto backup = sqlite3_backup_init(dest.m_connection, "main", m_connection, "main");
     if(!backup)
-        throw Sqlite3Exception(SQLITE_ERROR);
+        throw Sqlite3Exception(m_connection, SQLITE_ERROR);
     if((code = sqlite3_backup_step(backup, -1)) != SQLITE_DONE)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(m_connection, code);
     if((code = sqlite3_backup_finish(backup)) != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(m_connection, code);
     return dest;
 }
 
@@ -98,7 +98,7 @@ std::unique_ptr<cppw::Sqlite3Statement> cppw::Sqlite3Connection::PrepareStatemen
             statementStr.size(),
             &statement,
             nullptr)) != SQLITE_OK){
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(m_connection, code);
     }
     return std::unique_ptr<Sqlite3Statement>(new Sqlite3Statement(statement));
 }
@@ -112,7 +112,7 @@ std::unique_ptr<cppw::Sqlite3Statement> cppw::Sqlite3Connection::PrepareStatemen
             size,
             &statement,
             nullptr)) != SQLITE_OK){
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(m_connection, code);
     }
     return std::unique_ptr<Sqlite3Statement>(new Sqlite3Statement(statement));
 }

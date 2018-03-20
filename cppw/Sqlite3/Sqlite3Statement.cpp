@@ -28,28 +28,28 @@ void cppw::Sqlite3Statement::Bind(const int paramIdx, const int val)
 {
     int code;
     if((code = sqlite3_bind_int(m_statement, paramIdx, val)) != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 }
 
 void cppw::Sqlite3Statement::Bind(const int paramIdx, const int64_t val)
 {
     int code;
     if((code = sqlite3_bind_int64(m_statement, paramIdx, val)) != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 }
 
 void cppw::Sqlite3Statement::Bind(const int paramIdx, const double val)
 {
     int code;
     if((code = sqlite3_bind_double(m_statement, paramIdx, val)) != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 }
 
 void cppw::Sqlite3Statement::Bind(const int paramIdx, const std::string& val)
 {
     int code;
     if((code = sqlite3_bind_text(m_statement, paramIdx, val.c_str(), val.size(), SQLITE_TRANSIENT)) != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 }
 
 //solely because string literals like to use the bool version for some reason...
@@ -57,42 +57,42 @@ void cppw::Sqlite3Statement::Bind(const int paramIdx, const char* val)
 {
     int code;
     if((code = sqlite3_bind_text(m_statement, paramIdx, val, strlen(val), SQLITE_TRANSIENT)) != SQLITE_OK)
-            throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 }
 
 void cppw::Sqlite3Statement::Bind(const int paramIdx, const bool val)
 {
     int code;
     if((code = sqlite3_bind_int(m_statement, paramIdx, val)) != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 }
 
 void cppw::Sqlite3Statement::BindNull(const int paramIdx)
 {
     int code;
     if((code = sqlite3_bind_null(m_statement, paramIdx)) != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 }
 
 void cppw::Sqlite3Statement::ClearBindings()
 {
     int code;
     if((code = sqlite3_clear_bindings(m_statement)) != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 }
 
 void cppw::Sqlite3Statement::Reset(bool throws)
 {
     int code = sqlite3_reset(m_statement);
     if(throws && code != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
 }
 
 void cppw::Sqlite3Statement::Finalize()
 {
     int code;
     if((code = sqlite3_finalize(m_statement)) != SQLITE_OK)
-        throw Sqlite3Exception(code);
+        throw Sqlite3Exception(sqlite3_db_handle(m_statement), code);
     m_statement = nullptr;
 }
 
