@@ -71,10 +71,12 @@ const QuickFilter* TopBar::GetQuickFilter() const
     return m_quickFilter;
 }
 
-void TopBar::ApplyFilter()
+void TopBar::ApplyFilter(bool useQuickCombo)
 {
+    if (useQuickCombo) {
     m_quickFilter->SetFilter(
             std::string(m_quickFilter->GetSelectedFilterName().utf8_str()));
+    }
     auto applyEvent = new wxCommandEvent(TopBarButtonEvent, id_apply_filter_btn);
     QueueEvent(applyEvent);
 }

@@ -773,5 +773,5 @@ void AdvFilterFrame::ApplyFilter()
     adv->tagVal = m_tagValTextField->GetValue().utf8_str();
 
     m_topBar->GetQuickFilter()->SetFilter(std::move(basic), std::move(adv));
-    m_topBar->ApplyFilter();
+    m_topBar->ApplyFilter(false);
 }

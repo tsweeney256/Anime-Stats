@@ -51,7 +51,7 @@ public:
     void ShowButton(int buttonId, bool enable=true);
     QuickFilter* GetQuickFilter();
     const QuickFilter* GetQuickFilter() const;
-    void ApplyFilter();
+    void ApplyFilter(bool useQuickCombo = true);
     void DefaultFilter();
     void AdvFilter();
     void AdvSort();
