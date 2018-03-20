@@ -70,23 +70,39 @@ const QuickFilter* TopBar::GetQuickFilter() const
     return m_quickFilter;
 }
 
+void TopBar::ApplyFilter()
+{
+    auto applyEvent = new wxCommandEvent(TopBarButtonEvent, id_apply_filter_btn);
+    QueueEvent(applyEvent);
+}
+
 void TopBar::OnAdvrFrameDestruction(wxWindowDestroyEvent& event)
 {
     if(event.GetId() == id_adv_filter_frame)
         m_buttons[AdjustButtonId(id_adv_filter_btn)]->Enable();
     else if(event.GetId() == id_adv_sort_frame)
         m_buttons[AdjustButtonId(id_adv_sort_btn)]->Enable();
+    auto newEvent = new wxCommandEvent(TopBarButtonEvent, id_apply_filter_btn);
+    QueueEvent(newEvent);
 }
 
 void TopBar::OnButton(wxCommandEvent& event)
 {
     switch (event.GetId()) {
+    case id_apply_filter_btn:
+        m_quickFilter->SetFilter(
+            std::string(m_quickFilter->GetSelectedFilterName().utf8_str()));
+        goto default_case;
+    case id_default_filter_btn:
+        m_quickFilter->LoadDefaultFilter();
+        goto default_case;
     case id_adv_filter_btn:
         AdvFilter();
         break;
     case id_adv_sort_btn:
         AdvSort();
         break;
+    default_case:
     default:
         auto clone = event.Clone();
         clone->SetEventType(TopBarButtonEvent);

@@ -1,10 +1,19 @@
 #include <wx/sizer.h>
 #include <wx/msgdlg.h>
 #include <fmt/format.h>
-#include "MainFrame.hpp"
-#include "AnalysisPanel.hpp"
 #include "AnalysisBox.hpp"
 #include "SqlStrings.hpp"
+#include "MainFrame.hpp"
+#include "QuickFilter.hpp"
+#include "TopBar.hpp"
+#include "AnalysisPanel.hpp"
+
+wxBEGIN_EVENT_TABLE(AnalysisPanel, StatsPanel)
+    EVT_COMMAND(TopBar::id_apply_filter_btn, TopBarButtonEvent,
+                AnalysisPanel::OnApplyFilter)
+    EVT_COMMAND(TopBar::id_default_filter_btn, TopBarButtonEvent,
+                AnalysisPanel::OnDefaultFilter)
+wxEND_EVENT_TABLE()
 
 AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
                              cppw::Sqlite3Connection* connection, TopBar* topBar)
@@ -54,4 +63,19 @@ void AnalysisPanel::ResetStats()
 
     m_mainSizer->Add(m_statSizer, wxSizerFlags(0));
     m_mainSizer->SetSizeHints(this);
+}
+
+void AnalysisPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
+{
+    ApplyFilter();
+}
+
+void AnalysisPanel::OnDefaultFilter(wxCommandEvent& WXUNUSED(event))
+{
+    ApplyFilter();
+}
+
+void AnalysisPanel::ApplyFilter()
+{
+    ResetStats();
 }

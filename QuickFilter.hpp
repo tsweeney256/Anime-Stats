@@ -46,6 +46,7 @@ public:
     void LoadDefaultFilter();
     void SetFilter(std::unique_ptr<BasicFilterInfo> bfi,
                    std::unique_ptr<AdvFilterInfo> afi);
+    void SetFilter(std::string name);
     void SetSort(std::vector<colSort> sortingRules);
     void SetDefaultFilter(std::string name);
     wxString GetSelectedFilterName() const;

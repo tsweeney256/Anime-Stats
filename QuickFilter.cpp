@@ -41,7 +41,6 @@ enum {
 wxBEGIN_EVENT_TABLE(QuickFilter, wxPanel)
     EVT_TEXT_ENTER(wxID_ANY, QuickFilter::OnProcessEnter)
     EVT_TEXT(id_title_text_field, QuickFilter::OnTitleText)
-    EVT_COMBOBOX(id_select_combo, QuickFilter::OnComboBoxChange)
     EVT_BUTTON(id_new_btn, QuickFilter::OnQuickFilterNew)
     EVT_BUTTON(id_overwrite_btn, QuickFilter::OnQuickFilterOverwrite)
     EVT_BUTTON(id_delete_btn, QuickFilter::OnQuickFilterDelete)
@@ -123,6 +122,11 @@ void QuickFilter::SetFilter(std::unique_ptr<BasicFilterInfo> bfi,
                             std::unique_ptr<AdvFilterInfo> afi)
 {
     m_dbFilter->SetFilter(std::move(bfi), std::move(afi));
+}
+
+void QuickFilter::SetFilter(std::string name)
+{
+    m_dbFilter->LoadFilter(name);
 }
 
 void QuickFilter::SetSort(std::vector<colSort> sortingRules)
@@ -337,12 +341,6 @@ void QuickFilter::OnTitleText(wxCommandEvent& event)
 {
     auto filter = m_dbFilter->GetFilter();
     filter.first->title = std::string(event.GetString().utf8_str());
-}
-
-void QuickFilter::OnComboBoxChange(wxCommandEvent& WXUNUSED(event))
-{
-    m_dbFilter->LoadFilter(
-        std::string(m_quickFilterSelect->GetValue().utf8_str()));
 }
 
 void QuickFilter::OnQuickFilterNew(wxCommandEvent& WXUNUSED(event))

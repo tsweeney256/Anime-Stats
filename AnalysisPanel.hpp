@@ -20,6 +20,13 @@ public:
     void ResetStats();
 
 private:
-    void dummy() override {}
+    void OnApplyFilter(wxCommandEvent& event);
+    void OnDefaultFilter(wxCommandEvent& event);
+
+    void ApplyFilter();
+
     wxBoxSizer* m_statSizer = nullptr;
+
+    void dummy() override {}
+    wxDECLARE_EVENT_TABLE();
 };

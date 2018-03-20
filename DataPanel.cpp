@@ -205,7 +205,6 @@ void DataPanel::EditTags()
 
 void DataPanel::DefaultFilter()
 {
-    m_quickFilter->LoadDefaultFilter();
     ApplyFilter();
 }
 

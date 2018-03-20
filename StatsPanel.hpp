@@ -52,4 +52,5 @@ protected:
     cppw::Sqlite3Connection* m_connection;
     wxBoxSizer* m_mainSizer;
     MainFrame* m_top;
+    TopBar* m_topBar;
 };
