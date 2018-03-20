@@ -23,12 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 #include <wx/stattext.h>
 
 class MainFrame;
-class QuickFilter;
+class TopBar;
 
 class AdvFilterFrame : public wxFrame
 {
 public:
-    AdvFilterFrame(QuickFilter* parent, MainFrame* top, wxWindowID id,
+    AdvFilterFrame(TopBar* parent, MainFrame* top, wxWindowID id,
                    const wxString& title, const wxPoint &pos,
                    const wxSize& size);
 
@@ -71,7 +71,7 @@ private:
     const int m_maxDay    = 31;
 
     MainFrame* m_top;
-    QuickFilter* m_quickFilter;
+    TopBar* m_topBar;
     wxScrolledWindow* m_mainPanel;
 
     wxCheckBox* m_watchedCheck;

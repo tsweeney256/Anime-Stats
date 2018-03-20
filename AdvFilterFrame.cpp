@@ -21,6 +21,7 @@
 #include "FilterStructs.hpp"
 #include "MainFrame.hpp"
 #include "QuickFilter.hpp"
+#include "TopBar.hpp"
 #include "AdvFilterFrame.hpp"
 
 BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
@@ -47,12 +48,12 @@ BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
     EVT_BUTTON(wxID_APPLY, AdvFilterFrame::OnApply)
 END_EVENT_TABLE()
 
-AdvFilterFrame::AdvFilterFrame(QuickFilter* parent, MainFrame* top,
+AdvFilterFrame::AdvFilterFrame(TopBar* parent, MainFrame* top,
                                wxWindowID id, const wxString& title,
                                const wxPoint& pos, const wxSize& size)
     : wxFrame(parent, id, title, pos, size,
               wxDEFAULT_FRAME_STYLE & ~(/*wxRESIZE_BORDER |*/ wxMAXIMIZE_BOX)),
-      m_top(top), m_quickFilter(parent)
+      m_top(top), m_topBar(parent)
 {
     m_mainPanel = new wxScrolledWindow(this, wxID_ANY);
     m_mainPanel->SetScrollRate(10, 10);
@@ -771,6 +772,6 @@ void AdvFilterFrame::ApplyFilter()
     adv->tagKey = m_tagKeyTextField->GetValue().utf8_str();
     adv->tagVal = m_tagValTextField->GetValue().utf8_str();
 
-    m_quickFilter->SetFilter(std::move(basic), std::move(adv));
-    m_top->UpdateStats();
+    m_topBar->GetQuickFilter()->SetFilter(std::move(basic), std::move(adv));
+    m_topBar->ApplyFilter();
 }
