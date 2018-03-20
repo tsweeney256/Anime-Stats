@@ -2,7 +2,6 @@
 #include <wx/msgdlg.h>
 #include <fmt/format.h>
 #include "AnalysisBox.hpp"
-#include "Helpers.hpp"
 #include "MainFrame.hpp"
 #include "QuickFilter.hpp"
 #include "SqlStrings.hpp"
@@ -20,15 +19,6 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
                              cppw::Sqlite3Connection* connection, TopBar* topBar)
     : StatsPanel(parent, top, id, connection, topBar)
 {
-    wxString temp;
-    readFileIntoString(temp, "basicSelect.sql", m_top);
-    std::string statementStr = std::string(
-        ("create temp table tempSeries as " + temp + " where 1<>1").utf8_str());
-    auto stmt = m_connection->PrepareStatement(statementStr);
-    stmt->Bind(1, "");
-    auto result = stmt->GetResults();
-    result->NextRow();
-
     m_statSizer = new wxBoxSizer(wxHORIZONTAL);
     m_mainSizer->Add(m_statSizer, wxSizerFlags(0));
 }

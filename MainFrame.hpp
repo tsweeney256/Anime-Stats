@@ -72,6 +72,7 @@ private:
     void DbUpdateNotify();
     void UpdateNegOneDb();
     void Reset(cppw::Sqlite3Connection* connection);
+    void MakeTempSeriesTable();
 
     wxDECLARE_EVENT_TABLE();
 

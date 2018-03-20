@@ -529,6 +529,7 @@ bool MainFrame::CreateMemoryDb()
     try {
         m_connection->ExecuteQuery(std::string(createStr.utf8_str()));
         UpdateDb(0);
+        MakeTempSeriesTable();
     } catch (const cppw::Sqlite3Exception& e) {
         wxMessageBox(std::string("Error: ") + e.what());
         Destroy();
@@ -547,6 +548,7 @@ bool MainFrame::OpenDb(const wxString& file)
         if (UpdateDb(GetDbVersion())) {
             DbUpdateNotify();
         }
+        MakeTempSeriesTable();
     } catch (const cppw::Sqlite3Exception& e) {
         wxMessageBox(std::string("Error: ") + e.what());
         Destroy();
@@ -820,4 +822,16 @@ void MainFrame::Reset(cppw::Sqlite3Connection* connection)
     m_dataPanel->ResetPanel(connection);
     m_analysisPanel->ResetConnection(connection);
     SetUnsavedChanges(false);
+}
+
+void MainFrame::MakeTempSeriesTable()
+{
+    wxString temp;
+    readFileIntoString(temp, "basicSelect.sql", this);
+    std::string statementStr = std::string(
+        ("create temp table tempSeries as " + temp + " where 1<>1").utf8_str());
+    auto stmt = m_connection->PrepareStatement(statementStr);
+    stmt->Bind(1, "");
+    auto result = stmt->GetResults();
+    result->NextRow();
 }
