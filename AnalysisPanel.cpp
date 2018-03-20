@@ -85,6 +85,7 @@ void AnalysisPanel::ResetStats()
         statSizerFlags);
 
     m_mainSizer->SetSizeHints(this);
+    Layout();
 }
 
 void AnalysisPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
