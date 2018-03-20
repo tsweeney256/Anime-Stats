@@ -135,6 +135,7 @@ void DbFilter::SaveFilter(std::string name, bool makeDefault)
 {
     auto idFilter = InsertFilterToDb(name, makeDefault);
     SaveSortToDb(idFilter);
+    m_defaultFilter = name;
 }
 
 void DbFilter::DeleteFilter(std::string name)
@@ -161,6 +162,7 @@ void DbFilter::SetDefaultFilter(std::string name)
     stmt->Bind(1, name);
     result = stmt->GetResults();
     result->NextRow();
+    m_defaultFilter = name;
 }
 
 std::vector<std::string> DbFilter::GetFilterNames()
