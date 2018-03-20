@@ -30,6 +30,7 @@
 #include <wx/dir.h>
 #include <wx/filedlg.h>
 #include <wx/richmsgdlg.h>
+#include <wx/wupdlock.h>
 #include <wx/xml/xml.h>
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
@@ -556,6 +557,7 @@ bool MainFrame::OpenDb(const wxString& file)
 
 void MainFrame::OnTabChange(wxBookCtrlEvent& event)
 {
+    wxWindowUpdateLocker lock(this);
     if(event.GetSelection() == 1){
         try{
             std::pair<int, bool> buttonRules[] = {
