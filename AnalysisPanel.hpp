@@ -23,7 +23,7 @@ private:
     void OnApplyFilter(wxCommandEvent& event);
     void OnDefaultFilter(wxCommandEvent& event);
 
-    void ApplyFilter();
+    void ApplyFilter() override;
 
     wxBoxSizer* m_statSizer = nullptr;
 
