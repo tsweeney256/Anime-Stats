@@ -47,7 +47,7 @@ public:
     void SetFilter(std::unique_ptr<BasicFilterInfo> bfi,
                    std::unique_ptr<AdvFilterInfo> afi);
     void SetSort(std::vector<colSort> sortingRules);
-    void SetDefaultFilter(wxString name);
+    void SetDefaultFilter(std::string name);
     wxString GetSelectedFilterName() const;
     cppw::Sqlite3Result* GetAnimeData(bool filtered, bool sorted);
 

@@ -130,9 +130,9 @@ void QuickFilter::SetSort(std::vector<colSort> sortingRules)
     m_dbFilter->SetSort(sortingRules);
 }
 
-void QuickFilter::SetDefaultFilter(wxString name)
+void QuickFilter::SetDefaultFilter(std::string name)
 {
-    m_dbFilter->SetDefaultFilter(std::string(name.utf8_str()));
+    m_dbFilter->SetDefaultFilter(name);
 }
 
 wxString QuickFilter::GetSelectedFilterName() const

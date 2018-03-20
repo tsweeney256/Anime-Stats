@@ -316,7 +316,7 @@ void MainFrame::OnMakeDefaultFilter(wxCommandEvent& WXUNUSED(event))
             return;
         }
         SetUnsavedChanges(true);
-        quickFilter->SetDefaultFilter(curFilter);
+        quickFilter->SetDefaultFilter(std::string(curFilter.utf8_str()));
         wxMessageBox("The default filter is now \"" + curFilter + "\"");
     } catch (const cppw::Sqlite3Exception& e) {
         wxMessageBox(e.what());
