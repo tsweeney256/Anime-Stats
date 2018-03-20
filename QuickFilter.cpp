@@ -130,6 +130,8 @@ void QuickFilter::SetFilter(std::unique_ptr<BasicFilterInfo> bfi,
 void QuickFilter::SetFilter(std::string name)
 {
     m_dbFilter->LoadFilter(name);
+    m_dbFilter->GetFilter().first->title =
+        std::string(m_quickFilterTitle->GetValue().utf8_str());
 }
 
 void QuickFilter::SetSort(std::vector<colSort> sortingRules)

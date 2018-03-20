@@ -63,6 +63,7 @@ public:
 private:
     void OnAdvrFrameDestruction(wxWindowDestroyEvent& event);
     void OnButton(wxCommandEvent& event);
+    void OnTextEnter(wxCommandEvent& event);
 
     int AdjustButtonId(int id);
 

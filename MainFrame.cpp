@@ -268,42 +268,42 @@ void MainFrame::OnRedo(wxCommandEvent& WXUNUSED(event)) { m_dataPanel->Redo(); }
 
 void MainFrame::OnAddRow(wxCommandEvent& WXUNUSED(event))
 {
-    m_dataPanel->AddRow();
+    m_topBar->AddRow();
 }
 
 void MainFrame::OnDeleteRows(wxCommandEvent& WXUNUSED(event))
 {
-    m_dataPanel->DeleteRows();
+    m_topBar->DeleteRows();
 }
 
 void MainFrame::OnAliasTitle(wxCommandEvent& WXUNUSED(event))
 {
-    m_dataPanel->AliasTitle();
+    m_topBar->AliasTitle();
 }
 
 void MainFrame::OnEditTags(wxCommandEvent& WXUNUSED(event))
 {
-    m_dataPanel->EditTags();
+    m_topBar->EditTags();
 }
 
 void MainFrame::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
 {
-    m_dataPanel->ApplyFilter();
+    m_topBar->ApplyFilter();
 }
 
 void MainFrame::OnDefaultFilter(wxCommandEvent& WXUNUSED(event))
 {
-    m_dataPanel->DefaultFilter();
+    m_topBar->DefaultFilter();
 }
 
 void MainFrame::OnAdvFilter(wxCommandEvent& WXUNUSED(event))
 {
-    m_dataPanel->AdvFilter();
+    m_topBar->AdvFilter();
 }
 
 void MainFrame::OnAdvSort(wxCommandEvent& WXUNUSED(event))
 {
-    m_dataPanel->AdvSort();
+    m_topBar->AdvSort();
 }
 
 void MainFrame::OnMakeDefaultFilter(wxCommandEvent& WXUNUSED(event))

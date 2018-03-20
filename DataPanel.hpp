@@ -71,7 +71,6 @@ public:
 private:
     void dummy() override {}
 
-    void OnTextEnter(wxCommandEvent& event);
     void OnApplyFilter(wxCommandEvent& event);
     void OnDefaultFilter(wxCommandEvent& event);
     void OnEditTags(wxCommandEvent& event);

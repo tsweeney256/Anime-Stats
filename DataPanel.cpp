@@ -49,7 +49,6 @@
 #include "TopBar.hpp"
 
 BEGIN_EVENT_TABLE(DataPanel, wxPanel)
-    EVT_COMMAND(wxID_ANY, QuickFilterProcessEnterEvent, DataPanel::OnTextEnter)
     EVT_COMMAND(TopBar::id_apply_filter_btn, TopBarButtonEvent,
                 DataPanel::OnApplyFilter)
     EVT_COMMAND(TopBar::id_default_filter_btn, TopBarButtonEvent,
@@ -212,11 +211,6 @@ void DataPanel::ClearCommandHistory()
 {
     m_commands.clear();
     m_commandLevel = 0;
-}
-
-void DataPanel::OnTextEnter(wxCommandEvent& WXUNUSED(event))
-{
-    ApplyFilter();
 }
 
 void DataPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))

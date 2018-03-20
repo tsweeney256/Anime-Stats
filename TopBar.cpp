@@ -11,6 +11,7 @@
 wxBEGIN_EVENT_TABLE(TopBar, wxScrolledWindow)
     EVT_WINDOW_DESTROY(TopBar::OnAdvrFrameDestruction)
     EVT_BUTTON(wxID_ANY, TopBar::OnButton)
+    EVT_COMMAND(wxID_ANY, QuickFilterProcessEnterEvent, TopBar::OnTextEnter)
 wxEND_EVENT_TABLE()
 
 enum {
@@ -72,48 +73,18 @@ const QuickFilter* TopBar::GetQuickFilter() const
 
 void TopBar::ApplyFilter()
 {
+    m_quickFilter->SetFilter(
+            std::string(m_quickFilter->GetSelectedFilterName().utf8_str()));
     auto applyEvent = new wxCommandEvent(TopBarButtonEvent, id_apply_filter_btn);
     QueueEvent(applyEvent);
 }
 
-void TopBar::OnAdvrFrameDestruction(wxWindowDestroyEvent& event)
+void TopBar::DefaultFilter()
 {
-    if(event.GetId() == id_adv_filter_frame)
-        m_buttons[AdjustButtonId(id_adv_filter_btn)]->Enable();
-    else if(event.GetId() == id_adv_sort_frame)
-        m_buttons[AdjustButtonId(id_adv_sort_btn)]->Enable();
-    auto newEvent = new wxCommandEvent(TopBarButtonEvent, id_apply_filter_btn);
-    QueueEvent(newEvent);
-}
-
-void TopBar::OnButton(wxCommandEvent& event)
-{
-    switch (event.GetId()) {
-    case id_apply_filter_btn:
-        m_quickFilter->SetFilter(
-            std::string(m_quickFilter->GetSelectedFilterName().utf8_str()));
-        goto default_case;
-    case id_default_filter_btn:
-        m_quickFilter->LoadDefaultFilter();
-        goto default_case;
-    case id_adv_filter_btn:
-        AdvFilter();
-        break;
-    case id_adv_sort_btn:
-        AdvSort();
-        break;
-    default_case:
-    default:
-        auto clone = event.Clone();
-        clone->SetEventType(TopBarButtonEvent);
-        QueueEvent(clone);
-        break;
-    }
-}
-
-int TopBar::AdjustButtonId(int id)
-{
-    return id - wxID_HIGHEST - 1;
+    m_quickFilter->LoadDefaultFilter();
+    auto applyEvent = new wxCommandEvent(
+        TopBarButtonEvent, id_default_filter_btn);
+    QueueEvent(applyEvent);
 }
 
 void TopBar::AdvFilter()
@@ -133,6 +104,73 @@ void TopBar::AdvSort()
         m_quickFilter, m_top, id_adv_sort_frame, m_connection);
     frame->Show(true);
     m_buttons[AdjustButtonId(id_adv_sort_btn)]->Disable();
+}
+
+void TopBar::AddRow()
+{
+    auto applyEvent = new wxCommandEvent(TopBarButtonEvent, id_add_row_btn);
+    QueueEvent(applyEvent);
+}
+
+void TopBar::DeleteRows()
+{
+    auto applyEvent = new wxCommandEvent(TopBarButtonEvent, id_delete_row_btn);
+    QueueEvent(applyEvent);
+}
+
+void TopBar::AliasTitle()
+{
+    auto applyEvent = new wxCommandEvent(TopBarButtonEvent, id_alias_title_btn);
+    QueueEvent(applyEvent);
+}
+
+void TopBar::EditTags()
+{
+    auto applyEvent = new wxCommandEvent(TopBarButtonEvent, id_edit_tags_btn);
+    QueueEvent(applyEvent);
+}
+
+void TopBar::OnAdvrFrameDestruction(wxWindowDestroyEvent& event)
+{
+    if(event.GetId() == id_adv_filter_frame)
+        m_buttons[AdjustButtonId(id_adv_filter_btn)]->Enable();
+    else if(event.GetId() == id_adv_sort_frame)
+        m_buttons[AdjustButtonId(id_adv_sort_btn)]->Enable();
+    auto newEvent = new wxCommandEvent(TopBarButtonEvent, id_apply_filter_btn);
+    QueueEvent(newEvent);
+}
+
+void TopBar::OnButton(wxCommandEvent& event)
+{
+    switch (event.GetId()) {
+    case id_apply_filter_btn:
+        ApplyFilter();
+        break;
+    case id_default_filter_btn:
+        DefaultFilter();
+        break;
+    case id_adv_filter_btn:
+        AdvFilter();
+        break;
+    case id_adv_sort_btn:
+        AdvSort();
+        break;
+    default:
+        auto clone = event.Clone();
+        clone->SetEventType(TopBarButtonEvent);
+        QueueEvent(clone);
+        break;
+    }
+}
+
+void TopBar::OnTextEnter(wxCommandEvent& WXUNUSED(event))
+{
+    ApplyFilter();
+}
+
+int TopBar::AdjustButtonId(int id)
+{
+    return id - wxID_HIGHEST - 1;
 }
 
 wxDEFINE_EVENT(TopBarButtonEvent, wxCommandEvent);
