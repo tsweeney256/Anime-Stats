@@ -494,7 +494,7 @@ void DataPanel::ResetTable(cppw::Sqlite3Result* results)
 void DataPanel::ApplyFilter()
 {
     try{
-        auto results = m_quickFilter->GetAnimeData(true, true);
+        auto results = m_quickFilter->GetAnimeData(true, true, false);
         ResetTable(results);
     }catch(cppw::Sqlite3Exception& e){
         wxMessageBox(std::string("Error applying filter.\n") + e.what());

@@ -147,7 +147,8 @@ wxString QuickFilter::GetSelectedFilterName() const
     return m_quickFilterSelect->GetValue();
 }
 
-cppw::Sqlite3Result* QuickFilter::GetAnimeData(bool filtered,  bool sorted)
+cppw::Sqlite3Result* QuickFilter::GetAnimeData(
+    bool filtered,  bool sorted, bool useTempTable)
 {
     auto sqlStr = std::string(m_basicSelectString);
     const auto* cThis = this;
@@ -296,6 +297,13 @@ cppw::Sqlite3Result* QuickFilter::GetAnimeData(bool filtered,  bool sorted)
                 usingTagVal = true;
                 statusStr << " and val like ?3 ";
             }
+        }
+        if (useTempTable) {
+            auto dropStmt = m_connection->PrepareStatement(
+                "drop table if exists tempSeries");
+            auto dropResult = dropStmt->GetResults();
+            dropResult->NextRow();
+            sqlStr = "create temp table tempSeries as " + sqlStr;
         }
         //1=1 is just a dumb hack so I don't have to worry about when
         //to start using 'and's and 'or's

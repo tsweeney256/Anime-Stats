@@ -50,7 +50,8 @@ public:
     void SetSort(std::vector<colSort> sortingRules);
     void SetDefaultFilter(std::string name);
     wxString GetSelectedFilterName() const;
-    cppw::Sqlite3Result* GetAnimeData(bool filtered, bool sorted);
+    cppw::Sqlite3Result* GetAnimeData(
+        bool filtered, bool sorted, bool useTempTable);
 
 private:
     void OnProcessEnter(wxCommandEvent& event);

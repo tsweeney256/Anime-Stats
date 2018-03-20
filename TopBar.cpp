@@ -119,7 +119,7 @@ int TopBar::AdjustButtonId(int id)
 void TopBar::AdvFilter()
 {
     //non-modal
-    auto frame = new AdvFilterFrame(m_quickFilter, m_top, id_adv_filter_frame,
+    auto frame = new AdvFilterFrame(this, m_top, id_adv_filter_frame,
                                     "Advanced Filtering", wxDefaultPosition,
                                     wxDefaultSize);
     frame->Show(true);

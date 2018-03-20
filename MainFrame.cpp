@@ -592,6 +592,8 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& event)
             m_topBar->ShowButton(rule.first, rule.second);
         }
         m_topBar->Reparent(m_dataPanel);
+        m_dataPanel->Layout();
+        m_dataPanel->ApplyFilter();
     }
     m_topBar->Layout();
 }
