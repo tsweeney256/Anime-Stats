@@ -44,9 +44,7 @@ void StatsPanel::AttachTopBar()
 
 void StatsPanel::DetachTopBar()
 {
-    if (m_mainSizer->Detach(m_topBar)) {
-        m_topBar->Reparent(nullptr);
-    }
+    m_mainSizer->Detach(m_topBar);
 }
 
 void StatsPanel::ApplyFilter()
