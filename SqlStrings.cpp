@@ -1,9 +1,6 @@
 #include "SqlStrings.hpp"
 
 namespace SqlStrings{
-    const std::string medianStr =
-        "select median({0})\n"
-        "from Series\n";
 
     const std::string distribution =
         "select\n"

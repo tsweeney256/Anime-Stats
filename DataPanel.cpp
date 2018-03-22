@@ -43,7 +43,6 @@
 #include "EditTagDialog.hpp"
 #include "MainFrame.hpp"
 #include "Settings.hpp"
-#include "SqlStrings.hpp"
 #include "Helpers.hpp"
 #include "QuickFilter.hpp"
 #include "TopBar.hpp"
@@ -724,8 +723,11 @@ int DataPanel::GetColMedian(const std::string& colName)
 {
     std::string medianStr;
     try{
-        medianStr = fmt::format(SqlStrings::medianStr, colName);
-        auto stmt = m_connection->PrepareStatement(medianStr);
+        const std::string medianStr =
+            "select median({0})\n"
+            "from Series\n";
+        auto stmt = m_connection->PrepareStatement(
+            fmt::format(medianStr, colName));
         auto result = stmt->GetResults();
         result->NextRow();
         return result->GetInt(0);
