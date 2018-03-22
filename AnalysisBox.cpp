@@ -6,8 +6,8 @@
 #include "AnalysisBox.hpp"
 
 AnalysisBox::AnalysisBox(
-        wxWindow* parent, MainFrame* top, wxWindowID id,
-        cppw::Sqlite3Result* result, wxString boxLabel, bool rightAlign)
+    wxWindow* parent, MainFrame* top, wxWindowID id, wxString boxLabel,
+    cppw::Sqlite3Result* result, int startCol, int endCol, bool rightAlign)
     : wxPanel(parent, id), m_top(top)
 {
     SetFont(wxFont(GetFont().GetPointSize(), wxFONTFAMILY_TELETYPE,
@@ -15,11 +15,11 @@ AnalysisBox::AnalysisBox(
     m_mainSizer = new wxStaticBoxSizer(wxVERTICAL, this, boxLabel);
     auto textSizer = new wxBoxSizer(wxVERTICAL);
 
-    result->NextRow();
-    for (int i = 0; i < result->GetColumnCount(); ++i) {
+    for (int i = startCol; i < endCol; ++i) {
         auto rowSizer = new wxBoxSizer(wxHORIZONTAL);
         auto rowItemSizer = new wxBoxSizer(wxVERTICAL);
-        auto staticText = new wxStaticText(this, wxID_ANY, result->GetString(i));
+        auto val = result->GetString(i);
+        auto staticText = new wxStaticText(this, wxID_ANY, val);
         rowSizer->Add(
             new wxStaticText(this, wxID_ANY, result->GetColumnName(i) + ":"),
             wxSizerFlags(0).Border(wxLEFT | wxRIGHT | wxBOTTOM));

@@ -25,6 +25,11 @@ private:
 
     void ApplyFilter() override;
 
+    std::string m_groupCol = "constant";
+    std::string m_fromTable = "tempSeries";
+    std::string m_havingExpr = "";
+    std::string m_sort = "constant";
+    bool m_asc = true;
     wxBoxSizer* m_statSizer = nullptr;
 
     void dummy() override {}

@@ -1,94 +1,110 @@
+#include <fmt/format.h>
 #include "SqlStrings.hpp"
 
-namespace SqlStrings{
+using namespace fmt::literals;
 
+namespace SqlStrings{
     const std::string distribution =
-        "select\n"
-        "    printf(\"%.2f\", avg(rating)) as `Average`,\n"
-        "    printf(\"%.2f\", median(rating)) as `Median`,\n"
-        "    printf(\"%.2f\", stdev(rating)) as `Std. Dev`,\n"
-        "    count(rating) as `Count`\n"
-        "from tempSeries\n";
+        "select {group_col},\n"
+        "    printf(\"%.2f\", avg(Rating)) as Average,\n"
+        "    printf(\"%.2f\", median(Rating)) as Median,\n"
+        "    printf(\"%.2f\", stdev(Rating)) as `Std. Dev`,\n"
+        "    count(Rating) as `Count`\n"
+        "from {from_table}\n"
+        "group by {group_col}\n"
+        "{having_expr}\n"
+        "{order_by} {group_col}\n";
 
     const std::string countWatchedStatus =
-        "select `Watched`, `Watching`, `Stalled`, `Dropped`, `To Watch`\n"
-        "from (\n"
-        "    select count(idWatchedStatus) as `Watched`\n"
-        "    from tempSeries\n"
-        "    where idWatchedStatus = 1\n"
-        ")\n"
-        "left join (\n"
-        "    select count(idWatchedStatus) as `Watching`\n"
-        "    from tempSeries\n"
-        "    where idWatchedStatus = 2\n"
-        ")\n"
-        "left join (\n"
-        "    select count(idWatchedStatus) as `Stalled`\n"
-        "    from tempSeries\n"
-        "    where idWatchedStatus = 3\n"
-        ")\n"
-        "left join (\n"
-        "    select count(idWatchedStatus) as `Dropped`\n"
-        "    from tempSeries\n"
-        "    where idWatchedStatus = 4\n"
-        ")\n"
-        "left join (\n"
-        "    select count(idWatchedStatus) as `To Watch`\n"
-        "    from tempSeries\n"
-        "    where idWatchedStatus = 5\n"
-        ")\n";
+        "select {group_col},\n"
+        "    count(idWatchedStatus, 1) as Watched,\n"
+        "    count(idWatchedStatus, 2) as Watching,\n"
+        "    count(idWatchedStatus, 3) as Stalled,\n"
+        "    count(idWatchedStatus, 4) as Dropped,\n"
+        "    count(idWatchedStatus, 5) as `To Watch`\n"
+        "from {from_table}\n"
+        "group by {group_col}\n"
+        "{having_expr}\n"
+        "{order_by} {group_col}\n";
+
 
     const std::string countReleaseType =
-        "select `TV`, `OVA`, `ONA`, `Movie`, `TV Special`\n"
-        "from (\n"
-        "    select count(idReleaseType) as `TV`\n"
-        "    from tempSeries\n"
-        "    where idReleaseType = 1\n"
-        ")\n"
-        "left join (\n"
-        "    select count(idReleaseType) as `OVA`\n"
-        "    from tempSeries\n"
-        "    where idReleaseType = 2\n"
-        ")\n"
-        "left join (\n"
-        "    select count(idReleaseType) as `ONA`\n"
-        "    from tempSeries\n"
-        "    where idReleaseType = 3\n"
-        ")\n"
-        "left join (\n"
-        "    select count(idReleaseType) as `Movie`\n"
-        "    from tempSeries\n"
-        "    where idReleaseType = 4\n"
-        ")\n"
-        "left join (\n"
-        "    select count(idReleaseType) as `TV Special`\n"
-        "    from tempSeries\n"
-        "    where idReleaseType = 5\n"
-        ")\n";
+        "select {group_col},\n"
+        "    count(idReleaseType, 1) as TV,\n"
+        "    count(idReleaseType, 2) as OVA,\n"
+        "    count(idReleaseType, 3) as ONA,\n"
+        "    count(idReleaseType, 4) as Movie,\n"
+        "    count(idReleaseType, 5) as `TV Special`\n"
+        "from {from_table}\n"
+        "group by {group_col}\n"
+        "{having_expr}\n"
+        "{order_by} {group_col}\n";
 
     const std::string timeWatchedSql =
-        "SELECT printf(\"%.2f\",  sum(episodesWatched * episodeLength) / 1436.068333333) as `Days`, `Formatted`, '' as `With Rewatches`, `third` as `Days`, `fourth` as `Formatted`\n"
-        "from tempSeries\n"
-        "left join(\n"
-        "    SELECT printf(\"%d Years, %02d Months, %02d Days, %02d Hours, %02d Minutes\",  year, month, day, hour, minute ) as `Formatted`\n"
-        "    FROM(SELECT year, month, day, hour, val * 60 as minute\n"
-        "        FROM(SELECT val * 24 - CAST(val * 24 as INT) as val, year, month, day, val * 24 as hour\n"
-        "            FROM (SELECT val - CAST(val as INT) as val, year, month, val as day\n"
-        "                FROM (SELECT val - CAST(val / 30.520183333 as INT) * 30.520183333 as val, year, val / 30.520183333 as month\n"
-        "                    FROM (SELECT val - CAST(val / 366.2422 as INT)  * 366.2422 as val, val / 366.2422  as year\n"
-        "                        FROM (SELECT sum(episodesWatched * episodeLength) / 1436.068333333 as val FROM tempSeries)))))))\n"
-        "left join(\n"
-        "    SELECT printf(\"%.2f\",  sum((IFNULL(rewatchedEpisodes, 0) + episodesWatched) * episodeLength) / 1436.068333333) as `third`\n"
-        "    from tempSeries)\n"
-        "left join(\n"
-        "       --There are 366.2422 stellar days in a year\n"
-        "       --Dividing by 12 gives us 30.520183333 days in a month\n"
-        "       --A stellar day is 23 hours 56 minutes and 4.1 seconds long or 1436.068333333 minutes long\n"
-        "       SELECT printf(\"%d Years, %02d Months, %02d Days, %02d Hours, %02d Minutes\",  year, month, day, hour, minute ) as `fourth`\n"
-        "       FROM(SELECT year, month, day, hour, val * 60 as minute\n"
-        "               FROM(SELECT val * 24 - CAST(val * 24 as INT) as val, year, month, day, val * 24 as hour\n"
-        "                       FROM (SELECT val - CAST(val as INT) as val, year, month, val as day\n"
-        "                               FROM (SELECT val - CAST(val / 30.520183333 as INT) * 30.520183333 as val, year, val / 30.520183333 as month\n"
-        "                                       FROM (SELECT val - CAST(val / 366.2422 as INT)  * 366.2422 as val, val / 366.2422  as year\n"
-        "                                               FROM (SELECT sum((IFNULL(rewatchedEpisodes, 0) + episodesWatched) * episodeLength) / 1436.068333333 as val FROM tempSeries)))))))\n";
+        "--There are 366.2422 stellar days in a year\n"
+        "--Dividing by 12 gives us 30.520183333 days in a month\n"
+        "--A stellar day is 23 hours 56 minutes and 4.1 seconds long or 1436.068333333 minutes long\n"
+        "select {group_col}, printf(\"%.2f\", totalDays) as `Days`, printf(\"%d Years, %02d Months, %02d Days, %02d Hours, %02d Minutes\",  watchedYear, month, day, hour, minute ) as `Formatted`, '' as `With Rewatches`, printf(\"%.2f\",  totalRewatchedDays) as `Days`, printf(\"%d Years, %02d Months, %02d Days, %02d Hours, %02d Minutes\",  rewatchedYear, rewatchedMonth, rewatchedDay, rewatchedHour, rewatchedMinute) as `Formatted`\n"
+        "from(select {group_col}, totalDays, watchedYear, month, day, hour, val * 60 as minute, val, totalRewatchedDays, rewatchedYear, rewatchedMonth, rewatchedDay, rewatchedHour, rewatchedVal * 60 as rewatchedMinute, rewatchedVal\n"
+        "    from(select {group_col}, totalDays, val * 24 - cast(val * 24 as int) as val, watchedYear, month, day, val * 24 as hour, totalRewatchedDays, rewatchedVal * 24 - cast(rewatchedVal * 24 as int) as rewatchedVal, rewatchedYear, rewatchedMonth, rewatchedDay, rewatchedVal * 24 as rewatchedHour\n"
+        "        from (select {group_col}, totalDays, val - cast(val as int) as val, watchedYear, month, val as day, totalRewatchedDays, rewatchedVal - cast(rewatchedVal as int) as rewatchedVal, rewatchedYear, rewatchedMonth, rewatchedVal as rewatchedDay\n"
+        "            from (select {group_col}, totalDays, val - cast(val / 30.520183333 as int) * 30.520183333 as val, watchedYear, val / 30.520183333 as month, totalRewatchedDays, rewatchedVal - cast(rewatchedVal / 30.520183333 as int) * 30.520183333 as rewatchedVal, rewatchedYear, rewatchedVal / 30.520183333 as rewatchedMonth\n"
+        "                from (select {group_col}, val as totalDays, val - cast(val / 366.2422 as int)  * 366.2422 as val, val / 366.2422  as watchedYear, rewatchedVal as totalRewatchedDays, rewatchedVal - cast(rewatchedVal / 366.2422 as int)  * 366.2422 as rewatchedVal, rewatchedVal / 366.2422  as rewatchedYear\n"
+        "                    from (select {group_col}, sum(episodesWatched * episodeLength) / 1436.068333333 as val, sum((ifnull(rewatchedEpisodes, 0) + episodesWatched) * episodeLength) / 1436.068333333 as rewatchedVal from {from_table} group by {group_col} {having_expr}))))))\n"
+        "{order_by} {group_col}\n";
+
+    //ugly amalgamation of the above to make sorting easier
+    const std::string amalgamationColsBottom =
+        //Amount Watched
+        /*these columns are baked into the query because timeWatched is
+         more complicated*/
+        //Rating
+        "    printf(\"%.2f\", avg(Rating)) as Average,\n"
+        "    printf(\"%.2f\", median(Rating)) as Median,\n"
+        "    printf(\"%.2f\", stdev(Rating)) as `Std. Dev`,\n"
+        "    count(Rating) as `Count`,\n"
+        //Count Watched Status
+        "    count(idWatchedStatus, 1) as Watched,\n"
+        "    count(idWatchedStatus, 2) as Watching,\n"
+        "    count(idWatchedStatus, 3) as Stalled,\n"
+        "    count(idWatchedStatus, 4) as Dropped,\n"
+        "    count(idWatchedStatus, 5) as `To Watch`,\n"
+        //Count Release Type
+        "    count(idReleaseType, 1) as TV,\n"
+        "    count(idReleaseType, 2) as OVA,\n"
+        "    count(idReleaseType, 3) as ONA,\n"
+        "    count(idReleaseType, 4) as Movie,\n"
+        "    count(idReleaseType, 5) as `TV Special`\n";
+
+    const std::string amalgamationColsTop =
+        "Average, Median, `Std. Dev`, `Count`, Watched, Watching, `Stalled`, Dropped, `To Watch`, TV, OVA, ONA, Movie, `TV Special`";
+
+    const std::string bigUglyAmalgamation =
+        "--There are 366.2422 stellar days in a year\n"
+        "--Dividing by 12 gives us 30.520183333 days in a month\n"
+        "--A stellar day is 23 hours 56 minutes and 4.1 seconds long or 1436.068333333 minutes long\n"
+        "select `{group_col}`,\n"
+        "    printf(\"%.2f\", totalDays) as `Days`,\n"
+        "    printf(\"%d Years, %02d Months, %02d Days, %02d Hours, %02d Minutes\",  watchedYear, month, day, hour, minute ) as `Formatted`,\n"
+        "    '' as `With Rewatches`,\n"
+        "printf(\"%.2f\",  totalRewatchedDays) as `Days`,\n"
+        "printf(\"%d Years, %02d Months, %02d Days, %02d Hours, %02d Minutes\",  rewatchedYear, rewatchedMonth, rewatchedDay, rewatchedHour, rewatchedMinute) as `Formatted`,\n"
+        //wanted to use fmt::format to make this prettier but it doesnt
+        //support partial formatting
+        + amalgamationColsTop +
+        "from(select `{group_col}`, totalDays, watchedYear, month, day, hour, val * 60 as minute, val, totalRewatchedDays, rewatchedYear, rewatchedMonth, rewatchedDay, rewatchedHour, rewatchedVal * 60 as rewatchedMinute, rewatchedVal, " + amalgamationColsTop + "\n"
+        "    from(select `{group_col}`, totalDays, val * 24 - cast(val * 24 as int) as val, watchedYear, month, day, val * 24 as hour, totalRewatchedDays, rewatchedVal * 24 - cast(rewatchedVal * 24 as int) as rewatchedVal, rewatchedYear, rewatchedMonth, rewatchedDay, rewatchedVal * 24 as rewatchedHour, " + amalgamationColsTop + "\n"
+        "        from (select `{group_col}`, totalDays, val - cast(val as int) as val, watchedYear, month, val as day, totalRewatchedDays, rewatchedVal - cast(rewatchedVal as int) as rewatchedVal, rewatchedYear, rewatchedMonth, rewatchedVal as rewatchedDay, " + amalgamationColsTop + "\n"
+        "            from (select `{group_col}`, totalDays, val - cast(val / 30.520183333 as int) * 30.520183333 as val, watchedYear, val / 30.520183333 as month, totalRewatchedDays, rewatchedVal - cast(rewatchedVal / 30.520183333 as int) * 30.520183333 as rewatchedVal, rewatchedYear, rewatchedVal / 30.520183333 as rewatchedMonth, " + amalgamationColsTop + "\n"
+        "                from (select `{group_col}`, val as totalDays, val - cast(val / 366.2422 as int)  * 366.2422 as val, val / 366.2422  as watchedYear, rewatchedVal as totalRewatchedDays, rewatchedVal - cast(rewatchedVal / 366.2422 as int)  * 366.2422 as rewatchedVal, rewatchedVal / 366.2422  as rewatchedYear, " + amalgamationColsTop + "\n"
+        "                    from (\n"
+        "                        select `{group_col}`,\n"
+        "                        sum(episodesWatched * episodeLength) / 1436.068333333 as val,\n"
+        "                        sum((ifnull(rewatchedEpisodes, 0) + episodesWatched) * episodeLength) / 1436.068333333 as rewatchedVal,\n"
+        + amalgamationColsBottom +
+        "                        from {from_table}\n"
+        "                        group by `{group_col}`\n"
+        "                        {having_expr}\n"
+        "))))))\n"
+        "order by `{order_col}` {asc}\n";
 }
