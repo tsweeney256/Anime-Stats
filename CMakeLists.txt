@@ -48,6 +48,10 @@ set(CPPW_SQLITE3 cppw/Sqlite3/Sqlite3Connection.cpp
   cppw/Sqlite3/Sqlite3Result.cpp
   cppw/Sqlite3/Sqlite3Statement.cpp)
 
+add_library(count_value STATIC
+  external/my-extensions/count_value.c)
+target_compile_definitions(count_value PRIVATE
+  SQLITE_CORE=1)
 add_library(extensions-functions STATIC
   external/sqlite3-extensions/extension-functions.c)
 target_compile_definitions(extensions-functions PRIVATE
@@ -72,6 +76,7 @@ if(wxWidgets_FOUND)
 endif(wxWidgets_FOUND)
 
 target_link_libraries(AnimeStats
+  count_value
   extensions-functions
   fmt)
 

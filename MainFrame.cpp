@@ -47,6 +47,8 @@ static const int current_db_version = 4;
 extern "C"{
     int sqlite3_extension_init(
         sqlite3 *db, char **pzErrMsg, const sqlite3_api_routines *pApi);
+    int sqlite3_countvalue_init(
+        sqlite3 *db, char **pzErrMsg, const sqlite3_api_routines *pApi);
 }
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
@@ -78,6 +80,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
     sqlite3_auto_extension((void(*)(void))sqlite3_extension_init);
+    sqlite3_auto_extension((void(*)(void))sqlite3_countvalue_init);
     //
     //settings
     //
