@@ -17,12 +17,15 @@
 #include <wx/panel.h>
 #include <wx/button.h>
 #include <wx/sizer.h>
+#include <fmt/format.h>
 #include "cppw/Sqlite3.hpp"
 #include "AppIDs.hpp"
 #include "Helpers.hpp"
 #include "MainFrame.hpp"
 #include "QuickFilter.hpp"
 #include "AdvSortFrame.hpp"
+
+using namespace fmt::literals;
 
 BEGIN_EVENT_TABLE(AdvSortFrame, wxFrame)
     EVT_CLOSE(AdvSortFrame::OnClose)
@@ -107,6 +110,7 @@ AdvSortFrame::AdvSortFrame(QuickFilter* quickFilter, MainFrame* top,
     wxString basicSelect;
     readFileIntoString(basicSelect, "basicSelect.sql", top);
     std::string stmtStr = std::string(basicSelect.utf8_str()) + " where 1<>1";
+    stmtStr = fmt::format(stmtStr, "tag_cols"_a="");
     auto stmt = connection->PrepareStatement(stmtStr);
     auto result = stmt->GetResults();
     result->NextRow();

@@ -57,6 +57,11 @@ GroupStatsDlg::GroupStatsDlg(wxWindow* parent, MainFrame* top, wxWindowID id,
             groupComboOptions.Add(result->GetColumnName(i));
             havingColComboOptions.Add(result->GetColumnName(i));
         }
+        std::vector<std::string> tagCols = {"Tag", "Tag Value"};
+        for (const auto& col : tagCols) {
+            groupComboOptions.Add(col);
+            havingColComboOptions.Add(col);
+        }
     } catch (const cppw::Sqlite3Exception& e) {
         wxMessageBox(e.what());
         top->Close(true);

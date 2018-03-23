@@ -73,7 +73,9 @@ void AnalysisPanel::ResetConnection(cppw::Sqlite3Connection* connection)
 void AnalysisPanel::ResetStats()
 {
     wxWindowUpdateLocker lock(this);
-    auto tempTable = m_topBar->GetQuickFilter()->GetAnimeData(true, false, true);
+    bool useTagCols = m_groupCol == "Tag" || m_groupCol == "Tag Value";
+    auto tempTable =
+        m_topBar->GetQuickFilter()->GetAnimeData(true, false, true, useTagCols);
     tempTable->NextRow();
 
     m_statSizer->Clear(true);

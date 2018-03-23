@@ -51,7 +51,7 @@ public:
     void SetDefaultFilter(std::string name);
     wxString GetSelectedFilterName() const;
     cppw::Sqlite3Result* GetAnimeData(
-        bool filtered, bool sorted, bool useTempTable);
+        bool filtered, bool sorted, bool useTempTable, bool useTagCols = false);
 
 private:
     void OnProcessEnter(wxCommandEvent& event);

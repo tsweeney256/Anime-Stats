@@ -32,6 +32,7 @@
 #include <wx/richmsgdlg.h>
 #include <wx/wupdlock.h>
 #include <wx/xml/xml.h>
+#include <fmt/format.h>
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "ColorOptionsDlg.hpp"
@@ -42,6 +43,8 @@
 #ifndef NDEBUG
 #include <iostream>
 #endif
+
+using namespace fmt::literals;
 
 static const int current_db_version = 4;
 extern "C"{
@@ -831,10 +834,12 @@ void MainFrame::Reset(cppw::Sqlite3Connection* connection)
 
 void MainFrame::MakeTempSeriesTable()
 {
-    wxString temp;
-    readFileIntoString(temp, "basicSelect.sql", this);
-    std::string statementStr = std::string(
-        ("create temp table tempSeries as " + temp + " where 1<>1").utf8_str());
+    wxString wxTemp;
+    readFileIntoString(wxTemp, "basicSelect.sql", this);
+    std::string temp = std::string(wxTemp.utf8_str());
+    temp = fmt::format(temp, "tag_cols"_a=", 1 as Tag, 1 as `Tag Value`");
+    std::string statementStr =
+        "create temp table tempSeries as " + temp + " where 1<>1";
     auto stmt = m_connection->PrepareStatement(statementStr);
     stmt->Bind(1, "");
     auto result = stmt->GetResults();

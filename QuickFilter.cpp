@@ -22,6 +22,7 @@
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
 #include <wx/textctrl.h>
+#include <fmt/format.h>
 #include "cppw/Sqlite3.hpp"
 #include "DbFilter.hpp"
 #include "Helpers.hpp"
@@ -29,6 +30,8 @@
 #include "MainFrame.hpp"
 #include "SortStruct.hpp"
 #include "QuickFilter.hpp"
+
+using namespace fmt::literals;
 
 namespace
 {
@@ -150,9 +153,13 @@ wxString QuickFilter::GetSelectedFilterName() const
 }
 
 cppw::Sqlite3Result* QuickFilter::GetAnimeData(
-    bool filtered,  bool sorted, bool useTempTable)
+    bool filtered,  bool sorted, bool useTempTable, bool useTagCols)
 {
-    auto sqlStr = std::string(m_basicSelectString);
+    std::string tagColsStr =
+        useTagCols ?
+        ", tag as Tag, val as `Tag Value`" :
+        ", 1 as Tag, 1 as `Tag Value`";
+    auto sqlStr = fmt::format(m_basicSelectString, "tag_cols"_a=tagColsStr);
     const auto* cThis = this;
     ConstFilter filter = cThis->GetFilter();
     auto newBasicFilterInfo = filter.first;

@@ -16,7 +16,7 @@ select distinct rightSide.idSeries, name as Title, pronunciation as Pronunciatio
         type as "Release Type", year as Year, season as Season, episodesWatched as "Episodes Watched",
         totalEpisodes as "Total Episodes", rewatchedEpisodes as "Rewatched Episodes" , episodeLength as "Episode Length",
         dateStarted as "Date Started", dateFinished as "Date Finished", nameSort,
-        idWatchedStatus, idReleaseType, episodesWatched, rewatchedEpisodes, episodeLength, rating, 1 as constant
+        idWatchedStatus, idReleaseType, episodesWatched, rewatchedEpisodes, episodeLength, rating, 1 as constant {tag_cols}
 from (select distinct LeftTitle.idSeries
 from (select * from Title inner join Label on Title.idLabel = Label.idLabel) as LeftTitle
 left join (select name, idSeries from Title inner join Label on Title.idLabel = Label.idLabel) as RightTitle
