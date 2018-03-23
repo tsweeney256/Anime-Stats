@@ -549,6 +549,7 @@ bool MainFrame::OpenDb(const wxString& file)
     m_connection = std::make_unique<cppw::Sqlite3Connection>(
         std::string(file.utf8_str()));
     m_dbFile = file;
+    m_dbInMemory = false;
     SetDbFlags(m_connection.get());
     try {
         if (UpdateDb(GetDbVersion())) {
