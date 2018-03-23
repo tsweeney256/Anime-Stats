@@ -135,7 +135,8 @@ void AdvSortFrame::OnLeft(wxCommandEvent& WXUNUSED(event))
         m_toSort.emplace_back(sortName, m_ascBtnRight->GetValue());
         auto nameStr = m_dontList->GetString((m_dontList->GetSelection()));
         auto ascStr = wxString((m_ascBtnRight->GetValue() ? "ASC" : "DESC"));
-        wxString str = nameStr + "   " + ascStr;
+        wxString str =
+            (nameStr == "nameSort" ? "Title" : nameStr) + "   " + ascStr;
         m_sortList->InsertItems(1, &str, m_sortList->GetCount());
         m_dontList->Delete(m_dontList->GetSelection());
     }
@@ -167,7 +168,8 @@ void AdvSortFrame::OnRadioLeft(wxCommandEvent& WXUNUSED(event))
     if(m_sortList->GetSelection() != wxNOT_FOUND){
         auto nameStr = m_toSort[m_sortList->GetSelection()].name;
         auto ascStr = (m_ascBtnLeft->GetValue() ? _("ASC") : _("DESC"));
-        wxString str = nameStr + "   " + ascStr;
+        wxString str =
+            (nameStr == "nameSort" ? "Title" : nameStr) + "   " + ascStr;
         m_toSort[m_sortList->GetSelection()].asc = m_ascBtnLeft->GetValue();
         m_sortList->SetString(m_sortList->GetSelection(), str);
     }
