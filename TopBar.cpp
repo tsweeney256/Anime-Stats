@@ -35,7 +35,8 @@ TopBar::TopBar(wxWindow* parent, MainFrame* top, wxWindowID id,
         "Add Row",
         "Delete Rows",
         "Alias Title",
-        "Edit Tags"
+        "Edit Tags",
+        "Group Stats"
     };
     for (int i = 0; i < num_buttons; ++i) {
         m_buttons[i] = new wxButton(this, i + wxID_HIGHEST + 1, buttonNames[i]);
@@ -129,6 +130,12 @@ void TopBar::AliasTitle()
 void TopBar::EditTags()
 {
     auto applyEvent = new wxCommandEvent(TopBarButtonEvent, id_edit_tags_btn);
+    QueueEvent(applyEvent);
+}
+
+void TopBar::GroupStats()
+{
+    auto applyEvent = new wxCommandEvent(TopBarButtonEvent, id_group_stats_btn);
     QueueEvent(applyEvent);
 }
 

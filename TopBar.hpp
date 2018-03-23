@@ -40,6 +40,7 @@ public:
         id_delete_row_btn,
         id_alias_title_btn,
         id_edit_tags_btn,
+        id_group_stats_btn,
         dummy, // always keep this above num_buttons
         num_buttons = dummy - wxID_HIGHEST - 1
     };
@@ -59,6 +60,7 @@ public:
     void DeleteRows();
     void AliasTitle();
     void EditTags();
+    void GroupStats();
 
 private:
     void OnAdvrFrameDestruction(wxWindowDestroyEvent& event);
