@@ -59,9 +59,9 @@ namespace SqlStrings{
         /*these columns are baked into the query because timeWatched is
          more complicated*/
         //Rating
-        "    printf(\"%.2f\", avg(Rating)) as Average,\n"
-        "    printf(\"%.2f\", median(Rating)) as Median,\n"
-        "    printf(\"%.2f\", stdev(Rating)) as `Std. Dev`,\n"
+        "    cast(printf(\"%.2f\", avg(Rating)) as float) as Average,\n"
+        "    cast(printf(\"%.2f\", median(Rating)) as float) as Median,\n"
+        "    cast(printf(\"%.2f\", stdev(Rating)) as float) as `Std. Dev`,\n"
         "    count(Rating) as `Count`,\n"
         //Count Watched Status
         "    count(idWatchedStatus, 1) as Watched,\n"
