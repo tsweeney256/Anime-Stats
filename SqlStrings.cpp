@@ -84,11 +84,10 @@ namespace SqlStrings{
         "--Dividing by 12 gives us 30.520183333 days in a month\n"
         "--A stellar day is 23 hours 56 minutes and 4.1 seconds long or 1436.068333333 minutes long\n"
         "select `{group_col}`,\n"
-        "    printf(\"%.2f\", totalDays) as `Days`,\n"
+        "    cast(printf(\"%.2f\", totalDays) as float) as `Days`,\n"
         "    printf(\"%d Years, %02d Months, %02d Days, %02d Hours, %02d Minutes\",  watchedYear, month, day, hour, minute ) as `Formatted`,\n"
-        "    '' as `With Rewatches`,\n"
-        "printf(\"%.2f\",  totalRewatchedDays) as `Days`,\n"
-        "printf(\"%d Years, %02d Months, %02d Days, %02d Hours, %02d Minutes\",  rewatchedYear, rewatchedMonth, rewatchedDay, rewatchedHour, rewatchedMinute) as `Formatted`,\n"
+        "    cast(printf(\"%.2f\",  totalRewatchedDays) as float) as `Days with Rewatched`,\n"
+        "    printf(\"%d Years, %02d Months, %02d Days, %02d Hours, %02d Minutes\",  rewatchedYear, rewatchedMonth, rewatchedDay, rewatchedHour, rewatchedMinute) as `Formatted`,\n"
         //wanted to use fmt::format to make this prettier but it doesnt
         //support partial formatting
         + amalgamationColsTop +
@@ -106,5 +105,5 @@ namespace SqlStrings{
         "                        group by `{group_col}`\n"
         "                        {having_expr}\n"
         "))))))\n"
-        "order by `{order_col}` {asc}\n";
+        "order by `{order_col}` {order_direction}\n";
 }

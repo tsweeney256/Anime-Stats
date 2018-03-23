@@ -32,6 +32,7 @@ set(SOURCE_FILES
   DataPanel.cpp
   DbFilter.cpp
   EditTagDialog.cpp
+  GroupStatsDlg.cpp
   Helpers.cpp
   MainFrame.cpp
   QuickFilter.cpp

@@ -573,7 +573,8 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& event)
                 {TopBar::id_add_row_btn, false},
                 {TopBar::id_delete_row_btn, false},
                 {TopBar::id_alias_title_btn, false},
-                {TopBar::id_edit_tags_btn, false}
+                {TopBar::id_edit_tags_btn, false},
+                {TopBar::id_group_stats_btn, true}
             };
             for (auto& rule : buttonRules) {
                 m_topBar->ShowButton(rule.first, rule.second);
@@ -595,7 +596,8 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& event)
             {TopBar::id_add_row_btn, true},
             {TopBar::id_delete_row_btn, true},
             {TopBar::id_alias_title_btn, true},
-            {TopBar::id_edit_tags_btn, true}
+            {TopBar::id_edit_tags_btn, true},
+            {TopBar::id_group_stats_btn, false}
         };
         for (auto& rule : buttonRules) {
             m_topBar->ShowButton(rule.first, rule.second);
