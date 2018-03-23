@@ -69,6 +69,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(DEFAULT_FILTER, MainFrame::OnDefaultFilter)
     EVT_MENU(ADV_FILTER, MainFrame::OnAdvFilter)
     EVT_MENU(ADV_SORT, MainFrame::OnAdvSort)
+    EVT_MENU(GROUP_STATS, MainFrame::OnGroupStats)
     EVT_MENU(MAKE_DEFAULT_FILTER, MainFrame::OnMakeDefaultFilter)
     EVT_MENU(DEFAULT_DB_ASK, MainFrame::OnDefaultDbAsk)
     EVT_MENU(DEFAULT_DB, MainFrame::OnDefaultDb)
@@ -162,6 +163,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     filterMenu->Append(DEFAULT_FILTER, _("Default Filter\tCTRL+d"));
     filterMenu->Append(ADV_FILTER, _("Advanced Filter\tCTRL+SHIFT+f"));
     filterMenu->Append(ADV_SORT, _("Advanced Sort\tCTRL+SHIFT+s"));
+    filterMenu->Append(GROUP_STATS, _("Group Stats\tCTRL+g"));
     filterMenu->Append(MAKE_DEFAULT_FILTER, _("Make Default Filter"),
                        _("Will make the currently selected filter the default"));
 
@@ -318,6 +320,11 @@ void MainFrame::OnAdvFilter(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnAdvSort(wxCommandEvent& WXUNUSED(event))
 {
     m_topBar->AdvSort();
+}
+
+void MainFrame::OnGroupStats(wxCommandEvent& WXUNUSED(event))
+{
+    m_topBar->GroupStats();
 }
 
 void MainFrame::OnMakeDefaultFilter(wxCommandEvent& WXUNUSED(event))

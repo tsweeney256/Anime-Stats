@@ -51,6 +51,7 @@ private:
     void OnDefaultFilter(wxCommandEvent& event);
     void OnAdvFilter(wxCommandEvent& event);
     void OnAdvSort(wxCommandEvent& event);
+    void OnGroupStats(wxCommandEvent& event);
     void OnMakeDefaultFilter(wxCommandEvent& event);
     void OnDefaultDbAsk(wxCommandEvent& event);
     void OnDefaultDb(wxCommandEvent& event);
@@ -108,6 +109,7 @@ private:
         DEFAULT_FILTER,
         ADV_FILTER,
         ADV_SORT,
+        GROUP_STATS,
         MAKE_DEFAULT_FILTER,
         VIEW_DATA_TAB,
         VIEW_ANALYSIS_TAB
