@@ -23,11 +23,12 @@
 class wxBoxSizer;
 class wxComboBox;
 class wxRadioButton;
+class wxScrolledWindow;
 class wxTextCtrl;
-class MainFrame;
 class AnalysisBox;
-class TopBar;
 class GroupStatsDlg;
+class MainFrame;
+class TopBar;
 
 class AnalysisPanel : public StatsPanel
 {
@@ -46,6 +47,8 @@ private:
 
     void ApplyFilter() override;
 
+    wxScrolledWindow* m_scrollPanel;
+    wxBoxSizer* m_scrollSizer;
     GroupStatsDlg* m_dlg;
     std::string m_groupCol = "constant";
     std::string m_fromTable = "tempSeries";

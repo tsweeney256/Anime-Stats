@@ -16,7 +16,7 @@
 #pragma once
 
 #include <exception>
-#include <wx/scrolwin.h>
+#include <wx/panel.h>
 
 namespace cppw
 {
@@ -33,7 +33,7 @@ public:
     const char* what() const noexcept override;
 };
 
-class StatsPanel : public wxScrolledWindow
+class StatsPanel : public wxPanel
 {
 public:
     StatsPanel(wxWindow* parent, MainFrame* top, wxWindowID id,

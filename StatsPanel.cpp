@@ -25,10 +25,9 @@ const char* StatsPanelNotImplementedException::what() const noexcept
 
 StatsPanel::StatsPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
                        cppw::Sqlite3Connection* connection, TopBar* topBar)
-    : wxScrolledWindow(parent, id), m_connection(connection), m_top(top),
+    : wxPanel(parent, id), m_connection(connection), m_top(top),
       m_topBar(topBar)
 {
-    SetScrollRate(10, 10);
     m_mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(m_mainSizer);
 }

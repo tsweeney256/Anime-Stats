@@ -17,6 +17,7 @@
 #include <tuple>
 #include <wx/combobox.h>
 #include <wx/msgdlg.h>
+#include <wx/scrolwin.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <fmt/format.h>
@@ -43,9 +44,14 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
                              cppw::Sqlite3Connection* connection, TopBar* topBar)
     : StatsPanel(parent, top, id, connection, topBar)
 {
+    m_scrollPanel = new wxScrolledWindow(this, wxID_ANY);
+    m_scrollPanel->SetScrollRate(10, 10);
+    m_mainSizer->Add(m_scrollPanel, wxSizerFlags(0).Expand());
+    m_scrollSizer = new wxBoxSizer(wxVERTICAL);
     m_dlg = new GroupStatsDlg(this, m_top, wxID_ANY, m_connection);
     m_statSizer = new wxBoxSizer(wxVERTICAL);
-    m_mainSizer->Add(m_statSizer, wxSizerFlags(0));
+    m_scrollPanel->SetSizer(m_scrollSizer);
+    m_scrollSizer->Add(m_statSizer, wxSizerFlags(0));
 }
 
 AnalysisPanel::~AnalysisPanel()
@@ -97,7 +103,7 @@ void AnalysisPanel::ResetStats()
                     results->IsNull(0) || results->GetString(0) == ""
                     ? "Null" : results->GetString(0);
                 auto label = new wxStaticText(
-                    this, wxID_ANY,
+                    m_scrollPanel, wxID_ANY,
                     m_groupCol + " " + text + ":");
                 label->SetFont(
                     wxFont(GetFont().GetPointSize(), wxFONTFAMILY_TELETYPE,
@@ -111,7 +117,7 @@ void AnalysisPanel::ResetStats()
                 auto startCol = std::get<2>(settings);
                 auto endCol = std::get<3>(settings);
                 auto dataBox = new AnalysisBox(
-                    this, m_top, wxID_ANY, boxTitle, results.get(),
+                    m_scrollPanel, m_top, wxID_ANY, boxTitle, results.get(),
                     startCol, endCol, alignRight);
                 statRow->Add(dataBox, wxSizerFlags(0).Border(wxALL).Expand());
             }
@@ -122,6 +128,7 @@ void AnalysisPanel::ResetStats()
         m_top->Close(true);
     }
 
+    m_scrollSizer->SetSizeHints(m_scrollPanel);
     m_mainSizer->SetSizeHints(this);
     Layout();
 }
