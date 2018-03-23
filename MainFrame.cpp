@@ -659,6 +659,8 @@ int MainFrame::SaveChangesPopup()
                 if(!WriteMemoryDbToFile())
                     status = wxID_CANCEL;
             }
+        } else if (status == wxID_NO) {
+            m_connection->Rollback();
         }
     }catch(cppw::Sqlite3Exception& e){
         wxMessageBox(std::string("Error:\n") + e.what());
