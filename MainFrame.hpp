@@ -59,6 +59,8 @@ private:
     void OnColorOptions(wxCommandEvent& event);
     void OnImportMAL(wxCommandEvent& event);
     void OnTabChange(wxBookCtrlEvent& event);
+    void OnViewDataTab(wxCommandEvent& event);
+    void OnViewAnalysisTab(wxCommandEvent& event);
 
     bool CreateMemoryDb();
     bool OpenDb(const wxString& file);
@@ -106,7 +108,9 @@ private:
         DEFAULT_FILTER,
         ADV_FILTER,
         ADV_SORT,
-        MAKE_DEFAULT_FILTER
+        MAKE_DEFAULT_FILTER,
+        VIEW_DATA_TAB,
+        VIEW_ANALYSIS_TAB
     };
 };
 

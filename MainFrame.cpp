@@ -76,6 +76,8 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_NEW, MainFrame::OnNew)
     EVT_MENU(wxID_OPEN, MainFrame::OnOpen)
     EVT_MENU(MAL_IMPORT, MainFrame::OnImportMAL)
+    EVT_MENU(VIEW_DATA_TAB, MainFrame::OnViewDataTab)
+    EVT_MENU(VIEW_ANALYSIS_TAB, MainFrame::OnViewAnalysisTab)
     EVT_NOTEBOOK_PAGE_CHANGING(wxID_ANY, MainFrame::OnTabChange)
 wxEND_EVENT_TABLE()
 
@@ -163,12 +165,17 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     filterMenu->Append(MAKE_DEFAULT_FILTER, _("Make Default Filter"),
                        _("Will make the currently selected filter the default"));
 
+    auto viewMenu = new wxMenu;
+    viewMenu->Append(VIEW_DATA_TAB, _("Data Tab\tALT+1"));
+    viewMenu->Append(VIEW_ANALYSIS_TAB, _("Analysis Tab\tALT+2"));
+
     auto helpMenu = new wxMenu;
     helpMenu->Append(wxID_ABOUT);
 
     menuBar->Append(m_fileMenu, _("&File"));
     menuBar->Append(editMenu, _("&Edit"));
     menuBar->Append(filterMenu, _("Fi&lter"));
+    menuBar->Append(viewMenu, _("&View"));
     menuBar->Append(helpMenu, _("&Help"));
 
     //
@@ -176,17 +183,17 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     //
     auto mainPanel = new wxPanel(this, wxID_ANY);
     auto mainPanelSizer = new wxBoxSizer(wxVERTICAL);
-    auto notebook = new wxNotebook(mainPanel, wxID_ANY);
+    m_notebook = new wxNotebook(mainPanel, wxID_ANY);
     m_topBar = new TopBar(this, this, wxID_ANY, m_connection.get());
     m_dataPanel = new DataPanel(
-        notebook, this, wxID_ANY, m_connection.get(), m_settings.get(),
+        m_notebook, this, wxID_ANY, m_connection.get(), m_settings.get(),
         m_topBar);
     m_analysisPanel = new AnalysisPanel(
-        notebook, this, wxID_ANY, m_connection.get(), m_topBar);
+        m_notebook, this, wxID_ANY, m_connection.get(), m_topBar);
     m_dataPanel->AttachTopBar();
-    notebook->AddPage(m_dataPanel, _("Data"));
-    notebook->AddPage(m_analysisPanel, _("Analysis"));
-    mainPanelSizer->Add(notebook, wxSizerFlags(1).Expand());
+    m_notebook->AddPage(m_dataPanel, _("Data"));
+    m_notebook->AddPage(m_analysisPanel, _("Analysis"));
+    mainPanelSizer->Add(m_notebook, wxSizerFlags(1).Expand());
     mainPanel->SetSizerAndFit(mainPanelSizer);
     m_firstRun = false;
 }
@@ -615,6 +622,20 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& WXUNUSED(event))
             m_dataPanel->Layout();
         }
         m_onDataTab = !m_onDataTab;
+    }
+}
+
+void MainFrame::OnViewDataTab(wxCommandEvent& WXUNUSED(event))
+{
+    if (m_notebook->GetSelection() != 0) {
+        m_notebook->SetSelection(0);
+    }
+}
+
+void MainFrame::OnViewAnalysisTab(wxCommandEvent& WXUNUSED(event))
+{
+    if (m_notebook->GetSelection() != 1) {
+        m_notebook->SetSelection(1);
     }
 }
 
