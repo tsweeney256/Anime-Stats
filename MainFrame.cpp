@@ -76,7 +76,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_NEW, MainFrame::OnNew)
     EVT_MENU(wxID_OPEN, MainFrame::OnOpen)
     EVT_MENU(MAL_IMPORT, MainFrame::OnImportMAL)
-    EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, MainFrame::OnTabChange)
+    EVT_NOTEBOOK_PAGE_CHANGING(wxID_ANY, MainFrame::OnTabChange)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
@@ -188,6 +188,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     notebook->AddPage(m_analysisPanel, _("Analysis"));
     mainPanelSizer->Add(notebook, wxSizerFlags(1).Expand());
     mainPanel->SetSizerAndFit(mainPanelSizer);
+    m_firstRun = false;
 }
 
 bool MainFrame::UnsavedChangesExist() { return m_unsavedChanges; }
@@ -566,50 +567,54 @@ bool MainFrame::OpenDb(const wxString& file)
     return true;
 }
 
-void MainFrame::OnTabChange(wxBookCtrlEvent& event)
+void MainFrame::OnTabChange(wxBookCtrlEvent& WXUNUSED(event))
 {
-    wxWindowUpdateLocker lock(this);
-    if(event.GetSelection() == 1){
-        try{
+    //because this will get called after construction on linux but not windows
+    if (!m_firstRun)  {
+        wxWindowUpdateLocker lock(this);
+        if(m_onDataTab){
+            try{
+                std::pair<int, bool> buttonRules[] = {
+                    {TopBar::id_apply_filter_btn, true},
+                    {TopBar::id_default_filter_btn, true},
+                    {TopBar::id_adv_filter_btn, true},
+                    {TopBar::id_adv_sort_btn, false},
+                    {TopBar::id_add_row_btn, false},
+                    {TopBar::id_delete_row_btn, false},
+                    {TopBar::id_alias_title_btn, false},
+                    {TopBar::id_edit_tags_btn, false},
+                    {TopBar::id_group_stats_btn, true}
+                };
+                for (auto& rule : buttonRules) {
+                    m_topBar->ShowButton(rule.first, rule.second);
+                }
+                m_analysisPanel->AttachTopBar();
+                m_analysisPanel->ResetStats();
+                m_analysisPanel->Layout();
+            } catch(const cppw::Sqlite3Exception& e){
+                wxMessageBox(e.what());
+                Close();
+            }
+        } else {
             std::pair<int, bool> buttonRules[] = {
                 {TopBar::id_apply_filter_btn, true},
                 {TopBar::id_default_filter_btn, true},
                 {TopBar::id_adv_filter_btn, true},
-                {TopBar::id_adv_sort_btn, false},
-                {TopBar::id_add_row_btn, false},
-                {TopBar::id_delete_row_btn, false},
-                {TopBar::id_alias_title_btn, false},
-                {TopBar::id_edit_tags_btn, false},
-                {TopBar::id_group_stats_btn, true}
+                {TopBar::id_adv_sort_btn, true},
+                {TopBar::id_add_row_btn, true},
+                {TopBar::id_delete_row_btn, true},
+                {TopBar::id_alias_title_btn, true},
+                {TopBar::id_edit_tags_btn, true},
+                {TopBar::id_group_stats_btn, false}
             };
             for (auto& rule : buttonRules) {
                 m_topBar->ShowButton(rule.first, rule.second);
             }
-            m_analysisPanel->AttachTopBar();
-            m_analysisPanel->ResetStats();
-            m_analysisPanel->Layout();
-        } catch(const cppw::Sqlite3Exception& e){
-            wxMessageBox(e.what());
-            Close();
+            m_dataPanel->AttachTopBar();
+            m_dataPanel->ApplyFilter();
+            m_dataPanel->Layout();
         }
-    } else {
-        std::pair<int, bool> buttonRules[] = {
-            {TopBar::id_apply_filter_btn, true},
-            {TopBar::id_default_filter_btn, true},
-            {TopBar::id_adv_filter_btn, true},
-            {TopBar::id_adv_sort_btn, true},
-            {TopBar::id_add_row_btn, true},
-            {TopBar::id_delete_row_btn, true},
-            {TopBar::id_alias_title_btn, true},
-            {TopBar::id_edit_tags_btn, true},
-            {TopBar::id_group_stats_btn, false}
-        };
-        for (auto& rule : buttonRules) {
-            m_topBar->ShowButton(rule.first, rule.second);
-        }
-        m_dataPanel->AttachTopBar();
-        m_dataPanel->ApplyFilter();
-        m_dataPanel->Layout();
+        m_onDataTab = !m_onDataTab;
     }
 }
 

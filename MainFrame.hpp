@@ -24,6 +24,7 @@
 
 class wxMenu;
 class wxBookCtrlEvent;
+class wxNotebook;
 class DataPanel;
 class TopBar;
 
@@ -87,6 +88,9 @@ private:
     const char* const settingsFileName = "settings.xml";
     bool m_unsavedChanges = false;
     TopBar* m_topBar = nullptr;
+    wxNotebook* m_notebook = nullptr;
+    bool m_onDataTab = true;
+    bool m_firstRun = true;
 
     enum
     {
