@@ -20,6 +20,7 @@
 #include <wx/scrolwin.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
+#include <wx/wupdlock.h>
 #include <fmt/format.h>
 #include "AnalysisBox.hpp"
 #include "GroupStatsDlg.hpp"
@@ -71,6 +72,7 @@ void AnalysisPanel::ResetConnection(cppw::Sqlite3Connection* connection)
 
 void AnalysisPanel::ResetStats()
 {
+    wxWindowUpdateLocker lock(this);
     auto tempTable = m_topBar->GetQuickFilter()->GetAnimeData(true, false, true);
     tempTable->NextRow();
 
