@@ -15,6 +15,7 @@
 
 #include "wx/sizer.h"
 #include "cppw/Sqlite3.hpp"
+#include "MainFrame.hpp"
 #include "TopBar.hpp"
 #include "StatsPanel.hpp"
 
@@ -34,16 +35,19 @@ StatsPanel::StatsPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
 
 void StatsPanel::AttachTopBar()
 {
-    if (m_topBar->GetParent() != this) {
-        m_mainSizer->Prepend(m_topBar, wxSizerFlags(0));
-        m_topBar->Reparent(this);
-        Layout();
-    }
+    DetachTopBar();
+    m_topBar->Reparent(this);
+    m_mainSizer->Prepend(m_topBar, wxSizerFlags(0));
+    Layout();
 }
 
 void StatsPanel::DetachTopBar()
 {
-    m_mainSizer->Detach(m_topBar);
+    auto sizer = m_topBar->GetContainingSizer();
+    if (sizer) {
+        sizer->Detach(m_topBar);
+    }
+    m_topBar->Reparent(m_top);
 }
 
 void StatsPanel::ApplyFilter()

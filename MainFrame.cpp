@@ -582,7 +582,6 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& event)
             for (auto& rule : buttonRules) {
                 m_topBar->ShowButton(rule.first, rule.second);
             }
-            m_dataPanel->DetachTopBar();
             m_analysisPanel->AttachTopBar();
             m_analysisPanel->ResetStats();
             m_analysisPanel->Layout();
@@ -605,7 +604,6 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& event)
         for (auto& rule : buttonRules) {
             m_topBar->ShowButton(rule.first, rule.second);
         }
-        m_analysisPanel->DetachTopBar();
         m_dataPanel->AttachTopBar();
         m_dataPanel->ApplyFilter();
         m_dataPanel->Layout();
