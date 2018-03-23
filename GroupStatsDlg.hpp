@@ -51,6 +51,7 @@ public:
 private:
     void OnGroupCombo(wxCommandEvent& event);
     void OnAggregateCombo(wxCommandEvent& event);
+    void OnOk(wxCommandEvent& event);
 
     void EnableGroupControls(bool enable);
     void EnableHavingControls(bool enable);

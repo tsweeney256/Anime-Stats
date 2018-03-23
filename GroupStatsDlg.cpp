@@ -33,6 +33,7 @@ enum {
 wxBEGIN_EVENT_TABLE(GroupStatsDlg, wxDialog)
     EVT_COMBOBOX(id_group_combo, GroupStatsDlg::OnGroupCombo)
     EVT_COMBOBOX(id_having_aggregate_combo, GroupStatsDlg::OnAggregateCombo)
+    EVT_BUTTON(wxID_OK, GroupStatsDlg::OnOk)
 wxEND_EVENT_TABLE()
 
 GroupStatsDlg::GroupStatsDlg(wxWindow* parent, MainFrame* top, wxWindowID id,
@@ -46,6 +47,7 @@ GroupStatsDlg::GroupStatsDlg(wxWindow* parent, MainFrame* top, wxWindowID id,
     auto textSizerFlags = wxSizerFlags(0).Center();
     groupSizer->Add(groupText, textSizerFlags);
     wxArrayString groupComboOptions;
+    wxArrayString havingColComboOptions;
     try {
         auto stmt = m_connection->PrepareStatement(
             "select * from tempSeries where 0");
@@ -53,6 +55,7 @@ GroupStatsDlg::GroupStatsDlg(wxWindow* parent, MainFrame* top, wxWindowID id,
         groupComboOptions.Add("");
         for (int i = col::PRONUNCIATION + 1; i < col::DATE_STARTED; ++i) {
             groupComboOptions.Add(result->GetColumnName(i));
+            havingColComboOptions.Add(result->GetColumnName(i));
         }
     } catch (const cppw::Sqlite3Exception& e) {
         wxMessageBox(e.what());
@@ -81,8 +84,8 @@ GroupStatsDlg::GroupStatsDlg(wxWindow* parent, MainFrame* top, wxWindowID id,
         havingAggregateOptions, wxCB_READONLY);
     havingSizer->Add(m_havingAggregateCombo, comboSizerFlags);
     m_havingColumnCombo = new wxComboBox(
-        this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize,
-        groupComboOptions, wxCB_READONLY);
+        this, wxID_ANY, "Rating", wxDefaultPosition, wxDefaultSize,
+        havingColComboOptions, wxCB_READONLY);
     havingSizer->Add(m_havingColumnCombo, comboSizerFlags);
     wxArrayString havingOperatorOptions;
     havingOperatorOptions.Add("=");
@@ -161,6 +164,19 @@ void GroupStatsDlg::OnAggregateCombo(wxCommandEvent& WXUNUSED(event))
     m_havingColumnCombo->Enable(enable);
     m_havingOperatorCombo->Enable(enable);
     m_havingValue->Enable(enable);
+}
+
+void GroupStatsDlg::OnOk(wxCommandEvent& event)
+{
+    if (m_havingAggregateCombo->IsEnabled() &&
+        !m_havingAggregateCombo->GetValue().IsEmpty() &&
+        m_havingValue->GetValue().IsEmpty()) {
+        wxMessageBox(
+            "Error: Integer input box in \"Having\" section may not be empty "
+            "when using aggregate function");
+    } else {
+        event.Skip();
+    }
 }
 
 void GroupStatsDlg::EnableGroupControls(bool enable)
