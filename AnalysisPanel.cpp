@@ -47,7 +47,7 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
 {
     m_scrollPanel = new wxScrolledWindow(this, wxID_ANY);
     m_scrollPanel->SetScrollRate(10, 10);
-    m_mainSizer->Add(m_scrollPanel, wxSizerFlags(0).Expand());
+    m_mainSizer->Add(m_scrollPanel, wxSizerFlags(1).Expand());
     m_scrollSizer = new wxBoxSizer(wxVERTICAL);
     m_dlg = new GroupStatsDlg(this, m_top, wxID_ANY, m_connection);
     m_statSizer = new wxBoxSizer(wxVERTICAL);
@@ -130,9 +130,8 @@ void AnalysisPanel::ResetStats()
         m_top->Close(true);
     }
 
-    m_scrollSizer->SetSizeHints(m_scrollPanel);
-    m_mainSizer->SetSizeHints(this);
     Layout();
+    m_mainSizer->FitInside(this);
 }
 
 void AnalysisPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
