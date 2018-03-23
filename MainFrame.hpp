@@ -16,13 +16,15 @@
 #ifndef MAINFRAME_HPP
 #define MAINFRAME_HPP
 
-#include <wx/frame.h>
 #include <memory>
+#include <tuple>
+#include <wx/frame.h>
 #include "cppw/Sqlite3.hpp"
 #include "Settings.hpp"
 #include "AnalysisPanel.hpp"
 
 class wxMenu;
+class wxMenuItem;
 class wxBookCtrlEvent;
 class wxNotebook;
 class DataPanel;
@@ -77,6 +79,8 @@ private:
     void UpdateNegOneDb();
     void Reset(cppw::Sqlite3Connection* connection);
     void MakeTempSeriesTable();
+    void EnableTabSpecificItems(
+        const std::vector<std::tuple<int, int, wxMenu*, bool>>& rules);
 
     wxDECLARE_EVENT_TABLE();
 
@@ -85,6 +89,8 @@ private:
     AnalysisPanel* m_analysisPanel = nullptr;
     wxMenu* m_fileMenu;
     wxMenu* m_preferencesMenu;
+    wxMenu* m_editMenu;
+    wxMenu* m_filterMenu;
     std::unique_ptr<Settings> m_settings = nullptr;
     wxString m_dbFile;
     bool m_dbInMemory = false;

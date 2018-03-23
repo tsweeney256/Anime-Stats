@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <memory>
 #include <wx/menu.h>
@@ -144,27 +145,28 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     m_fileMenu->Enable(DEFAULT_DB, !m_dbInMemory);
     m_fileMenu->Append(wxID_EXIT);
 
-    auto editMenu = new wxMenu;
-    editMenu->Append(wxID_UNDO);
-    editMenu->Append(wxID_REDO);
-    editMenu->Append(ADD_ROW, _("Add Row\tCTRL+Enter"));
-    editMenu->Append(DELETE_ROWS, _("Delete Rows\tCTRL+SHIFT+Del"));
-    editMenu->Append(ALIAS_TITLE, _("Alias Title\tCTRL+t"));
-    editMenu->Append(EDIT_TAGS, _("Edit Tags\tCTRL+SHIFT+t"));
+    m_editMenu = new wxMenu;
+    m_editMenu->Append(wxID_UNDO);
+    m_editMenu->Append(wxID_REDO);
+    m_editMenu->Append(ADD_ROW, _("Add Row\tCTRL+Enter"));
+    m_editMenu->Append(DELETE_ROWS, _("Delete Rows\tCTRL+SHIFT+Del"));
+    m_editMenu->Append(ALIAS_TITLE, _("Alias Title\tCTRL+t"));
+    m_editMenu->Append(EDIT_TAGS, _("Edit Tags\tCTRL+SHIFT+t"));
     m_preferencesMenu = new wxMenu;
     m_preferencesMenu->Append(DEFAULT_DB_ASK, _("Always ask to change default database"),
                               _("Toggle whether or not you get asked to change your default database when you open a new one."), wxITEM_CHECK);
     m_preferencesMenu->Check(DEFAULT_DB_ASK, m_settings->defaultDbAsk);
     m_preferencesMenu->Append(COLOR_OPTIONS, _("Grid Colors"), _("Change what colors the grid uses."));
-    editMenu->AppendSubMenu(m_preferencesMenu, _("Preferences"));
+    m_editMenu->AppendSubMenu(m_preferencesMenu, _("Preferences"));
 
-    auto filterMenu = new wxMenu;
-    filterMenu->Append(APPLY_FILTER, _("Apply Filter\tCTRL+SHIFT+Enter"));
-    filterMenu->Append(DEFAULT_FILTER, _("Default Filter\tCTRL+d"));
-    filterMenu->Append(ADV_FILTER, _("Advanced Filter\tCTRL+SHIFT+f"));
-    filterMenu->Append(ADV_SORT, _("Advanced Sort\tCTRL+SHIFT+s"));
-    filterMenu->Append(GROUP_STATS, _("Group Stats\tCTRL+g"));
-    filterMenu->Append(MAKE_DEFAULT_FILTER, _("Make Default Filter"),
+    m_filterMenu = new wxMenu;
+    m_filterMenu->Append(APPLY_FILTER, _("Apply Filter\tCTRL+SHIFT+Enter"));
+    m_filterMenu->Append(DEFAULT_FILTER, _("Default Filter\tCTRL+d"));
+    m_filterMenu->Append(ADV_FILTER, _("Advanced Filter\tCTRL+SHIFT+f"));
+    m_filterMenu->Append(ADV_SORT, _("Advanced Sort\tCTRL+SHIFT+s"));
+    m_filterMenu->Append(GROUP_STATS, _("Group Stats\tCTRL+g"));
+    m_filterMenu->Enable(GROUP_STATS, false);
+    m_filterMenu->Append(MAKE_DEFAULT_FILTER, _("Make Default Filter"),
                        _("Will make the currently selected filter the default"));
 
     auto viewMenu = new wxMenu;
@@ -175,8 +177,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
     helpMenu->Append(wxID_ABOUT);
 
     menuBar->Append(m_fileMenu, _("&File"));
-    menuBar->Append(editMenu, _("&Edit"));
-    menuBar->Append(filterMenu, _("Fi&lter"));
+    menuBar->Append(m_editMenu, _("&Edit"));
+    menuBar->Append(m_filterMenu, _("Fi&lter"));
     menuBar->Append(viewMenu, _("&View"));
     menuBar->Append(helpMenu, _("&Help"));
 
@@ -586,44 +588,59 @@ void MainFrame::OnTabChange(wxBookCtrlEvent& WXUNUSED(event))
     //because this will get called after construction on linux but not windows
     if (!m_firstRun)  {
         wxWindowUpdateLocker lock(this);
-        if(m_onDataTab){
-            try{
-                std::pair<int, bool> buttonRules[] = {
-                    {TopBar::id_apply_filter_btn, true},
-                    {TopBar::id_default_filter_btn, true},
-                    {TopBar::id_adv_filter_btn, true},
-                    {TopBar::id_adv_sort_btn, false},
-                    {TopBar::id_add_row_btn, false},
-                    {TopBar::id_delete_row_btn, false},
-                    {TopBar::id_alias_title_btn, false},
-                    {TopBar::id_edit_tags_btn, false},
-                    {TopBar::id_group_stats_btn, true}
+        std::vector<std::tuple<int, int, wxMenu*, bool>> buttonRules;
+        if(m_onDataTab) {
+            try {
+                buttonRules = {
+                    {TopBar::id_apply_filter_btn,
+                     APPLY_FILTER, m_filterMenu, true},
+                    {TopBar::id_default_filter_btn,
+                     DEFAULT_FILTER, m_filterMenu, true},
+                    {TopBar::id_adv_filter_btn,
+                     ADV_FILTER, m_filterMenu, true},
+                    {TopBar::id_adv_sort_btn,
+                     ADV_SORT, m_filterMenu, false},
+                    {TopBar::id_add_row_btn,
+                     ADD_ROW, m_editMenu, false},
+                    {TopBar::id_delete_row_btn,
+                     DELETE_ROWS, m_editMenu, false},
+                    {TopBar::id_alias_title_btn,
+                     ALIAS_TITLE, m_editMenu, false},
+                    {TopBar::id_edit_tags_btn,
+                     EDIT_TAGS, m_editMenu, false},
+                    {TopBar::id_group_stats_btn,
+                     GROUP_STATS, m_filterMenu, true}
                 };
-                for (auto& rule : buttonRules) {
-                    m_topBar->ShowButton(rule.first, rule.second);
-                }
+                EnableTabSpecificItems(buttonRules);
                 m_analysisPanel->AttachTopBar();
                 m_analysisPanel->ResetStats();
                 m_analysisPanel->Layout();
-            } catch(const cppw::Sqlite3Exception& e){
+            } catch(const cppw::Sqlite3Exception& e) {
                 wxMessageBox(e.what());
                 Close();
             }
         } else {
-            std::pair<int, bool> buttonRules[] = {
-                {TopBar::id_apply_filter_btn, true},
-                {TopBar::id_default_filter_btn, true},
-                {TopBar::id_adv_filter_btn, true},
-                {TopBar::id_adv_sort_btn, true},
-                {TopBar::id_add_row_btn, true},
-                {TopBar::id_delete_row_btn, true},
-                {TopBar::id_alias_title_btn, true},
-                {TopBar::id_edit_tags_btn, true},
-                {TopBar::id_group_stats_btn, false}
+            buttonRules = {
+                {TopBar::id_apply_filter_btn,
+                 APPLY_FILTER, m_filterMenu, true},
+                {TopBar::id_default_filter_btn,
+                 DEFAULT_FILTER, m_filterMenu, true},
+                {TopBar::id_adv_filter_btn,
+                 ADV_FILTER, m_filterMenu, true},
+                {TopBar::id_adv_sort_btn,
+                 ADV_SORT, m_filterMenu, true},
+                {TopBar::id_add_row_btn,
+                 ADD_ROW, m_editMenu, true},
+                {TopBar::id_delete_row_btn,
+                 DELETE_ROWS, m_editMenu, true},
+                {TopBar::id_alias_title_btn,
+                 ALIAS_TITLE, m_editMenu, true},
+                {TopBar::id_edit_tags_btn,
+                 EDIT_TAGS, m_editMenu, true},
+                {TopBar::id_group_stats_btn,
+                 GROUP_STATS, m_filterMenu, false}
             };
-            for (auto& rule : buttonRules) {
-                m_topBar->ShowButton(rule.first, rule.second);
-            }
+            EnableTabSpecificItems(buttonRules);
             m_dataPanel->AttachTopBar();
             m_dataPanel->ApplyFilter();
             m_dataPanel->Layout();
@@ -880,4 +897,13 @@ void MainFrame::MakeTempSeriesTable()
     stmt->Bind(1, "");
     auto result = stmt->GetResults();
     result->NextRow();
+}
+
+void MainFrame::EnableTabSpecificItems(
+    const std::vector<std::tuple<int, int, wxMenu*, bool>>& rules)
+{
+    for (auto& rule : rules) {
+        m_topBar->ShowButton(std::get<0>(rule), std::get<3>(rule));
+        std::get<2>(rule)->Enable(std::get<1>(rule), std::get<3>(rule));
+    }
 }
