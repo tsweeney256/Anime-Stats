@@ -189,7 +189,8 @@ GroupStatsInfo GroupStatsDlg::GetGroupStatsInfo()
         ret.groupCol = "constant";
     }
     ret.fromTable = "tempSeries";
-    if (!m_havingAggregateCombo->GetValue().IsEmpty()) {
+    if (m_havingAggregateCombo->IsEnabled() &&
+        !m_havingAggregateCombo->GetValue().IsEmpty()) {
         ret.havingExpr =
             "having " +
             std::string(m_havingAggregateCombo->GetValue().utf8_str()) +
@@ -200,15 +201,19 @@ GroupStatsInfo GroupStatsDlg::GetGroupStatsInfo()
             " " +
             std::string(m_havingValue->GetValue().utf8_str());
     }
-    ret.orderCol = std::string(m_orderCombo->GetValue().utf8_str());
-    if (ret.orderCol == "Group Selection") {
+    auto orderEnabled = m_orderCombo->IsEnabled();
+    if (orderEnabled) {
+        ret.orderCol = std::string(m_orderCombo->GetValue().utf8_str());
+    }
+    if (!orderEnabled || ret.orderCol == "Group Selection") {
         ret.orderCol = ret.groupCol;
     } else {
         ret.orderCol =
             m_orderOptionsData[m_orderCombo->GetCurrentSelection()].second;
     }
     ret.orderDirection =
-        std::string(m_orderRadioAsc->GetValue() ? "asc" : "desc");
+        std::string(!m_orderRadioAsc->IsEnabled() ||
+                    m_orderRadioAsc->GetValue() ? "asc" : "desc");
 
 
     return ret;
