@@ -98,9 +98,10 @@ void AnalysisPanel::ResetStats()
             {"Release Type Count", true, 14, 19}
         };
 
-        while (results->NextRow()) {
+        bool resultsExist = results->NextRow();
+        do {
             auto statRow = new wxBoxSizer(wxHORIZONTAL);
-            if (m_groupCol != "constant") {
+            if (resultsExist && m_groupCol != "constant") {
                 std::string text =
                     results->IsNull(0) || results->GetString(0) == ""
                     ? "Null" : results->GetString(0);
@@ -124,7 +125,7 @@ void AnalysisPanel::ResetStats()
                 statRow->Add(dataBox, wxSizerFlags(0).Border(wxALL).Expand());
             }
             m_statSizer->Add(statRow, wxSizerFlags(0));
-        }
+        } while (results->NextRow());
     } catch (const cppw::Sqlite3Exception& e) {
         wxMessageBox(e.what());
         m_top->Close(true);

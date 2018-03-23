@@ -18,7 +18,7 @@ AnalysisBox::AnalysisBox(
     for (int i = startCol; i < endCol; ++i) {
         auto rowSizer = new wxBoxSizer(wxHORIZONTAL);
         auto rowItemSizer = new wxBoxSizer(wxVERTICAL);
-        auto val = result->GetString(i);
+        auto val = result->IsNull(i) ? "0" : result->GetString(i);
         auto staticText = new wxStaticText(this, wxID_ANY, val);
         rowSizer->Add(
             new wxStaticText(this, wxID_ANY, result->GetColumnName(i) + ":"),
