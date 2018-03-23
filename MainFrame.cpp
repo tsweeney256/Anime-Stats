@@ -194,10 +194,9 @@ bool MainFrame::UnsavedChangesExist() { return m_unsavedChanges; }
 
 void MainFrame::SetUnsavedChanges(bool unsavedChanges)
 {
-    if(unsavedChanges && !m_unsavedChanges)
-        SetTitle("*" + GetTitle());
-    else if(m_unsavedChanges && !unsavedChanges)
-        SetTitle(GetTitle().Mid(1));
+    wxString unsavedStr = unsavedChanges ? "*" : "";
+    wxString fileStr = m_dbFile.IsEmpty() ? "*New*" : m_dbFile;
+    SetTitle(unsavedStr + "Anime Stats - " + fileStr);
     m_unsavedChanges = unsavedChanges;
 }
 
@@ -529,6 +528,8 @@ bool MainFrame::CreateMemoryDb()
     m_connection = std::make_unique<cppw::Sqlite3Connection>(":memory:");
     m_dbInMemory = true;
     m_dbFile = "";
+    SetTitle("Anime Stats - *New*");
+    SetUnsavedChanges(m_unsavedChanges);
     SetDbFlags(m_connection.get());
     wxString createStr;
     readFileIntoString(createStr, "create.sql", this);
@@ -550,6 +551,7 @@ bool MainFrame::OpenDb(const wxString& file)
         std::string(file.utf8_str()));
     m_dbFile = file;
     m_dbInMemory = false;
+    SetTitle("Anime Stats - " + m_dbFile);
     SetDbFlags(m_connection.get());
     try {
         if (UpdateDb(GetDbVersion())) {
