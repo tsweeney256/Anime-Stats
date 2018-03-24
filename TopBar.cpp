@@ -42,6 +42,7 @@ TopBar::TopBar(wxWindow* parent, MainFrame* top, wxWindowID id,
         m_buttons[i] = new wxButton(this, i + wxID_HIGHEST + 1, buttonNames[i]);
         buttonSizer->Add(m_buttons[i], wxSizerFlags(1).Expand());
     }
+    m_buttons[num_buttons-1]->Show(false);
     mainSizer->Add(
         m_quickFilter, wxSizerFlags(0).Expand().Border(wxTOP | wxLEFT));
     mainSizer->Add(
