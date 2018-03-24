@@ -65,7 +65,9 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
     EVT_GRID_CELL_CHANGED(DataPanel::OnGridCellChanged)
     EVT_GRID_LABEL_RIGHT_CLICK(DataPanel::OnLabelContextMenu)
+    EVT_GRID_CELL_RIGHT_CLICK(DataPanel::OnCellRightClick)
     EVT_MENU_RANGE(ID_VIEW_COL_BEGIN, ID_VIEW_COL_END, DataPanel::OnLabelContextMenuItem)
+    EVT_MENU_RANGE(ID_VIEW_COL_END+1, ID_VIEW_COL_END+2, DataPanel::OnCellContextMenuItem)
 END_EVENT_TABLE()
 
 DataPanel::DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
@@ -93,6 +95,9 @@ DataPanel::DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
     //
     //Misc initializations
     //
+    m_cellContextMenu = new wxMenu;
+    m_cellContextMenu->Append(ID_VIEW_COL_END+1, "Increment Value\tALT++");
+    m_cellContextMenu->Append(ID_VIEW_COL_END+2, "Decrement Value\tALT+-");
     ResetPanel(m_connection);
 }
 
@@ -391,6 +396,38 @@ void DataPanel::OnLabelContextMenuItem(wxCommandEvent& event)
     }
     else
         m_grid->HideCol(col);
+}
+
+void DataPanel::OnCellRightClick(wxGridEvent& event)
+{
+    m_grid->SetGridCursor(event.GetRow(), event.GetCol());
+    if(event.GetRow() >= 0 &&
+       (col::isColNumeric(event.GetCol()) ||
+        event.GetCol() == col::DATE_STARTED ||
+        event.GetCol() == col::DATE_FINISHED)) {
+        m_grid->PopupMenu(m_cellContextMenu, event.GetPosition());
+    } else {
+        event.Skip();
+    }
+}
+
+void DataPanel::OnCellContextMenuItem(wxCommandEvent& event)
+{
+    auto row = m_grid->GetGridCursorRow();
+    auto col = m_grid->GetGridCursorCol();
+    if (col::isColNumeric(m_grid->GetGridCursorCol())) {
+        if (event.GetId() == ID_VIEW_COL_END+1) {
+            m_grid->IncreaseCellInt(row, col, 1);
+        } else if (event.GetId() == ID_VIEW_COL_END+2) {
+            m_grid->IncreaseCellInt(row, col, -1);
+        }
+    } else { //can only be date
+        if (event.GetId() == ID_VIEW_COL_END+1) {
+            m_grid->IncreaseCellDate(row, col, 1);
+        } else if (event.GetId() == ID_VIEW_COL_END+2) {
+            m_grid->IncreaseCellDate(row, col, -1);
+        }
+    }
 }
 
 void DataPanel::ResetTable(cppw::Sqlite3Result* results)

@@ -84,6 +84,8 @@ private:
     void OnAdvrFrameDestruction(wxWindowDestroyEvent& event);
     void OnLabelContextMenu(wxGridEvent& event);
     void OnLabelContextMenuItem(wxCommandEvent& event);
+    void OnCellRightClick(wxGridEvent& event);
+    void OnCellContextMenuItem(wxCommandEvent& event);
 
     void ResetTable(cppw::Sqlite3Result* results);
     void HandleCommandChecking();
@@ -111,6 +113,7 @@ private:
     Settings* m_settings;
     wxTextCtrl* m_titleFilterTextField;
     wxMenu* m_labelContextMenu = nullptr;
+    wxMenu* m_cellContextMenu = nullptr;
     std::vector<std::unique_ptr<SqlGridCommand>> m_commands;
     std::vector<wxString> m_allowedWatchedVals;
     std::vector<wxString> m_allowedReleaseVals;
