@@ -33,6 +33,7 @@ namespace cppw { class Sqlite3Connection; }
 class MainFrame;
 class wxMenu;
 struct Settings;
+class DataGrid;
 class QuickFilter;
 class TopBar;
 
@@ -106,7 +107,7 @@ private:
         enum{R, G, B};
     };
 
-    wxGrid* m_grid;
+    DataGrid* m_grid;
     Settings* m_settings;
     wxTextCtrl* m_titleFilterTextField;
     wxMenu* m_labelContextMenu = nullptr;

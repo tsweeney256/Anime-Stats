@@ -39,6 +39,7 @@
 #include "AppIDs.hpp"
 #include "cppw/Sqlite3.hpp"
 #include "CustomGridCellEditors.hpp"
+#include "DataGrid.hpp"
 #include "TitleAliasDialog.hpp"
 #include "EditTagDialog.hpp"
 #include "MainFrame.hpp"
@@ -77,7 +78,7 @@ DataPanel::DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
     ////grid
     ////
 
-    m_grid = new wxGrid(this, ID_DATA_GRID);
+    m_grid = new DataGrid(this, ID_DATA_GRID);
     m_grid->CreateGrid(0,0);
 
     BuildAllowedValsMap(m_allowedWatchedVals, "select status from WatchedStatus order by idWatchedStatus");

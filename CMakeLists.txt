@@ -29,6 +29,7 @@ set(SOURCE_FILES
   AppIDs.cpp
   ColorOptionsDlg.cpp
   CustomGridCellEditors.cpp
+  DataGrid.cpp
   DataPanel.cpp
   DbFilter.cpp
   EditTagDialog.cpp
