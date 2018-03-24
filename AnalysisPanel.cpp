@@ -109,7 +109,7 @@ void AnalysisPanel::ResetStats()
                     ? "Null" : results->GetString(0);
                 auto label = new wxStaticText(
                     m_scrollPanel, wxID_ANY,
-                    m_groupCol + " " + text + ":");
+                    m_groupCol + " " + wxString::FromUTF8(text.c_str()) + ":");
                 label->SetFont(
                     wxFont(GetFont().GetPointSize(), wxFONTFAMILY_TELETYPE,
                            wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
