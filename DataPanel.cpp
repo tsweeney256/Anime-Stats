@@ -80,7 +80,7 @@ DataPanel::DataPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
     ////grid
     ////
 
-    m_grid = new DataGrid(this, ID_DATA_GRID);
+    m_grid = new DataGrid(this, top, ID_DATA_GRID);
     m_grid->CreateGrid(0,0);
 
     BuildAllowedValsMap(m_allowedWatchedVals, "select status from WatchedStatus order by idWatchedStatus");

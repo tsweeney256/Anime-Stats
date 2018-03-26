@@ -16,6 +16,7 @@
 #include <wx/datetime.h>
 #include <wx/msgdlg.h>
 #include "AppIDs.hpp"
+#include "MainFrame.hpp"
 #include "DataGrid.hpp"
 
 wxBEGIN_EVENT_TABLE(DataGrid, wxGrid)
@@ -23,8 +24,8 @@ wxBEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_CHAR(DataGrid::OnChar)
 wxEND_EVENT_TABLE()
 
-DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
-    : wxGrid(parent, id)
+DataGrid::DataGrid(wxWindow* parent, MainFrame* top, wxWindowID id)
+    : wxGrid(parent, id), m_top(top)
 {}
 
 void DataGrid::IncreaseCellInt(int row, int col, int amount)
@@ -40,6 +41,7 @@ void DataGrid::IncreaseCellInt(int row, int col, int amount)
         val = 999999;
     }
     SetCellValue(row, col, wxString::Format("%ld", val));
+    m_top->SetUnsavedChanges(true);
 }
 
 void DataGrid::IncreaseCellDate(int row, int col, int amount)
@@ -60,6 +62,7 @@ void DataGrid::IncreaseCellDate(int row, int col, int amount)
         }
     }
     SetCellValue(row, col, date.FormatISODate());
+    m_top->SetUnsavedChanges(true);
 }
 
 void DataGrid::OnChar(wxKeyEvent& event)

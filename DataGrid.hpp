@@ -16,16 +16,20 @@
 #pragma once
 #include <wx/grid.h>
 
+class MainFrame;
+
 class DataGrid : public wxGrid
 {
 public:
-    DataGrid(wxWindow* parent, wxWindowID id);
+    DataGrid(wxWindow* parent, MainFrame* top, wxWindowID id);
     void IncreaseCellInt(int row, int col, int amount);
     void IncreaseCellDate(int row, int col, int amount);
 
 private:
     void OnChar(wxKeyEvent& key);
     void OnKeyDown(wxKeyEvent& key);
+
+    MainFrame* m_top;
 
     wxDECLARE_EVENT_TABLE();
 };
