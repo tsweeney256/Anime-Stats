@@ -27,7 +27,7 @@ namespace cppw
 		Sqlite3Exception(sqlite3* connection, int errCode);
 
 		int GetErrorCode() const;
-		virtual const char* what() const noexcept;
+		virtual const char* what() const noexcept override;
 
 	private:
         sqlite3* m_connection;

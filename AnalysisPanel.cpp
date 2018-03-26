@@ -122,7 +122,7 @@ void AnalysisPanel::ResetStats()
                 auto startCol = std::get<2>(settings);
                 auto endCol = std::get<3>(settings);
                 auto dataBox = new AnalysisBox(
-                    m_scrollPanel, m_top, wxID_ANY, boxTitle, results.get(),
+                    m_scrollPanel, wxID_ANY, boxTitle, results.get(),
                     startCol, endCol, alignRight);
                 statRow->Add(dataBox, wxSizerFlags(0).Border(wxALL).Expand());
             }

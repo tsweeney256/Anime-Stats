@@ -48,12 +48,12 @@ BEGIN_EVENT_TABLE(AdvFilterFrame, wxFrame)
     EVT_BUTTON(wxID_APPLY, AdvFilterFrame::OnApply)
 END_EVENT_TABLE()
 
-AdvFilterFrame::AdvFilterFrame(TopBar* parent, MainFrame* top,
+AdvFilterFrame::AdvFilterFrame(TopBar* parent,
                                wxWindowID id, const wxString& title,
                                const wxPoint& pos, const wxSize& size)
     : wxFrame(parent, id, title, pos, size,
               wxDEFAULT_FRAME_STYLE & ~(/*wxRESIZE_BORDER |*/ wxMAXIMIZE_BOX)),
-      m_top(top), m_topBar(parent)
+      m_topBar(parent)
 {
     m_mainPanel = new wxScrolledWindow(this, wxID_ANY);
     m_mainPanel->SetScrollRate(10, 10);

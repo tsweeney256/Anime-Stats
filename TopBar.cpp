@@ -94,7 +94,7 @@ void TopBar::DefaultFilter()
 void TopBar::AdvFilter()
 {
     //non-modal
-    auto frame = new AdvFilterFrame(this, m_top, id_adv_filter_frame,
+    auto frame = new AdvFilterFrame(this, id_adv_filter_frame,
                                     "Advanced Filtering", wxDefaultPosition,
                                     wxDefaultSize);
     frame->Show(true);

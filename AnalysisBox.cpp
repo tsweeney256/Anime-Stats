@@ -6,9 +6,9 @@
 #include "AnalysisBox.hpp"
 
 AnalysisBox::AnalysisBox(
-    wxWindow* parent, MainFrame* top, wxWindowID id, wxString boxLabel,
+    wxWindow* parent, wxWindowID id, wxString boxLabel,
     cppw::Sqlite3Result* result, int startCol, int endCol, bool rightAlign)
-    : wxPanel(parent, id), m_top(top)
+    : wxPanel(parent, id)
 {
     SetFont(wxFont(GetFont().GetPointSize(), wxFONTFAMILY_TELETYPE,
                    wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));

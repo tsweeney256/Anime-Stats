@@ -154,7 +154,7 @@ public:
     virtual const char* what() const noexcept override {return "Title may not be empty.";}
 
 protected:
-    void AbstractDummy() {}
+    void AbstractDummy() override {}
 };
 
 class DupeTitleException : public SqlGridCommandException
@@ -163,7 +163,7 @@ public:
     virtual const char* what() const noexcept override {return "Entry with this title already exists.";}
 
 protected:
-    void AbstractDummy() {}
+    void AbstractDummy() override {}
 };
 
 class BlankPronunciationException : public SqlGridCommandException
@@ -171,7 +171,7 @@ class BlankPronunciationException : public SqlGridCommandException
 public:
     virtual const char* what() const noexcept override {return "Pronunciation may not consist of only blank spaces.";}
 protected:
-    void AbstractDummy() {}
+    void AbstractDummy() override {}
 };
 
 #endif

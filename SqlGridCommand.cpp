@@ -158,7 +158,7 @@ InsertCommand::InsertCommand(
 {
     CheckIfLegalTitle(m_connection, title); //throws and cancels the construction if not legal
     //ExecuteCommon uses the m_titles vector, not the singular m_title
-    std::array<std::string, selectedTitleCols> temp {m_title, std::to_string(m_idLabel), ""};
+    std::array<std::string, selectedTitleCols> temp {{m_title, std::to_string(m_idLabel), ""}};
     m_titles.push_back(temp);
     ExecuteCommon();
     m_grid->SetCellValue(m_grid->GetNumberRows()-1, col::ID_SERIES, std::to_string(m_idSeries));

@@ -28,7 +28,7 @@ class TopBar;
 class AdvFilterFrame : public wxFrame
 {
 public:
-    AdvFilterFrame(TopBar* parent, MainFrame* top, wxWindowID id,
+    AdvFilterFrame(TopBar* parent, wxWindowID id,
                    const wxString& title, const wxPoint &pos,
                    const wxSize& size);
 
@@ -70,7 +70,6 @@ private:
     const int m_minDay    = 1;
     const int m_maxDay    = 31;
 
-    MainFrame* m_top;
     TopBar* m_topBar;
     wxScrolledWindow* m_mainPanel;
 

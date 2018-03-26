@@ -11,10 +11,9 @@ class AnalysisBox : public wxPanel
 {
 public:
     AnalysisBox(
-        wxWindow* parent, MainFrame* top, wxWindowID id, wxString boxLabel,
+        wxWindow* parent, wxWindowID id, wxString boxLabel,
         cppw::Sqlite3Result* result, int startCol, int endCol,
         bool rightAlign = true);
 private:
-    MainFrame* m_top;
     wxSizer* m_mainSizer;
 };

@@ -743,7 +743,7 @@ bool MainFrame::WriteMemoryDbToFile()
         if(status == wxID_OK){
             try{
                 m_connection = std::make_unique<cppw::Sqlite3Connection>(
-                    std::move(m_connection->BackupToFile(std::string(dlg.GetPath().utf8_str()))));
+                    m_connection->BackupToFile(std::string(dlg.GetPath().utf8_str())));
                 error = false;
                 dbIsNowFile = true;
                 SetDbFlags(m_connection.get());
