@@ -20,6 +20,7 @@
 #include <vector>
 #include <memory>
 #include <exception>
+#include <array>
 #include "AppIDs.hpp"
 #include "FilterStructs.hpp"
 
