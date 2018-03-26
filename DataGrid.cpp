@@ -19,6 +19,7 @@
 #include "DataGrid.hpp"
 
 wxBEGIN_EVENT_TABLE(DataGrid, wxGrid)
+    EVT_KEY_DOWN(DataGrid::OnKeyDown)
     EVT_CHAR(DataGrid::OnChar)
 wxEND_EVENT_TABLE()
 
@@ -84,6 +85,31 @@ void DataGrid::OnChar(wxKeyEvent& event)
         }
     }
     if(!didWork) {
+        event.Skip();
+    }
+}
+
+void DataGrid::OnKeyDown(wxKeyEvent& event)
+{
+    bool skip = true;
+    int updown = 0;
+    if (event.GetKeyCode() == WXK_DOWN) {
+        updown = 1;
+    } else if (event.GetKeyCode() == WXK_UP) {
+        updown = -1;
+    }
+    if (updown != 0) {
+        auto selectedCells = GetSelectedCells();
+        auto selectedCols = GetSelectedCols();
+        auto selectedRows = GetSelectedRows();
+        if (!selectedCells.GetCount() &&
+            !selectedCols.GetCount() &&
+            selectedRows.GetCount() == 1) {
+            SelectRow(selectedRows[0] + updown);
+            skip = false;
+        }
+    }
+    if (skip) {
         event.Skip();
     }
 }
