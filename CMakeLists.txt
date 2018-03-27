@@ -22,8 +22,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "Stat
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 endif(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "Static_Debug")
 
-include_directories("${CMAKE_SOURCE_DIR}/external/fmt")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT DEFINED USE_AMALGAMATION)
+  set(USE_AMALGAMATION 1)
+elseif(NOT DEFINED USE_AMALGAMATION)
+  set(USE_AMALGAMATION 0)
+endif()
 
+include_directories("${CMAKE_SOURCE_DIR}/external/fmt")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/fmt")
 
 set(SOURCE_FILES
@@ -71,11 +76,24 @@ if(WIN STREQUAL "true" OR WIN32)
   target_sources(AnimeStats PUBLIC resource.rc)
 endif(WIN STREQUAL "true" OR WIN32)
 
-find_package(SQLite3 REQUIRED)
-if(SQLITE3_FOUND)
+find_package(SQLite3)
+if(SQLITE3_FOUND AND NOT USE_AMALGAMATION)
+  message("Using system SQLite")
   include_directories(${SQLITE3_INCLUDE_DIRS})
   target_link_libraries(AnimeStats ${SQLITE3_LIBRARIES})
-endif(SQLITE3_FOUND)
+elseif(NOT SQLITE_FOUND OR USE_AMALGAMATION)
+  if (NOT SQLITE_FOUND AND NOT USE_AMALGAMATION)
+    message(WARNING "\
+Using SQLite Amalgamation despite settings \
+because no SQLite was found on the system")
+  else()
+    message("Using packaged SQLite Amalgamation")
+  endif()
+  include_directories("${CMAKE_SOURCE_DIR}/external/sqlite-amalgamation")
+  add_library(sqlite-amalgamation STATIC
+      external/sqlite-amalgamation/sqlite3.c)
+  target_link_libraries(AnimeStats sqlite-amalgamation dl)
+endif()
 
 find_package(wxWidgets REQUIRED core base adv xml)
 if(wxWidgets_FOUND)
