@@ -68,9 +68,9 @@ add_library(count_value STATIC
   external/my-extensions/count_value.c)
 target_compile_definitions(count_value PRIVATE
   SQLITE_CORE=1)
-add_library(extensions-functions STATIC
+add_library(extension-functions STATIC
   external/sqlite3-extensions/extension-functions.c)
-target_compile_definitions(extensions-functions PRIVATE
+target_compile_definitions(extension-functions PRIVATE
   SQLITE_CORE=1)
 
 add_executable(AnimeStats ${CPPW_SQLITE3} ${SOURCE_FILES})
@@ -106,7 +106,7 @@ endif(wxWidgets_FOUND)
 
 target_link_libraries(AnimeStats
   count_value
-  extensions-functions
+  extension-functions
   fmt)
 
 file(COPY "${CMAKE_SOURCE_DIR}/sql"
