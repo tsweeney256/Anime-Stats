@@ -112,9 +112,6 @@ target_link_libraries(AnimeStats
   extension-functions
   fmt)
 
-file(COPY "${CMAKE_SOURCE_DIR}/sql"
-   DESTINATION .)
-
 set(INSTALL_PERMISSIONS_EXECUTE OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE
                                 WORLD_READ WORLD_EXECUTE)
