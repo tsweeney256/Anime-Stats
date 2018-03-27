@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <wx/panel.h>
 #include <wx/button.h>
+#include <wx/msgdlg.h>
 #include <wx/sizer.h>
 #include <fmt/format.h>
 #include "cppw/Sqlite3.hpp"
@@ -186,13 +187,21 @@ void AdvSortFrame::OnCancel(wxCommandEvent& WXUNUSED(event))
 
 void AdvSortFrame::OnApply(wxCommandEvent& WXUNUSED(event))
 {
-    ApplyOkCommon();
+    if (!m_toSort.empty()) {
+        ApplyOkCommon();
+    } else {
+        wxMessageBox("Error: No Sort Given");
+    }
 }
 
 void AdvSortFrame::OnOk(wxCommandEvent& WXUNUSED(event))
 {
-    ApplyOkCommon();
-    Close();
+    if(!m_toSort.empty()) {
+        ApplyOkCommon();
+        Close();
+    } else {
+        wxMessageBox("Error: No Sort Given");
+    }
 }
 
 void AdvSortFrame::UpDownCommon(int direction)
