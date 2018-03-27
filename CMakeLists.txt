@@ -35,36 +35,37 @@ include_directories("${CMAKE_SOURCE_DIR}/external/fmt")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/fmt")
 
 set(SOURCE_FILES
-  sql/BasicSelect.cpp
-  sql/CreateCommands.cpp
-  sql/SqlStrings.cpp
-  AdvFilterFrame.cpp
-  AdvSortFrame.cpp
-  AnalysisBox.cpp
-  AnalysisPanel.cpp
-  App.cpp
-  AppIDs.cpp
-  ColorOptionsDlg.cpp
-  CustomGridCellEditors.cpp
-  DataGrid.cpp
-  DataPanel.cpp
-  DbFilter.cpp
-  EditTagDialog.cpp
-  GroupStatsDlg.cpp
-  Helpers.cpp
-  MainFrame.cpp
-  QuickFilter.cpp
-  Settings.cpp
-  SqlGridCommand.cpp
-  SqlTitleAliasCommand.cpp
-  StatsPanel.cpp
-  TitleAliasDialog.cpp
-  TopBar.cpp
+  src/sql/BasicSelect.cpp
+  src/sql/CreateCommands.cpp
+  src/sql/SqlStrings.cpp
+  src/AdvFilterFrame.cpp
+  src/AdvSortFrame.cpp
+  src/AnalysisBox.cpp
+  src/AnalysisPanel.cpp
+  src/App.cpp
+  src/AppIDs.cpp
+  src/ColorOptionsDlg.cpp
+  src/CustomGridCellEditors.cpp
+  src/DataGrid.cpp
+  src/DataPanel.cpp
+  src/DbFilter.cpp
+  src/EditTagDialog.cpp
+  src/GroupStatsDlg.cpp
+  src/Helpers.cpp
+  src/MainFrame.cpp
+  src/QuickFilter.cpp
+  src/Settings.cpp
+  src/SqlGridCommand.cpp
+  src/SqlTitleAliasCommand.cpp
+  src/StatsPanel.cpp
+  src/TitleAliasDialog.cpp
+  src/TopBar.cpp
   )
-set(CPPW_SQLITE3 cppw/Sqlite3/Sqlite3Connection.cpp
-  cppw/Sqlite3/Sqlite3Exception.cpp
-  cppw/Sqlite3/Sqlite3Result.cpp
-  cppw/Sqlite3/Sqlite3Statement.cpp)
+set(CPPW_SQLITE3
+  src/cppw/Sqlite3/Sqlite3Connection.cpp
+  src/cppw/Sqlite3/Sqlite3Exception.cpp
+  src/cppw/Sqlite3/Sqlite3Result.cpp
+  src/cppw/Sqlite3/Sqlite3Statement.cpp)
 
 add_library(count_value STATIC
   external/my-extensions/count_value.c)
@@ -78,7 +79,7 @@ target_compile_definitions(extension-functions PRIVATE
 add_executable(AnimeStats ${CPPW_SQLITE3} ${SOURCE_FILES})
 
 if(WIN32)
-  target_sources(AnimeStats PUBLIC resource.rc)
+  target_sources(AnimeStats PUBLIC src/resource.rc)
 endif()
 
 find_package(SQLite3)
