@@ -42,6 +42,7 @@ set(SOURCE_FILES
   App.cpp
   AppIDs.cpp
   BasicSelect.cpp
+  CreateCommands.cpp
   ColorOptionsDlg.cpp
   CustomGridCellEditors.cpp
   DataGrid.cpp

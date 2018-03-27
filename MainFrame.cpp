@@ -42,6 +42,7 @@
 #include "QuickFilter.hpp"
 #include "TopBar.hpp"
 #include "BasicSelect.hpp"
+#include "CreateCommands.hpp"
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -552,7 +553,7 @@ bool MainFrame::CreateMemoryDb()
     wxString createStr;
     readFileIntoString(createStr, "create.sql", this);
     try {
-        m_connection->ExecuteQuery(std::string(createStr.utf8_str()));
+        m_connection->ExecuteQuery(SqlStrings::createCommands[0]);
         UpdateDb(0);
         MakeTempSeriesTable();
     } catch (const cppw::Sqlite3Exception& e) {
@@ -793,12 +794,7 @@ bool MainFrame::UpdateDb(int version)
         version++;
     }
     for (int i = version; i < current_db_version; ++i) {
-        wxString fileStr;
-        readFileIntoString(
-            fileStr,
-            std::string("create_p") + std::to_string(i + 1) + ".sql",
-            this);
-        m_connection->ExecuteQuery(std::string(fileStr.utf8_str()));
+        m_connection->ExecuteQuery(SqlStrings::createCommands[i+1]);
         updated = true;
     }
     return updated;
