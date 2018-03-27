@@ -24,6 +24,7 @@
 #include <wx/textctrl.h>
 #include <fmt/format.h>
 #include "cppw/Sqlite3.hpp"
+#include "BasicSelect.hpp"
 #include "DbFilter.hpp"
 #include "Helpers.hpp"
 #include "FilterStructs.hpp"
@@ -102,9 +103,7 @@ void QuickFilter::Reset(cppw::Sqlite3Connection* connection)
         m_quickFilterSelect->Append(wxString::FromUTF8(name.c_str()));
     }
     m_quickFilterSelect->SetValue(m_dbFilter->GetDefaultFilterName());
-    wxString basicSelectStringTemp;
-    readFileIntoString(basicSelectStringTemp, "basicSelect.sql", m_top);
-    m_basicSelectString = std::string(basicSelectStringTemp.utf8_str());
+    m_basicSelectString = SqlStrings::basicSelect;
 }
 
 ConstFilter QuickFilter::GetFilter() const

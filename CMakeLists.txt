@@ -41,6 +41,7 @@ set(SOURCE_FILES
   AnalysisPanel.cpp
   App.cpp
   AppIDs.cpp
+  BasicSelect.cpp
   ColorOptionsDlg.cpp
   CustomGridCellEditors.cpp
   DataGrid.cpp

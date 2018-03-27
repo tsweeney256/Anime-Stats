@@ -41,6 +41,7 @@
 #include "cppw/Sqlite3.hpp"
 #include "QuickFilter.hpp"
 #include "TopBar.hpp"
+#include "BasicSelect.hpp"
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -887,10 +888,8 @@ void MainFrame::Reset(cppw::Sqlite3Connection* connection)
 
 void MainFrame::MakeTempSeriesTable()
 {
-    wxString wxTemp;
-    readFileIntoString(wxTemp, "basicSelect.sql", this);
-    std::string temp = std::string(wxTemp.utf8_str());
-    temp = fmt::format(temp, "tag_cols"_a=", 1 as Tag, 1 as `Tag Value`");
+    auto temp = fmt::format(
+        SqlStrings::basicSelect, "tag_cols"_a=", 1 as Tag, 1 as `Tag Value`");
     std::string statementStr =
         "create temp table tempSeries as " + temp + " where 1<>1";
     auto stmt = m_connection->PrepareStatement(statementStr);
