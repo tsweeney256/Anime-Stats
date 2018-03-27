@@ -10,7 +10,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 endif()
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O2")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} -s")
 set(CMAKE_CXX_FLAGS_STATIC_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${STATIC_ARGS}")
 set(CMAKE_CXX_FLAGS_STATIC_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${STATIC_ARGS}")
@@ -18,12 +18,20 @@ set(STATIC_ARGS "-static-libstdc++ -static-libgcc -static")
 set(CMAKE_EXE_LINKER_FLAGS_STATIC_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${STATIC_ARGS}")
 set(CMAKE_EXE_LINKER_FLAGS_STATIC_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${STATIC_ARGS}")
 
-if(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "Static_Debug")
+string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
+if("${BUILD_TYPE_UPPER}" STREQUAL "STATIC_RELEASE" OR
+    "${BUILD_TYPE_UPPER}" STREQUAL "STATIC_DEBUG")
+  message("Using static libraries")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-endif(CMAKE_BUILD_TYPE STREQUAL "Static_Release" OR CMAKE_BUILD_TYPE STREQUAL "Static_Debug")
+endif()
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT DEFINED USE_AMALGAMATION)
+  set(USE_AMALGAMATION 1)
+elseif(NOT DEFINED USE_AMALGAMATION)
+  set(USE_AMALGAMATION 0)
+endif()
 
 include_directories("${CMAKE_SOURCE_DIR}/external/fmt")
-
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/fmt")
 
 set(SOURCE_FILES
@@ -67,15 +75,28 @@ target_compile_definitions(extensions-functions PRIVATE
 
 add_executable(AnimeStats ${CPPW_SQLITE3} ${SOURCE_FILES})
 
-if(WIN STREQUAL "true" OR WIN32)
+if(WIN32)
   target_sources(AnimeStats PUBLIC resource.rc)
-endif(WIN STREQUAL "true" OR WIN32)
+endif()
 
-find_package(SQLite3 REQUIRED)
-if(SQLITE3_FOUND)
+find_package(SQLite3)
+if(SQLITE3_FOUND AND NOT USE_AMALGAMATION)
+  message("Using system SQLite")
   include_directories(${SQLITE3_INCLUDE_DIRS})
   target_link_libraries(AnimeStats ${SQLITE3_LIBRARIES})
-endif(SQLITE3_FOUND)
+elseif(NOT SQLITE_FOUND OR USE_AMALGAMATION)
+  if (NOT SQLITE_FOUND AND NOT USE_AMALGAMATION)
+    message(WARNING "\
+Using SQLite Amalgamation despite settings \
+because no SQLite was found on the system")
+  else()
+    message("Using packaged SQLite Amalgamation")
+  endif()
+  include_directories("${CMAKE_SOURCE_DIR}/external/sqlite-amalgamation")
+  add_library(sqlite-amalgamation STATIC
+      external/sqlite-amalgamation/sqlite3.c)
+  target_link_libraries(AnimeStats sqlite-amalgamation dl)
+endif()
 
 find_package(wxWidgets REQUIRED core base adv xml)
 if(wxWidgets_FOUND)
