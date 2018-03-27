@@ -75,9 +75,9 @@ target_compile_definitions(extensions-functions PRIVATE
 
 add_executable(AnimeStats ${CPPW_SQLITE3} ${SOURCE_FILES})
 
-if(WIN STREQUAL "true" OR WIN32)
+if(WIN32)
   target_sources(AnimeStats PUBLIC resource.rc)
-endif(WIN STREQUAL "true" OR WIN32)
+endif()
 
 find_package(SQLite3)
 if(SQLITE3_FOUND AND NOT USE_AMALGAMATION)
