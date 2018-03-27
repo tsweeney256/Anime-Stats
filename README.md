@@ -1,6 +1,6 @@
 # Anime Stats
 
-A multi-platform application to help keep track of all the shows you've watched and various individual and aggregate information about them.
+A multi-platform application to help keep track of all the shows you've watched and various individual and aggregate information about them. Supports importing your data from MAL.
 
 ## Download and Install
 ### Windows:
