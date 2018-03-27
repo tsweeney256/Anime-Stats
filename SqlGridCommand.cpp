@@ -21,11 +21,15 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cctype>
+#include <fmt/format.h>
 #include "cppw/Sqlite3.hpp"
+#include "sql/BasicSelect.hpp"
 #include "SqlGridCommand.hpp"
 #include "AppIDs.hpp"
 #include "DataPanel.hpp"
 #include "Helpers.hpp"
+
+using namespace fmt::literals;
 
 SqlGridCommand::SqlGridCommand(cppw::Sqlite3Connection* connection, wxGrid* grid)
     : m_connection(connection), m_grid(grid) {}
@@ -267,11 +271,9 @@ void DeleteCommand::ExecuteCommon()
 {
     //backup all series and titles associated with each series then delete them
     auto seriesSelectStmt = m_connection->PrepareStatement("select " + seriesColNames + " from Series where idSeries = ?");
-    wxString statementStr;
-    readFileIntoString(statementStr, "basicSelect.sql", dynamic_cast<DataPanel*>(m_grid->GetParent())->GetTop());
-
-    auto seriesViewSelectStmt = m_connection->PrepareStatement(std::string(statementStr.utf8_str()) +
-                                                               " where rightSide.idSeries= ?");
+    auto seriesViewSelectStmt = m_connection->PrepareStatement(
+        fmt::format(SqlStrings::basicSelect, "tag_cols"_a="") +
+        " where rightSide.idSeries= ?");
     wxGridUpdateLocker lock(m_grid);
     //for(auto idSeries : m_idSeries){
     for(unsigned int i = 0; i < m_idSeries.size(); ++i){ //range based for loop crashes the debugger for some strange reason

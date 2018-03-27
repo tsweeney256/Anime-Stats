@@ -19,6 +19,7 @@
 #include <wx/sizer.h>
 #include <fmt/format.h>
 #include "cppw/Sqlite3.hpp"
+#include "sql/BasicSelect.hpp"
 #include "AppIDs.hpp"
 #include "Helpers.hpp"
 #include "MainFrame.hpp"
@@ -107,9 +108,7 @@ AdvSortFrame::AdvSortFrame(QuickFilter* quickFilter, MainFrame* top,
     fullSizer->Add(bottomBtnSizer, wxSizerFlags(0).Border(wxALL).Bottom().Right());
 
     wxArrayString cols;
-    wxString basicSelect;
-    readFileIntoString(basicSelect, "basicSelect.sql", top);
-    std::string stmtStr = std::string(basicSelect.utf8_str()) + " where 1<>1";
+    std::string stmtStr = SqlStrings::basicSelect + " where 1<>1";
     stmtStr = fmt::format(stmtStr, "tag_cols"_a="");
     auto stmt = connection->PrepareStatement(stmtStr);
     auto result = stmt->GetResults();

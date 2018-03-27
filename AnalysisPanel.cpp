@@ -22,11 +22,11 @@
 #include <wx/stattext.h>
 #include <wx/wupdlock.h>
 #include <fmt/format.h>
+#include "sql/SqlStrings.hpp"
 #include "AnalysisBox.hpp"
 #include "GroupStatsDlg.hpp"
 #include "MainFrame.hpp"
 #include "QuickFilter.hpp"
-#include "SqlStrings.hpp"
 #include "TopBar.hpp"
 #include "AnalysisPanel.hpp"
 

@@ -34,6 +34,8 @@
 #include <wx/wupdlock.h>
 #include <wx/xml/xml.h>
 #include <fmt/format.h>
+#include "sql/BasicSelect.hpp"
+#include "sql/CreateCommands.hpp"
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "ColorOptionsDlg.hpp"
@@ -551,7 +553,7 @@ bool MainFrame::CreateMemoryDb()
     wxString createStr;
     readFileIntoString(createStr, "create.sql", this);
     try {
-        m_connection->ExecuteQuery(std::string(createStr.utf8_str()));
+        m_connection->ExecuteQuery(SqlStrings::createCommands[0]);
         UpdateDb(0);
         MakeTempSeriesTable();
     } catch (const cppw::Sqlite3Exception& e) {
@@ -792,12 +794,7 @@ bool MainFrame::UpdateDb(int version)
         version++;
     }
     for (int i = version; i < current_db_version; ++i) {
-        wxString fileStr;
-        readFileIntoString(
-            fileStr,
-            std::string("create_p") + std::to_string(i + 1) + ".sql",
-            this);
-        m_connection->ExecuteQuery(std::string(fileStr.utf8_str()));
+        m_connection->ExecuteQuery(SqlStrings::createCommands[i+1]);
         updated = true;
     }
     return updated;
@@ -887,10 +884,8 @@ void MainFrame::Reset(cppw::Sqlite3Connection* connection)
 
 void MainFrame::MakeTempSeriesTable()
 {
-    wxString wxTemp;
-    readFileIntoString(wxTemp, "basicSelect.sql", this);
-    std::string temp = std::string(wxTemp.utf8_str());
-    temp = fmt::format(temp, "tag_cols"_a=", 1 as Tag, 1 as `Tag Value`");
+    auto temp = fmt::format(
+        SqlStrings::basicSelect, "tag_cols"_a=", 1 as Tag, 1 as `Tag Value`");
     std::string statementStr =
         "create temp table tempSeries as " + temp + " where 1<>1";
     auto stmt = m_connection->PrepareStatement(statementStr);
