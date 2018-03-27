@@ -23,9 +23,9 @@
 #include <cctype>
 #include <fmt/format.h>
 #include "cppw/Sqlite3.hpp"
+#include "sql/BasicSelect.hpp"
 #include "SqlGridCommand.hpp"
 #include "AppIDs.hpp"
-#include "BasicSelect.hpp"
 #include "DataPanel.hpp"
 #include "Helpers.hpp"
 

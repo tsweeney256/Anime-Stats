@@ -19,8 +19,8 @@
 #include <wx/sizer.h>
 #include <fmt/format.h>
 #include "cppw/Sqlite3.hpp"
+#include "sql/BasicSelect.hpp"
 #include "AppIDs.hpp"
-#include "BasicSelect.hpp"
 #include "Helpers.hpp"
 #include "MainFrame.hpp"
 #include "QuickFilter.hpp"

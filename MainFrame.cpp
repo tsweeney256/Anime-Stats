@@ -34,6 +34,8 @@
 #include <wx/wupdlock.h>
 #include <wx/xml/xml.h>
 #include <fmt/format.h>
+#include "sql/BasicSelect.hpp"
+#include "sql/CreateCommands.hpp"
 #include "MainFrame.hpp"
 #include "DataPanel.hpp"
 #include "ColorOptionsDlg.hpp"
@@ -41,8 +43,6 @@
 #include "cppw/Sqlite3.hpp"
 #include "QuickFilter.hpp"
 #include "TopBar.hpp"
-#include "BasicSelect.hpp"
-#include "CreateCommands.hpp"
 #ifndef NDEBUG
 #include <iostream>
 #endif

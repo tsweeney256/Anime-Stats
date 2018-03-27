@@ -35,14 +35,15 @@ include_directories("${CMAKE_SOURCE_DIR}/external/fmt")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/fmt")
 
 set(SOURCE_FILES
+  sql/BasicSelect.cpp
+  sql/CreateCommands.cpp
+  sql/SqlStrings.cpp
   AdvFilterFrame.cpp
   AdvSortFrame.cpp
   AnalysisBox.cpp
   AnalysisPanel.cpp
   App.cpp
   AppIDs.cpp
-  BasicSelect.cpp
-  CreateCommands.cpp
   ColorOptionsDlg.cpp
   CustomGridCellEditors.cpp
   DataGrid.cpp
@@ -55,7 +56,6 @@ set(SOURCE_FILES
   QuickFilter.cpp
   Settings.cpp
   SqlGridCommand.cpp
-  SqlStrings.cpp
   SqlTitleAliasCommand.cpp
   StatsPanel.cpp
   TitleAliasDialog.cpp

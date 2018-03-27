@@ -24,7 +24,7 @@
 #include <wx/textctrl.h>
 #include <fmt/format.h>
 #include "cppw/Sqlite3.hpp"
-#include "BasicSelect.hpp"
+#include "sql/BasicSelect.hpp"
 #include "DbFilter.hpp"
 #include "Helpers.hpp"
 #include "FilterStructs.hpp"
