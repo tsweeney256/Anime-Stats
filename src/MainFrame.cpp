@@ -550,8 +550,6 @@ bool MainFrame::CreateMemoryDb()
     SetTitle("Anime Stats - *New*");
     SetUnsavedChanges(m_unsavedChanges);
     SetDbFlags(m_connection.get());
-    wxString createStr;
-    readFileIntoString(createStr, "create.sql", this);
     try {
         m_connection->ExecuteQuery(SqlStrings::createCommands[0]);
         UpdateDb(0);
