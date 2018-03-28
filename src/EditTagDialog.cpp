@@ -115,10 +115,16 @@ void EditTagDialog::OnDeleteRowButton(wxCommandEvent& WXUNUSED(event))
 void EditTagDialog::OnGridCellChanging(wxGridEvent& event)
 {
     try {
-        if (event.GetRow() == m_grid->GetNumberRows()-1) {
-            HandleInsert(event.GetString());
+        if (!event.GetString().IsEmpty()) {
+            if (event.GetRow() == m_grid->GetNumberRows()-1) {
+                HandleInsert(event.GetString());
+            } else {
+                HandleUpdate(event.GetRow(), event.GetCol(), event.GetString());
+            }
+            event.Skip();
         } else {
-            HandleUpdate(event.GetRow(), event.GetCol(), event.GetString());
+            event.Veto();
+            wxMessageBox("Error: Empty tags are not allowed");
         }
     } catch (cppw::Sqlite3Exception& exception) {
         if (exception.GetErrorCode() == SQLITE_CONSTRAINT) {
