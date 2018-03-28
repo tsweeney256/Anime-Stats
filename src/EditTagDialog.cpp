@@ -116,7 +116,7 @@ void EditTagDialog::OnDeleteRowButton(wxCommandEvent& WXUNUSED(event))
 void EditTagDialog::OnGridCellChanging(wxGridEvent& event)
 {
     try {
-        if (!event.GetString().IsEmpty()) {
+        if (!(event.GetString().IsEmpty() && event.GetCol() == TAG_COL)) {
             if (event.GetRow() == m_grid->GetNumberRows()-1) {
                 HandleInsert(event.GetString());
             } else {
