@@ -40,6 +40,7 @@
 #include "DataPanel.hpp"
 #include "ColorOptionsDlg.hpp"
 #include "Helpers.hpp"
+#include "LegalDlg.hpp"
 #include "cppw/Sqlite3.hpp"
 #include "QuickFilter.hpp"
 #include "TopBar.hpp"
@@ -82,6 +83,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(MAL_IMPORT, MainFrame::OnImportMAL)
     EVT_MENU(VIEW_DATA_TAB, MainFrame::OnViewDataTab)
     EVT_MENU(VIEW_ANALYSIS_TAB, MainFrame::OnViewAnalysisTab)
+    EVT_MENU(HELP_LEGAL, MainFrame::OnHelpLegal)
     EVT_NOTEBOOK_PAGE_CHANGING(wxID_ANY, MainFrame::OnTabChange)
 wxEND_EVENT_TABLE()
 
@@ -177,6 +179,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 
     auto helpMenu = new wxMenu;
     helpMenu->Append(wxID_ABOUT);
+    helpMenu->Append(HELP_LEGAL, "Legal");
 
     menuBar->Append(m_fileMenu, _("&File"));
     menuBar->Append(m_editMenu, _("&Edit"));
@@ -276,8 +279,10 @@ void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
     wxAboutDialogInfo info;
     info.SetName(_("Anime Stats"));
     info.SetVersion("0.02");
-    info.SetDescription(_("Helps keep track of anime stats"));
-    info.SetCopyright("(C) 2015 Thomas Sweeney");
+    info.SetDescription(_("Anime Stats is free and open source software.\n"
+                          "Check Help->Legal for more information."));
+    info.SetCopyright("(C) 2015-2018 Thomas Sweeney");
+    info.SetWebSite("https://github.com/tsweeney256/Anime-Stats");
 
     wxAboutBox(info);
 }
@@ -661,6 +666,12 @@ void MainFrame::OnViewAnalysisTab(wxCommandEvent& WXUNUSED(event))
     if (m_notebook->GetSelection() != 1) {
         m_notebook->SetSelection(1);
     }
+}
+
+void MainFrame::OnHelpLegal(wxCommandEvent& WXUNUSED(event))
+{
+    LegalDlg dlg(this, wxID_ANY);
+    dlg.ShowModal();
 }
 
 void MainFrame::SwitchToDataDir()

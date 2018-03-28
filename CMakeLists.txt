@@ -52,6 +52,7 @@ set(SOURCE_FILES
   src/EditTagDialog.cpp
   src/GroupStatsDlg.cpp
   src/Helpers.cpp
+  src/LegalDlg.cpp
   src/MainFrame.cpp
   src/QuickFilter.cpp
   src/Settings.cpp

@@ -64,6 +64,7 @@ private:
     void OnTabChange(wxBookCtrlEvent& event);
     void OnViewDataTab(wxCommandEvent& event);
     void OnViewAnalysisTab(wxCommandEvent& event);
+    void OnHelpLegal(wxCommandEvent& event);
 
     bool CreateMemoryDb();
     bool OpenDb(const wxString& file);
@@ -118,7 +119,8 @@ private:
         GROUP_STATS,
         MAKE_DEFAULT_FILTER,
         VIEW_DATA_TAB,
-        VIEW_ANALYSIS_TAB
+        VIEW_ANALYSIS_TAB,
+        HELP_LEGAL
     };
 };
 
