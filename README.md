@@ -24,3 +24,6 @@ cmake ..
 make
 sudo make install
 ```
+## CMake Options
+- Build Types: release (default), debug, static_release, static_debug
+- USE_AMALGAMATION: Use sqlite amalgamation packaged in this repository. true (default on mac), false (default everywhere else)
