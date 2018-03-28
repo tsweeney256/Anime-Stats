@@ -126,6 +126,7 @@ void EditTagDialog::OnGridCellChanging(wxGridEvent& event)
         } else {
             event.Veto();
             wxMessageBox("Error: Empty tags are not allowed");
+            return;
         }
     } catch (cppw::Sqlite3Exception& exception) {
         if (exception.GetErrorCode() == SQLITE_CONSTRAINT) {
