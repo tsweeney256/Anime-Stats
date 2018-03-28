@@ -16,7 +16,7 @@ A multi-platform application to help keep track of all the shows you've watched 
 - SQLite (optional)
 #### Download and Compile
 ```bash
-git clone --recursive
+git clone --recursive https://github.com/tsweeney256/Anime-Stats.git
 cd Anime-Stats
 mkdir build
 cd build
