@@ -12,7 +12,7 @@ A multi-platform application to help keep track of all the shows you've watched 
 #### Dependencies
 - GCC, Clang, or MinGW-w64
 - CMake 3.3 or higher
-- wxGTK2 or wxGTK3
+- wxWidgets
 - SQLite (optional)
 #### Download and Compile
 ```bash
