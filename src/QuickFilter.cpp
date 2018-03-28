@@ -306,18 +306,6 @@ cppw::Sqlite3Result* QuickFilter::GetAnimeData(
                 statusStr << " and val like ?3 ";
             }
         }
-        if (useTempTable) {
-            try {
-                auto deleteStmt = m_connection->PrepareStatement(
-                    "delete from tempSeries");
-                auto deleteResult = deleteStmt->GetResults();
-                deleteResult->NextRow();
-                sqlStr = "insert into tempSeries " + sqlStr;
-            } catch (const cppw::Sqlite3Exception& e) {
-                wxMessageBox(e.what());
-                m_top->Close(true);
-            }
-        }
         //1=1 is just a dumb hack so I don't have to worry about when
         //to start using 'and's and 'or's
         sqlStr += " where 1=1 " +
@@ -334,6 +322,18 @@ cppw::Sqlite3Result* QuickFilter::GetAnimeData(
            newAdvFilterInfo->tagValInverse) {
             usingTagVal = true;
             sqlStr += " and val like ?3 ";
+        }
+        if (useTempTable) {
+            try {
+                auto deleteStmt = m_connection->PrepareStatement(
+                    "delete from tempSeries");
+                auto deleteResult = deleteStmt->GetResults();
+                deleteResult->NextRow();
+                sqlStr = "insert into tempSeries select * from(" + sqlStr + ")";
+            } catch (const cppw::Sqlite3Exception& e) {
+                wxMessageBox(e.what());
+                m_top->Close(true);
+            }
         }
     }
     if (sorted) {
