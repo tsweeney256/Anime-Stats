@@ -81,6 +81,7 @@ private:
     void OnGridColSort(wxGridEvent& event);
     void OnGridCellChanging(wxGridEvent& event);
     void OnGridCellChanged(wxGridEvent& event);
+    void OnGridCellSelect(wxGridEvent& event);
     void OnAdvrFrameDestruction(wxWindowDestroyEvent& event);
     void OnLabelContextMenu(wxGridEvent& event);
     void OnLabelContextMenuItem(wxCommandEvent& event);

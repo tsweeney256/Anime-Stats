@@ -36,6 +36,7 @@ private:
     void OnAddRowButton(wxCommandEvent& event);
     void OnDeleteRowButton(wxCommandEvent& event);
     void OnGridCellChanging(wxGridEvent& event);
+    void OnGridCellSelect(wxGridEvent& event);
 
     void HandleInsert(wxString tag);
     void HandleUpdate(int row, int col, wxString val);

@@ -64,6 +64,7 @@ BEGIN_EVENT_TABLE(DataPanel, wxPanel)
     EVT_GRID_COL_SORT(DataPanel::OnGridColSort)
     EVT_GRID_CELL_CHANGING(DataPanel::OnGridCellChanging)
     EVT_GRID_CELL_CHANGED(DataPanel::OnGridCellChanged)
+    EVT_GRID_SELECT_CELL(DataPanel::OnGridCellSelect)
     EVT_GRID_LABEL_RIGHT_CLICK(DataPanel::OnLabelContextMenu)
     EVT_GRID_CELL_RIGHT_CLICK(DataPanel::OnCellRightClick)
     EVT_MENU_RANGE(ID_VIEW_COL_BEGIN, ID_VIEW_COL_END, DataPanel::OnLabelContextMenuItem)
@@ -374,6 +375,15 @@ void DataPanel::OnGridCellChanged(wxGridEvent& event)
         m_grid->SetFocus();
     }
     m_grid->Refresh(); //needed for Windows
+}
+
+void DataPanel::OnGridCellSelect(wxGridEvent& event)
+{
+    if(event.GetCol() < col::FIRST_VISIBLE_COL) {
+        m_grid->GoToCell(event.GetRow(), col::FIRST_VISIBLE_COL);
+        event.Veto();
+    }
+    event.Skip();
 }
 
 void DataPanel::OnLabelContextMenu(wxGridEvent& event)

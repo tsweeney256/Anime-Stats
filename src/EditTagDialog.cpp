@@ -43,6 +43,7 @@ BEGIN_EVENT_TABLE(EditTagDialog, wxDialog)
     EVT_BUTTON(ADD_ROW_BUTTON, EditTagDialog::OnAddRowButton)
     EVT_BUTTON(DELETE_ROW_BUTTON, EditTagDialog::OnDeleteRowButton)
     EVT_GRID_CELL_CHANGING(EditTagDialog::OnGridCellChanging)
+    EVT_GRID_SELECT_CELL(EditTagDialog::OnGridCellSelect)
 END_EVENT_TABLE()
 
 EditTagDialog::EditTagDialog(wxWindow* parent, wxWindowID id,
@@ -135,6 +136,15 @@ void EditTagDialog::OnGridCellChanging(wxGridEvent& event)
         throw;
     }
     m_madeChanges = true;
+}
+
+void EditTagDialog::OnGridCellSelect(wxGridEvent& event)
+{
+    if(event.GetCol() < FIRST_VISIBLE_COL) {
+        m_grid->GoToCell(event.GetRow(), FIRST_VISIBLE_COL);
+        event.Veto();
+    }
+    event.Skip();
 }
 
 void EditTagDialog::HandleInsert(wxString tag)
