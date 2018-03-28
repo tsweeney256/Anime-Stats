@@ -297,13 +297,21 @@ cppw::Sqlite3Result* QuickFilter::GetAnimeData(
             }
             if(newAdvFilterInfo->tagKeyEnabled &&
                !newAdvFilterInfo->tagKeyInverse) {
-                usingTagKey = true;
-                statusStr << " and tag like ?2 ";
+                if (newAdvFilterInfo->tagKey.empty()) {
+                    sqlStr += " and tag is null ";
+                } else {
+                    usingTagKey = true;
+                    sqlStr += " and tag like ?2 ";
+                }
             }
             if(newAdvFilterInfo->tagValEnabled &&
                !newAdvFilterInfo->tagValInverse) {
-                usingTagVal = true;
-                statusStr << " and val like ?3 ";
+                if (newAdvFilterInfo->tagKey.empty()) {
+                    sqlStr += " and (val is null or val == '')";
+                } else {
+                    usingTagVal = true;
+                    sqlStr += " and val like ?3 ";
+                }
             }
         }
         //1=1 is just a dumb hack so I don't have to worry about when
@@ -315,13 +323,21 @@ cppw::Sqlite3Result* QuickFilter::GetAnimeData(
         }
         if(newAdvFilterInfo->tagKeyEnabled &&
            newAdvFilterInfo->tagKeyInverse) {
-            usingTagKey = true;
-            sqlStr += " and tag like ?2 ";
+            if (newAdvFilterInfo->tagKey.empty()) {
+                sqlStr += " and tag is null ";
+            } else {
+                usingTagKey = true;
+                sqlStr += " and tag like ?2 ";
+            }
         }
         if(newAdvFilterInfo->tagValEnabled &&
            newAdvFilterInfo->tagValInverse) {
-            usingTagVal = true;
-            sqlStr += " and val like ?3 ";
+            if (newAdvFilterInfo->tagKey.empty()) {
+                sqlStr += " and (val is null or val == '')";
+            } else {
+                usingTagVal = true;
+                sqlStr += " and val like ?3 ";
+            }
         }
         if (useTempTable) {
             try {
