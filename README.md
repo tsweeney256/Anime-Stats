@@ -19,6 +19,7 @@ A multi-platform application to help keep track of all the shows you've watched 
 git clone --recursive
 cd Anime-Stats
 mkdir build
+cd buil
 cmake ..
 make
 sudo make install
