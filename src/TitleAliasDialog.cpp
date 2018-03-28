@@ -1,5 +1,5 @@
 /*Anime Stats
-  Copyright (C) 2016 Thomas Sweeney
+  Copyright (C) 2015-2018 Thomas Sweeney
   This file is part of Anime Stats.
   Anime Stats is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -143,4 +143,3 @@ void TitleAliasDialog::OnOk(wxCommandEvent& event)
         command->ApplyToDb();
     event.Skip();
 }
-
