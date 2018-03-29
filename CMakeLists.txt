@@ -14,8 +14,16 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 endif()
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} -s")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+if(NOT DEFINED PROFILING OR NOT PROFILING)
+  set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -s")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g \
+-fno-omit-frame-pointer \
+-fno-inline-functions \
+-fno-inline-functions-called-once \
+-fno-optimize-sibling-calls")
+endif()
 set(CMAKE_CXX_FLAGS_STATIC_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${STATIC_ARGS}")
 set(CMAKE_CXX_FLAGS_STATIC_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${STATIC_ARGS}")
 set(STATIC_ARGS "-static-libstdc++ -static-libgcc -static")
