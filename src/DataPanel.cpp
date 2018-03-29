@@ -648,40 +648,74 @@ MainFrame* DataPanel::GetTop() const
     return m_top;
 }
 
-void DataPanel::UpdateCellColor(int row, int col)
+void DataPanel::UpdateCellColor(int row, int col, bool updateDefault)
 {
     if(col != col::ID_SERIES){
-        int offsetCol = col - col::FIRST_VISIBLE_COL;
-        bool setBgColor = false;
-        bool valColorEnabled = m_settings->cellColors[offsetCol][Settings::VAL] > -1;
-        const auto& cellVal = m_grid->GetCellValue(row, col);
+        UpdateCellTextColor(row, col, updateDefault);
+        UpdateCellBgColor(row, col, updateDefault);
+    }
+}
 
-        if(m_settings->cellColors[offsetCol][Settings::TEXT] > -1){
-            m_grid->SetCellTextColour(row, col, wxColour(m_settings->cellColors[offsetCol][Settings::TEXT]));
-        }
-        else{
-            m_grid->SetCellTextColour(row, col, m_grid->GetDefaultCellTextColour());
-        }
+void DataPanel::UpdateCellTextColor(int row, int col, bool updateDefault)
+{
+    //written to avoid expensive calls to wxGrid methods
+    auto offsetCol = col- col::FIRST_VISIBLE_COL;
+    auto colorVal = m_settings->cellColors[offsetCol][Settings::TEXT];
+    auto colorEnabled = colorVal > -1;
+    if (!colorEnabled && !updateDefault) {
+        return;
+    } else if (colorEnabled) {
+        m_grid->SetCellTextColour(row, col, wxColour(colorVal));
+    } else {
+        m_grid->SetCellTextColour(
+            row, col, m_grid->GetDefaultCellTextColour());
+    }
+}
 
-        if(!cellVal.empty() && valColorEnabled){
-            if(col::isColLimitedValue(col)){
-                wxASSERT(m_cellColorInfo[col].allowedVals);
+void DataPanel::UpdateCellBgColor(int row, int col, bool updateDefault)
+{
+    //written to avoid expensive calls to wxGrid methods
+    auto offsetCol = col- col::FIRST_VISIBLE_COL;
+    auto colorVal = m_settings->cellColors[offsetCol][Settings::VAL];
+    auto colorCustomBgVal =
+        m_settings->cellColors[offsetCol][Settings::BACKGROUND];
+    auto colorValEnabled = colorVal > -1;
+    auto customBgEnabled = colorCustomBgVal > -1;
+
+    if (!colorValEnabled && !customBgEnabled && !updateDefault) {
+        return;
+    } else if (!colorValEnabled && !customBgEnabled && updateDefault) {
+        m_grid->SetCellBackgroundColour(
+            row, col, m_grid->GetDefaultCellBackgroundColour());
+    } else if (!colorValEnabled && customBgEnabled) {
+        m_grid->SetCellBackgroundColour(row, col, wxColour(colorCustomBgVal));
+    } else {
+        auto cellVal = m_grid->GetCellValue(row, col);
+        if (cellVal.IsEmpty()) {
+            if (customBgEnabled) {
+                m_grid->SetCellBackgroundColour(
+                    row, col, wxColour(colorCustomBgVal));
+            } else {
+                m_grid->SetCellBackgroundColour(
+                    row, col, m_grid->GetDefaultCellBackgroundColour());
+            }
+        } else {
+            if (col::isColLimitedValue(col)) {
                 int idx = -1;
                 //can't get the index of the combobox control because they possibly haven't been created yet and it'd be way
                 //more inefficient to pre-create a combobox for every cell than to just do a few string comparisons for each one
-                for(size_t i = 0; i < m_cellColorInfo[col].allowedVals->size(); ++i)
+                for(size_t i = 0; i < m_cellColorInfo[col].allowedVals->size(); ++i) {
                     if(!m_grid->GetCellValue(row, col).compare((*m_cellColorInfo[col].allowedVals)[i])){
                         //account for blanks being tracked by allowedVals but not in Settings
                         idx = i - (Settings::VAL - Settings::BACKGROUND);
                         break;
                     }
-                wxASSERT_MSG(idx > -1, "Illegal Limited Value");
+                }
                 //blank vals handled by the set background color
                 if(idx != 0 - (Settings::VAL - Settings::BACKGROUND)){
                     m_grid->SetCellBackgroundColour(row, col, wxColour(m_settings->cellColors[offsetCol][Settings::VAL + idx]));
-                    setBgColor = true;
                 }
-            }else if(col::isColNumeric(col)){
+            } else if (col::isColNumeric(col)) {
                 long val;
                 if(!cellVal.ToLong(&val)){
                     wxMessageBox("Error converting cell to long while coloring");
@@ -718,14 +752,7 @@ void DataPanel::UpdateCellColor(int row, int col)
                 }
                 m_grid->SetCellBackgroundColour(row, col,
                                                 wxColour(cellColour[CellColorInfo::R], cellColour[CellColorInfo::G], cellColour[CellColorInfo::B]));
-                setBgColor = true;
             }
-        }
-        if(!setBgColor && m_settings->cellColors[offsetCol][Settings::BACKGROUND] > -1){
-            m_grid->SetCellBackgroundColour(row, col, wxColour(m_settings->cellColors[offsetCol][Settings::BACKGROUND]));
-        }
-        else if(!setBgColor){
-            m_grid->SetCellBackgroundColour(row, col, m_grid->GetDefaultCellBackgroundColour());
         }
     }
 }
@@ -796,7 +823,7 @@ void DataPanel::RefreshGridColors()
 {
     for(int i = 0; i < m_grid->GetNumberRows()-1; ++i){
         for(int k = col::FIRST_VISIBLE_COL; k < m_grid->GetNumberCols(); ++k){
-            UpdateCellColor(i, k);
+            UpdateCellColor(i, k, true);
         }
     }
 }

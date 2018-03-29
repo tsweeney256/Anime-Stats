@@ -93,7 +93,9 @@ private:
     void BuildAllowedValsMap(std::vector<wxString>& map, const std::string& sqlStmtStr);
     void HandleUndoRedoColorChange();
     void UpdateOldFilterData();
-    void UpdateCellColor(int row, int col);
+    void UpdateCellColor(int row, int col, bool updateDefault = false);
+    void UpdateCellTextColor(int row, int col, bool updateDefault);
+    void UpdateCellBgColor(int row, int col, bool updatedefault);
     void UpdateNumericalCellColorInfo(int col);
     int GetColAggregate(std::string colName, std::string function);
     int GetColMedian(const std::string& colName);
