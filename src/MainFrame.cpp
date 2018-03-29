@@ -235,9 +235,10 @@ void MainFrame::OnClose(wxCloseEvent& event)
     }
     if(UnsavedChangesExist() && event.CanVeto()){
         auto status = SaveChangesPopup();
-        if(status != wxID_CANCEL)
+        if(status != wxID_CANCEL) {
+            m_connection->Rollback();
             Destroy();
-        else //cancel
+        } else //cancel
             event.Veto();
     }
     else{
