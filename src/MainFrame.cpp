@@ -50,7 +50,7 @@
 
 using namespace fmt::literals;
 
-static const int current_db_version = 4;
+static const int current_db_version = 5;
 extern "C"{
     int sqlite3_extension_init(
         sqlite3 *db, char **pzErrMsg, const sqlite3_api_routines *pApi);

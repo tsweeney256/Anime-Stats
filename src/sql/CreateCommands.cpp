@@ -292,6 +292,17 @@ namespace SqlStrings
         {
             "UPDATE `Version` set `version` = 4;\n"
             "INSERT INTO `SavedFilterSortName` (`name`) VALUES ('Pronunciation');"
+        },
+        //create_p5.sql
+        {
+            "UPDATE `Version` set `version` = 5;\n"
+            "INSERT INTO `SavedFilterArgName` (name) VALUES\n"
+            "    ('tagEnabled'),\n"
+            "    ('tagInverse'),\n"
+            "    ('tag'),\n"
+            "    ('tagValEnabled'),\n"
+            "    ('tagValInserse'),\n"
+            "    ('tagVal')\n"
         }
     };
 }

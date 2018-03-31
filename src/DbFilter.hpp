@@ -52,7 +52,8 @@ public:
 
 private:
     int GetFilterFromDb(std::string name);
-    void InsertFilterArg(int idSavedFilterArgName, int value);
+    template <typename T>
+    void InsertFilterArg(int idSavedFilterArgName, const T& value);
     int InsertFilterToDb(std::string name, bool makeDefault);
     void SaveSortEntryToDb(colSort sortingRule);
     void SaveSortToDb(int idSavedFilter);

@@ -68,7 +68,13 @@ namespace FilterArg
         monthFinishedLow,
         monthFinishedHigh,
         dayFinishedLow,
-        dayFinishedHigh
+        dayFinishedHigh,
+        tagEnabled,
+        tagInverse,
+        tag,
+        tagValEnabled,
+        tagValInverse,
+        tagVal
     };
 }
 
@@ -382,6 +388,24 @@ int DbFilter::GetFilterFromDb(std::string name)
         case FilterArg::dayFinishedHigh:
             m_advFilterInfo->dayFinishedHigh = argVal;
             break;
+        case FilterArg::tagEnabled:
+            m_advFilterInfo->tagKeyEnabled = argVal;
+            break;
+        case FilterArg::tagInverse:
+            m_advFilterInfo->tagKeyInverse = argVal;
+            break;
+        case FilterArg::tag:
+            m_advFilterInfo->tagKey = results->GetString(2);
+            break;
+        case FilterArg::tagValEnabled:
+            m_advFilterInfo->tagValEnabled = argVal;
+            break;
+        case FilterArg::tagValInverse:
+            m_advFilterInfo->tagValInverse = argVal;
+            break;
+        case FilterArg::tagVal:
+            m_advFilterInfo->tagVal = results->GetString(2);
+            break;
         default:
             wxMessageBox(wxString("Illegal filter arg ID found: ") +
                          std::to_string(argId));
@@ -391,7 +415,8 @@ int DbFilter::GetFilterFromDb(std::string name)
     return idFilter;
 }
 
-void DbFilter::InsertFilterArg(int idSavedFilterArgName, int value)
+template<typename T>
+void DbFilter::InsertFilterArg(int idSavedFilterArgName, const T& value)
 {
     m_insertFilterArgStmt->Reset();
     m_insertFilterArgStmt->Bind(2, idSavedFilterArgName);
@@ -569,6 +594,24 @@ int DbFilter::InsertFilterToDb(std::string name, bool makeDefault)
         }
         if(a.dayFinishedHigh != ra.dayFinishedHigh) {
             InsertFilterArg(48, a.dayFinishedHigh);
+        }
+    }
+    if (a.tagKeyEnabled != ra.tagKeyEnabled) {
+        InsertFilterArg(FilterArg::tagEnabled, a.tagKeyEnabled);
+        if (a.tagKeyInverse != ra.tagKeyInverse) {
+            InsertFilterArg(FilterArg::tagInverse, a.tagKeyInverse);
+        }
+        if (a.tagKey != ra.tagKey) {
+            InsertFilterArg(FilterArg::tag, a.tagKey);
+        }
+    }
+    if (a.tagValEnabled != ra.tagValEnabled) {
+        InsertFilterArg(FilterArg::tagValEnabled, a.tagValEnabled);
+        if (a.tagValInverse != ra.tagValInverse) {
+            InsertFilterArg(FilterArg::tagValInverse, a.tagValInverse);
+        }
+        if (a.tagVal != ra.tagVal) {
+            InsertFilterArg(FilterArg::tagVal, a.tagVal);
         }
     }
     return idSavedFilter;
