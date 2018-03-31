@@ -378,6 +378,7 @@ void MainFrame::OnNew(wxCommandEvent& WXUNUSED(event))
         m_fileMenu->Check(DEFAULT_DB, false);
         m_fileMenu->Enable(DEFAULT_DB, false);
         Reset(m_connection.get());
+        SetUnsavedChanges(false);
     }
 }
 
@@ -889,7 +890,6 @@ void MainFrame::Reset(cppw::Sqlite3Connection* connection)
     m_topBar->Reset(connection);
     m_dataPanel->ResetPanel(connection);
     m_analysisPanel->ResetConnection(connection);
-    SetUnsavedChanges(false);
 }
 
 void MainFrame::MakeTempSeriesTable()
