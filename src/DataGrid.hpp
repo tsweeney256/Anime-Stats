@@ -24,6 +24,7 @@ public:
     DataGrid(wxWindow* parent, MainFrame* top, wxWindowID id);
     void IncreaseCellInt(int row, int col, int amount);
     void IncreaseCellDate(int row, int col, int amount);
+    void SetCellValueWithEvents(int row, int col, const wxString& val);
 
 private:
     void OnChar(wxKeyEvent& key);

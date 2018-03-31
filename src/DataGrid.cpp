@@ -40,8 +40,7 @@ void DataGrid::IncreaseCellInt(int row, int col, int amount)
     } else if (val > 999999) {
         val = 999999;
     }
-    SetCellValue(row, col, wxString::Format("%ld", val));
-    m_top->SetUnsavedChanges(true);
+    SetCellValueWithEvents(row, col, wxString::Format("%ld", val));
 }
 
 void DataGrid::IncreaseCellDate(int row, int col, int amount)
@@ -61,8 +60,18 @@ void DataGrid::IncreaseCellDate(int row, int col, int amount)
             return;
         }
     }
-    SetCellValue(row, col, date.FormatISODate());
-    m_top->SetUnsavedChanges(true);
+    SetCellValueWithEvents(row, col, date.FormatISODate());
+}
+
+void DataGrid::SetCellValueWithEvents(int row, int col, const wxString& val)
+{
+    auto oldVal = GetCellValue(row, col);
+    SetCellValue(row, col, val);
+    if (SendEvent(wxEVT_GRID_CELL_CHANGING, val) == -1) {
+        SetCellValue(row, col, oldVal);
+    } else if (SendEvent(wxEVT_GRID_CELL_CHANGED, oldVal) == -1) {
+        SetCellValue(row, col, oldVal);
+    }
 }
 
 void DataGrid::OnChar(wxKeyEvent& event)
