@@ -306,7 +306,7 @@ cppw::Sqlite3Result* QuickFilter::GetAnimeData(
             }
             if(newAdvFilterInfo->tagValEnabled &&
                !newAdvFilterInfo->tagValInverse) {
-                if (newAdvFilterInfo->tagKey.empty()) {
+                if (newAdvFilterInfo->tagVal.empty()) {
                     sqlStr += " and (val is null or val == '')";
                 } else {
                     usingTagVal = true;
