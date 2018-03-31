@@ -35,9 +35,10 @@ TitleAliasDialog::TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite
                                    int64_t idSeries, wxString title)
     : wxDialog(parent, id, "Alias Title"), m_connection(connection), m_idSeries(idSeries), m_title(title)
 {
-    //create the dialog controls
-    auto list = new CustomEditableListBox(this, wxID_ANY, m_title, wxDefaultPosition,
-                                          wxDefaultSize, wxEL_DEFAULT_STYLE | wxEL_NO_REORDER);
+    m_title.Replace(wxString("&"), wxString("&&"), true);
+    auto list = new CustomEditableListBox(
+        this, wxID_ANY, m_title, wxDefaultPosition, wxDefaultSize,
+        wxEL_DEFAULT_STYLE | wxEL_NO_REORDER);
     m_list = list->GetListCtrl();
 
     auto btnSizer = CreateButtonSizer(wxOK | wxCANCEL);
