@@ -33,7 +33,7 @@ END_EVENT_TABLE()
 
 TitleAliasDialog::TitleAliasDialog(wxWindow* parent, wxWindowID id, cppw::Sqlite3Connection* connection,
                                    int64_t idSeries, wxString title)
-    : wxDialog(parent, id, "Title Alias"), m_connection(connection), m_idSeries(idSeries), m_title(title)
+    : wxDialog(parent, id, "Alias Title"), m_connection(connection), m_idSeries(idSeries), m_title(title)
 {
     //create the dialog controls
     auto list = new CustomEditableListBox(this, wxID_ANY, m_title, wxDefaultPosition,
