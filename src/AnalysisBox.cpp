@@ -17,12 +17,14 @@
 #include <wx/sizer.h>
 #include <wx/msgdlg.h>
 #include <wx/stattext.h>
+#include <fmt/format.h>
 #include "MainFrame.hpp"
 #include "AnalysisBox.hpp"
 
 AnalysisBox::AnalysisBox(
     wxWindow* parent, wxWindowID id, wxString boxLabel,
-    cppw::Sqlite3Result* result, int startCol, int endCol, bool rightAlign)
+    cppw::Sqlite3Result* result, int startCol, int endCol, bool rightAlign,
+    const std::vector<int>& paddingAmount)
     : wxPanel(parent, id)
 {
     SetFont(wxFont(GetFont().GetPointSize(), wxFONTFAMILY_TELETYPE,
@@ -30,10 +32,18 @@ AnalysisBox::AnalysisBox(
     m_mainSizer = new wxStaticBoxSizer(wxVERTICAL, this, boxLabel);
     auto textSizer = new wxBoxSizer(wxVERTICAL);
 
-    for (int i = startCol; i < endCol; ++i) {
+    //static cast just for the compiler warning
+    for (size_t i = startCol, k = 0; i < static_cast<size_t>(endCol); ++i, ++k) {
         auto rowSizer = new wxBoxSizer(wxHORIZONTAL);
         auto rowItemSizer = new wxBoxSizer(wxVERTICAL);
-        auto val = result->IsNull(i) ? "0" : result->GetString(i);
+        std::string val;
+        if (paddingAmount.size() > k && paddingAmount[k] > 0) {
+            val = fmt::format(
+                "{:." + std::to_string(paddingAmount[k]) + "f}",
+                result->IsNull(i) ? 0.0d : result->getDouble(i));
+        }  else {
+            val = result->IsNull(i) ? "0" : result->GetString(i);
+        }
         auto staticText = new wxStaticText(this, wxID_ANY, val);
         rowSizer->Add(
             new wxStaticText(this, wxID_ANY, result->GetColumnName(i) + ":"),

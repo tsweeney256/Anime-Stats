@@ -92,12 +92,13 @@ void AnalysisPanel::ResetStats()
         std::vector<std::tuple<std::string /*box name*/,
                                bool /*right align*/,
                                int /*start col*/,
-                               int /*end col*/>> boxSettings
+                               int /*end col*/,
+                               std::vector<int>>> boxSettings
         {
-            {"Time Spent on Anime", false, 1, 5},
-            {"Ratings", true, 5, 9},
-            {"Watched Status Count", true, 9, 14},
-            {"Release Type Count", true, 14, 19}
+            {"Time Spent on Anime", false, 1, 5, {2, 0, 2, 0}},
+            {"Ratings", true, 5, 9, {2, 2, 2, 0}},
+            {"Watched Status Count", true, 9, 14, {}},
+            {"Release Type Count", true, 14, 19, {}}
         };
 
         bool resultsExist = results->NextRow();
@@ -121,9 +122,10 @@ void AnalysisPanel::ResetStats()
                 auto alignRight = std::get<1>(settings);
                 auto startCol = std::get<2>(settings);
                 auto endCol = std::get<3>(settings);
+                const auto& paddingAmount = std::get<4>(settings);
                 auto dataBox = new AnalysisBox(
                     m_scrollPanel, wxID_ANY, boxTitle, results.get(),
-                    startCol, endCol, alignRight);
+                    startCol, endCol, alignRight, paddingAmount);
                 statRow->Add(dataBox, wxSizerFlags(0).Border(wxALL).Expand());
             }
             m_statSizer->Add(statRow, wxSizerFlags(0));

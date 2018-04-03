@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <vector>
 #include <wx/panel.h>
 #include "cppw/Sqlite3.hpp"
 
@@ -28,7 +29,7 @@ public:
     AnalysisBox(
         wxWindow* parent, wxWindowID id, wxString boxLabel,
         cppw::Sqlite3Result* result, int startCol, int endCol,
-        bool rightAlign = true);
+        bool rightAlign, const std::vector<int>& paddingAmount);
 private:
     wxSizer* m_mainSizer;
 };
