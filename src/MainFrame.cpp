@@ -282,7 +282,7 @@ void MainFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
     wxAboutDialogInfo info;
     info.SetName(_("Anime Stats"));
-    info.SetVersion("0.02");
+    info.SetVersion("1.0.0");
     info.SetDescription(_("Anime Stats is free and open source software.\n"
                           "Check Help->Legal for more information."));
     info.SetCopyright("(C) 2015-2018 Thomas Sweeney");
