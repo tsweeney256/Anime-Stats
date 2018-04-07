@@ -60,15 +60,16 @@ QuickFilter::QuickFilter(wxWindow* parent, MainFrame* top, wxWindowID id,
     m_quickFilterSelect = new wxComboBox(
         this, id_select_combo, "", wxDefaultPosition, wxDefaultSize, 0, nullptr,
         wxCB_READONLY | wxTE_PROCESS_ENTER);
-    m_quickFilterTitle = new wxTextCtrl(
-        this, id_title_text_field, wxEmptyString,
-        wxDefaultPosition, wxSize(250, -1), wxTE_PROCESS_ENTER);
     auto quickFilterNewButton = new wxButton(
         this, id_new_btn, "New");
     auto quickFilterOverwriteButton = new wxButton(
         this, id_overwrite_btn, "Overwrite");
     auto quickFilterDeleteButton = new wxButton(
         this, id_delete_btn, "Delete");
+
+    m_quickFilterTitle = new wxTextCtrl(
+        this, id_title_text_field, wxEmptyString,
+        wxDefaultPosition, wxSize(250, -1), wxTE_PROCESS_ENTER);
 
     auto quickFilterTypeSizer = new wxStaticBoxSizer(
         wxHORIZONTAL, this, _("Quick Filter Type"));
