@@ -219,6 +219,8 @@ AdvFilterFrame::AdvFilterFrame(TopBar* parent,
     m_finishYearHigh->Disable();
     m_finishMonthHigh->Disable();
     m_finishDayHigh->Disable();
+    m_tagKeyInverse->Disable();
+    m_tagValInverse->Disable();
     m_tagKeyTextField->Disable();
     m_tagValTextField->Disable();
 
