@@ -579,6 +579,8 @@ bool MainFrame::OpenDb(const wxString& file)
     try {
         if (UpdateDb(GetDbVersion())) {
             DbUpdateNotify();
+        } else {
+            SetUnsavedChanges(false);
         }
         MakeTempSeriesTable();
     } catch (const cppw::Sqlite3Exception& e) {
