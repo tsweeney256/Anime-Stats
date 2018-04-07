@@ -1,6 +1,6 @@
 #Causes some libraries to fail to be statically linked if requiring a lower version for some reason
 cmake_minimum_required(VERSION 3.3)
-project(AnimeStats)
+project(animestats)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "release")
@@ -89,17 +89,17 @@ add_library(extension-functions STATIC
 target_compile_definitions(extension-functions PRIVATE
   SQLITE_CORE=1)
 
-add_executable(AnimeStats ${CPPW_SQLITE3} ${SOURCE_FILES})
+add_executable(animestats ${CPPW_SQLITE3} ${SOURCE_FILES})
 
 if(WIN32)
-  target_sources(AnimeStats PUBLIC src/resource.rc)
+  target_sources(animestats PUBLIC src/resource.rc)
 endif()
 
 find_package(SQLite3)
 if(SQLITE3_FOUND AND NOT USE_AMALGAMATION)
   message("Using system SQLite")
   include_directories(${SQLITE3_INCLUDE_DIRS})
-  target_link_libraries(AnimeStats ${SQLITE3_LIBRARIES})
+  target_link_libraries(animestats ${SQLITE3_LIBRARIES})
 elseif(NOT SQLITE_FOUND OR USE_AMALGAMATION)
   if (NOT SQLITE_FOUND AND NOT USE_AMALGAMATION)
     message(WARNING "\
@@ -112,18 +112,18 @@ because no SQLite was found on the system")
   add_library(sqlite-amalgamation STATIC
     external/sqlite-amalgamation/sqlite3.c)
   if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(AnimeStats dl)
+    target_link_libraries(animestats dl)
   endif()
-  target_link_libraries(AnimeStats sqlite-amalgamation)
+  target_link_libraries(animestats sqlite-amalgamation)
 endif()
 
 find_package(wxWidgets REQUIRED core base adv xml)
 if(wxWidgets_FOUND)
   include("${wxWidgets_USE_FILE}")
-  target_link_libraries(AnimeStats ${wxWidgets_LIBRARIES})
+  target_link_libraries(animestats ${wxWidgets_LIBRARIES})
 endif(wxWidgets_FOUND)
 
-target_link_libraries(AnimeStats
+target_link_libraries(animestats
   count_value
   extension-functions
   fmt)
@@ -131,6 +131,6 @@ target_link_libraries(AnimeStats
 set(INSTALL_PERMISSIONS_EXECUTE OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE
                                 WORLD_READ WORLD_EXECUTE)
-install(TARGETS AnimeStats
+install(TARGETS animestats
    DESTINATION bin
    PERMISSIONS ${INSTALL_PERMISSIONS_EXECUTE})
