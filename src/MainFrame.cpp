@@ -241,7 +241,10 @@ void MainFrame::OnClose(wxCloseEvent& event)
             event.Veto();
     }
     else{
-        m_connection->Rollback();
+        if (m_inTransaction) {
+            m_connection->Rollback();
+            m_inTransaction = false;
+        }
         Destroy();
     }
 }
@@ -252,6 +255,7 @@ void MainFrame::OnSave(wxCommandEvent& WXUNUSED(event))
     try{
         m_connection->Commit();
         m_connection->Begin();
+        m_inTransaction = true;
         savedChanges = true;
     }catch(cppw::Sqlite3Exception& e){
         wxMessageBox(std::string("Error saving.\n") + e.what());
@@ -719,12 +723,16 @@ int MainFrame::SaveChangesPopup()
         if(status == wxID_YES){
             m_connection->Commit();
             m_connection->Begin();
+            m_inTransaction = true;
             if(m_dbInMemory){
                 if(!WriteMemoryDbToFile())
                     status = wxID_CANCEL;
             }
         } else if (status == wxID_NO) {
-            m_connection->Rollback();
+            if (m_inTransaction) {
+                m_connection->Rollback();
+                m_inTransaction = false;
+            }
         }
     }catch(cppw::Sqlite3Exception& e){
         wxMessageBox(std::string("Error:\n") + e.what());
@@ -743,6 +751,7 @@ void MainFrame::SetDbFlags(cppw::Sqlite3Connection* connection)
 #endif
     connection->EnableForeignKey(true);
     connection->Begin();
+    m_inTransaction = true;
 }
 
 bool MainFrame::WriteMemoryDbToFile()

@@ -101,6 +101,7 @@ private:
     wxNotebook* m_notebook = nullptr;
     bool m_onDataTab = true;
     bool m_firstRun = true;
+    bool m_inTransaction = false;
 
     enum
     {
