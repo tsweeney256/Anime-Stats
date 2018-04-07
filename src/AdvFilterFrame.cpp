@@ -169,12 +169,12 @@ AdvFilterFrame::AdvFilterFrame(TopBar* parent,
     m_finishDayHigh = new wxSpinCtrl(m_mainPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, maxMonthDayTextSize,
                                      wxSP_ARROW_KEYS, m_minDay, m_maxDay, m_maxDay);
 
-    m_tagKeyTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
-    m_tagKeyInverse = new wxCheckBox(m_mainPanel, wxID_ANY, _("Invert"));
     m_tagKeyEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_TAG_KEY_ENABLE, _("Enable"));
-    m_tagValTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
-    m_tagValInverse = new wxCheckBox(m_mainPanel, wxID_ANY, _("Invert"));
+    m_tagKeyInverse = new wxCheckBox(m_mainPanel, wxID_ANY, _("Invert"));
+    m_tagKeyTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
     m_tagValEnabled = new wxCheckBox(m_mainPanel, ID_ADV_FILTER_TAG_VAL_ENABLE, _("Enable"));
+    m_tagValInverse = new wxCheckBox(m_mainPanel, wxID_ANY, _("Invert"));
+    m_tagValTextField = new wxTextCtrl(m_mainPanel, wxID_ANY);
 
     m_watchedCheck->SetValue(true);
     m_watchingCheck->SetValue(true);
