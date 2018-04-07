@@ -403,9 +403,9 @@ void MainFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
             if (m_dbFile.compare(m_settings->defaultDb)) {
                 DoDefaultDbPopup();
             } else {
-                m_fileMenu->Enable(DEFAULT_DB, true);
                 m_fileMenu->Check(DEFAULT_DB, true);
             }
+            m_fileMenu->Enable(DEFAULT_DB, true);
             Reset(m_connection.get());
         }
     }
