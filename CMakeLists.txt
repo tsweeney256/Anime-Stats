@@ -111,10 +111,10 @@ because no SQLite was found on the system")
   include_directories("${CMAKE_SOURCE_DIR}/external/sqlite-amalgamation")
   add_library(sqlite-amalgamation STATIC
     external/sqlite-amalgamation/sqlite3.c)
+  target_link_libraries(animestats sqlite-amalgamation)
   if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(animestats dl)
   endif()
-  target_link_libraries(animestats sqlite-amalgamation)
 endif()
 
 find_package(wxWidgets REQUIRED core base adv xml)
