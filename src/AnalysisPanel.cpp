@@ -51,8 +51,8 @@ AnalysisPanel::AnalysisPanel(wxWindow* parent, MainFrame* top, wxWindowID id,
     m_scrollSizer = new wxBoxSizer(wxVERTICAL);
     m_dlg = new GroupStatsDlg(this, m_top, wxID_ANY, m_connection);
     m_statSizer = new wxBoxSizer(wxVERTICAL);
-    m_scrollPanel->SetSizer(m_scrollSizer);
     m_scrollSizer->Add(m_statSizer, wxSizerFlags(0));
+    m_scrollPanel->SetSizerAndFit(m_scrollSizer);
 }
 
 AnalysisPanel::~AnalysisPanel()
@@ -134,7 +134,6 @@ void AnalysisPanel::ResetStats()
     }
 
     Layout();
-    m_mainSizer->FitInside(this);
 }
 
 void AnalysisPanel::OnApplyFilter(wxCommandEvent& WXUNUSED(event))
