@@ -111,9 +111,7 @@ void AnalysisPanel::ResetStats()
                 auto label = new wxStaticText(
                     m_scrollPanel, wxID_ANY,
                     m_groupCol + " " + wxString::FromUTF8(text.c_str()) + ":");
-                label->SetFont(
-                    wxFont(GetFont().GetPointSize(), wxFONTFAMILY_TELETYPE,
-                           wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+                label->SetFont(GetFont().Bold());
                 m_statSizer->Add(label, wxSizerFlags(0).Border(wxLEFT | wxTOP));
             }
             for (auto& settings : boxSettings)
