@@ -874,7 +874,7 @@ void MainFrame::UpdateNegOneDb()
                 auto insert_results = insert_stmt->GetResults();
                 try {
                     insert_results->NextRow();
-                } catch (cppw::Sqlite3Exception e) {
+                } catch (cppw::Sqlite3Exception& e) {
                     if (e.GetErrorCode() != SQLITE_CONSTRAINT) {
                         throw;
                     }
